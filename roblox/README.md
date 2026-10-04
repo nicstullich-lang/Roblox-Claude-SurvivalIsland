@@ -24,8 +24,10 @@ On the GitHub page of the repo, press the green **Code** button → **Download Z
 
 ## 3. Insert the code kit
 
-In the **Explorer** window: right-click **ServerStorage** → **Insert from File…** → pick `roblox/TX6_Kit.rbxmx`.
-A folder `TX6_Kit` appears inside ServerStorage.
+In the **Explorer** window: right-click **ServerStorage** → **Import Roblox Model** (older Studio versions call it
+**Insert from File…**) → pick `roblox/TX6_Kit.rbxmx` (if you don't see it, set the file-type box to *All files*).
+A folder `TX6_Kit` should appear inside ServerStorage. **If it lands in Workspace instead, drag it onto ServerStorage**
+before going on — the installer looks for it there, and its scripts must not sit in Workspace.
 
 ## 4. Run the installer (one line)
 
