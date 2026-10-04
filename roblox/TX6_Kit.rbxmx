@@ -1,0 +1,2789 @@
+<roblox xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.roblox.com/roblox.xsd" version="4"><External>null</External><External>nil</External><Item class="Folder" referent="RBX00000010"><Properties><string name="Name">TX6_Kit</string></Properties><Item class="ModuleScript" referent="RBX00000001"><Properties><string name="Name">Install</string><ProtectedString name="Source"><![CDATA[--!nonstrict
+--[[
+	TX-6 "Bastion" - one-time installer (run in Studio EDIT mode from the Command Bar):
+
+		require(game.ServerStorage.TX6_Kit.Install)()
+
+	What it does
+	  1. finds the model made by the 3D Importer (exports/TX6_Bastion_Roblox.fbx)
+	  2. installs ReplicatedStorage.TX6 (Config / RigData / Shared), the spawner and the client scripts
+	  3. turns the 172 imported MeshParts into a working vehicle:
+	       physics chassis + collision boxes, 4 sprung wheels (front steering, 4x4 motors),
+	       a Motor6D joint for every moving part, seats, ProximityPrompts, lights, materials
+	  4. stores the finished vehicle in ServerStorage.AdminVehicles.TX6_Bastion
+	Re-running it is safe: it replaces the previous install.
+]]
+
+local ServerStorage = game:GetService("ServerStorage")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ServerScriptService = game:GetService("ServerScriptService")
+local StarterPlayer = game:GetService("StarterPlayer")
+local CollectionService = game:GetService("CollectionService")
+
+local kit = script.Parent
+
+local function part(name: string, size: Vector3, cf: CFrame, parent: Instance): Part
+	local p = Instance.new("Part")
+	p.Name = name
+	p.Size = size
+	p.CFrame = cf
+	p.Anchored = true
+	p.CanCollide = false
+	p.CanQuery = false
+	p.CanTouch = false
+	p.Transparency = 1
+	p.CastShadow = false
+	p.TopSurface = Enum.SurfaceType.Smooth
+	p.BottomSurface = Enum.SurfaceType.Smooth
+	p.Parent = parent
+	return p
+end
+
+local function weld(a: BasePart, b: BasePart, parent: Instance?)
+	local w = Instance.new("WeldConstraint")
+	w.Part0 = a
+	w.Part1 = b
+	w.Parent = parent or b
+	return w
+end
+
+local function attach(name: string, parentPart: BasePart, worldCF: CFrame): Attachment
+	local a = Instance.new("Attachment")
+	a.Name = name
+	a.CFrame = parentPart.CFrame:ToObjectSpace(worldCF)
+	a.Parent = parentPart
+	return a
+end
+
+local function findSource(): Model?
+	local direct = workspace:FindFirstChild("TX6_Bastion_Roblox")
+	if direct and direct:IsA("Model") then
+		return direct
+	end
+	for _, d in workspace:GetDescendants() do
+		if d:IsA("BasePart") and string.sub(d.Name, 1, 14) == "RBX_Body_Paint" then
+			return d:FindFirstAncestorOfClass("Model")
+		end
+	end
+	-- re-install without importing again: use the untouched copy saved by the last install
+	local backup = ServerStorage:FindFirstChild("TX6_ImportBackup")
+	if backup and backup:IsA("Model") then
+		local copy = backup:Clone()
+		copy.Parent = workspace
+		return copy
+	end
+	return nil
+end
+
+-- put the imported model exactly where the Blender export expects it (independent of importer pivot options)
+local function normalise(source: Model, Rig)
+	local _, size = source:GetBoundingBox()
+	local expected = Rig.ImportSize
+	if size.Z < expected.Z * 0.5 then
+		-- imported in metres instead of studs
+		source:ScaleTo(source:GetScale() * Rig.S)
+		_, size = source:GetBoundingBox()
+		warn("[TX6] import was metre-scale - scaled up by", Rig.S)
+	end
+	if math.abs(size.Z - expected.Z) > expected.Z * 0.06 or math.abs(size.X - expected.X) > expected.X * 0.06 then
+		warn(string.format("[TX6] unexpected import size %.2f x %.2f x %.2f (expected %.2f x %.2f x %.2f) - "
+			.. "check the importer used Stud units, scale 1, World Forward = Front, World Up = Top",
+			size.X, size.Y, size.Z, expected.X, expected.Y, expected.Z))
+	end
+	local cf = source:GetBoundingBox()
+	local shift = Rig.ImportCenter - cf.Position
+	for _, d in source:GetDescendants() do
+		if d:IsA("BasePart") then
+			d.CFrame = d.CFrame + shift
+		end
+	end
+end
+
+local function install(source: Model?)
+	source = source or findSource()
+	assert(source, "[TX6] Import exports/TX6_Bastion_Roblox.fbx first (Home > Import 3D), then run the installer again.")
+
+	-- ------------------------------------------------------------------ shared modules -> ReplicatedStorage.TX6
+	local old = ReplicatedStorage:FindFirstChild("TX6")
+	if old then
+		old:Destroy()
+	end
+	local shared = kit.Shared:Clone()
+	shared.Name = "TX6"
+	shared.Parent = ReplicatedStorage
+	local Shared = require(shared:WaitForChild("Shared"))
+	local Rig, Config = Shared.Rig, Shared.Config
+
+	-- ------------------------------------------------------------------ server + client scripts
+	for _, s in kit.Server:GetChildren() do
+		local prev = ServerScriptService:FindFirstChild(s.Name)
+		if prev then
+			prev:Destroy()
+		end
+		s:Clone().Parent = ServerScriptService
+	end
+	local sps = StarterPlayer:FindFirstChildOfClass("StarterPlayerScripts")
+	for _, s in kit.Client:GetChildren() do
+		local prev = sps:FindFirstChild(s.Name)
+		if prev then
+			prev:Destroy()
+		end
+		s:Clone().Parent = sps
+	end
+
+	-- ------------------------------------------------------------------ collision groups (saved in the place)
+	local PhysicsService = game:GetService("PhysicsService")
+	for _, g in { "TX6_Body", "TX6_Wheels" } do
+		pcall(function()
+			if not PhysicsService:IsCollisionGroupRegistered(g) then
+				PhysicsService:RegisterCollisionGroup(g)
+			end
+		end)
+	end
+	pcall(function()
+		PhysicsService:CollisionGroupSetCollidable("TX6_Body", "TX6_Wheels", false)
+		PhysicsService:CollisionGroupSetCollidable("TX6_Wheels", "TX6_Wheels", false)
+	end)
+
+	-- keep an untouched copy of the import so the installer can be re-run later without importing again
+	if source.Parent ~= ServerStorage then
+		local oldBackup = ServerStorage:FindFirstChild("TX6_ImportBackup")
+		local fresh = source:Clone()
+		fresh.Name = "TX6_ImportBackup"
+		if oldBackup then
+			oldBackup:Destroy()
+		end
+		fresh.Parent = ServerStorage
+	end
+
+	-- ------------------------------------------------------------------ build the vehicle
+	normalise(source, Rig)
+	local car = Instance.new("Model")
+	car.Name = "TX6_Bastion"
+	car.ModelStreamingMode = Enum.ModelStreamingMode.Atomic -- streams in as one piece (StreamingEnabled maps)
+	car:SetAttribute("AdminOnly", true)
+	car:SetAttribute("Scale", "1 stud = 0.28 m")
+	car:SetAttribute("Source", "TX-6 Bastion (Blender build, exports/TX6_Bastion_Roblox.fbx)")
+
+	local folders = {}
+	for _, n in { "Joints", "Visual", "Collision", "Wheels", "Seats", "Lights", "Templates" } do
+		local f = Instance.new("Folder")
+		f.Name = n
+		f.Parent = car
+		folders[n] = f
+	end
+
+	-- physics chassis (the heavy, invisible root part)
+	local chassis = part("Chassis", Rig.ChassisSize, CFrame.new(Rig.ChassisCenter), car)
+	chassis.CustomPhysicalProperties = PhysicalProperties.new(Config.ChassisDensity, 0.3, 0, 1, 1)
+	chassis.RootPriority = 127
+	car.PrimaryPart = chassis
+
+	-- collision boxes (the only colliders of the body; bullets / raycasts hit these)
+	for _, b in Rig.Collision do
+		local c = part(b.Name, b.Size, CFrame.new(b.Center), folders.Collision)
+		c.CanCollide = true
+		c.CanQuery = true
+		c.Massless = true
+		c.CollisionGroup = "TX6_Body"
+		weld(chassis, c)
+	end
+
+	-- joint parts (one per moving group, at its hinge) connected with Motor6Ds
+	local jointPart = {}
+	for _, name in Rig.JointOrder do
+		local j = Rig.Joints[name]
+		if not j.Physics then
+			local jp = part("J_" .. name, Vector3.new(0.2, 0.2, 0.2), CFrame.new(j.Pivot), folders.Joints)
+			jp.Massless = true
+			jointPart[name] = jp
+		end
+	end
+	for _, name in Rig.JointOrder do
+		local jp = jointPart[name]
+		if jp then
+			local parentName = Rig.Joints[name].Parent
+			local p0 = jointPart[parentName] or chassis
+			local m = Instance.new("Motor6D")
+			m.Name = "Motor"
+			m.Part0 = p0
+			m.Part1 = jp
+			m.C0 = p0.CFrame:ToObjectSpace(jp.CFrame)
+			m.C1 = CFrame.identity
+			m.Parent = jp
+		end
+	end
+
+	-- ------------------------------------------------------------------ physics wheels + suspension + steering
+	local R, W = Rig.WheelRadius, Rig.WheelWidth
+	local strutOf, wheelOf = {}, {}
+	local up = function(pos: Vector3)
+		return CFrame.fromMatrix(pos, Vector3.yAxis, Vector3.zAxis) -- attachment X axis points up
+	end
+	local fwdAxle = function(pos: Vector3)
+		return CFrame.fromMatrix(pos, -Vector3.xAxis, Vector3.yAxis) -- X axis = -X so +AngularVelocity drives forward
+	end
+	for tag, w in Rig.Wheels do
+		local c = w.Center
+		local strut = part("Strut_" .. tag, Vector3.new(0.6, 0.6, 0.6), CFrame.new(c), folders.Wheels)
+		strut.CollisionGroup = "TX6_Wheels"
+		strut.CustomPhysicalProperties = PhysicalProperties.new(2, 0.3, 0, 1, 1)
+		local wheel = part("Wheel_" .. tag, Vector3.new(W, 2 * R, 2 * R), CFrame.new(c), folders.Wheels)
+		wheel.Shape = Enum.PartType.Cylinder
+		wheel.CanCollide = true
+		wheel.CollisionGroup = "TX6_Wheels"
+		wheel.CustomPhysicalProperties = PhysicalProperties.new(0.9, Config.TireFriction, 0.05, 100, 1)
+		strutOf[tag], wheelOf[tag] = strut, wheel
+
+		local a0 = attach("Susp_" .. tag, chassis, up(c))
+		local a1 = attach("Susp", strut, up(c))
+		local susp
+		if w.Steer then
+			susp = Instance.new("CylindricalConstraint")
+			susp.InclinationAngle = 0 -- rotation axis = the attachment X axis (vertical) -> wheels steer
+			susp.AngularActuatorType = Enum.ActuatorType.Servo
+			susp.ServoMaxTorque = 5e7
+			susp.AngularSpeed = Config.SteerSpeed
+			susp.TargetAngle = 0
+			susp.AngularLimitsEnabled = true
+			susp.LowerAngle = -42
+			susp.UpperAngle = 42
+		else
+			susp = Instance.new("PrismaticConstraint")
+		end
+		susp.Name = "Susp"
+		susp.Attachment0 = a0
+		susp.Attachment1 = a1
+		susp.LimitsEnabled = true
+		susp.LowerLimit = -Config.SuspensionDown
+		susp.UpperLimit = Config.SuspensionUp
+		susp.Parent = strut
+
+		local top = attach("SpringTop_" .. tag, chassis, CFrame.new(c + Vector3.new(0, Rig.SpringTop, 0)))
+		local bottom = attach("SpringBottom", strut, CFrame.new(c))
+		local spring = Instance.new("SpringConstraint")
+		spring.Name = "Spring"
+		spring.Attachment0 = top
+		spring.Attachment1 = bottom
+		spring.FreeLength = Rig.SpringTop + Config.SuspensionSag
+		spring.Stiffness = 30000 -- re-tuned from the real mass by TX6_Server when spawned
+		spring.Damping = 1500
+		spring.Visible = false
+		spring.Parent = strut
+
+		local ax0 = attach("Axle", strut, fwdAxle(c))
+		local ax1 = attach("Axle", wheel, fwdAxle(c))
+		local motor = Instance.new("HingeConstraint")
+		motor.Name = "Motor"
+		motor.Attachment0 = ax0
+		motor.Attachment1 = ax1
+		motor.ActuatorType = Enum.ActuatorType.Motor
+		motor.AngularVelocity = 0
+		motor.MotorMaxTorque = 2e6
+		motor.MotorMaxAcceleration = 200
+		motor.Parent = strut
+	end
+
+	-- ------------------------------------------------------------------ visual meshes: materials + welds
+	local groupNames = { "Body" }
+	for name in Rig.Joints do
+		table.insert(groupNames, name)
+	end
+	table.sort(groupNames, function(a, b)
+		return #a > #b
+	end)
+	local visualFolders = {}
+	local unknown, count = 0, 0
+	for _, d in source:GetDescendants() do
+		if d:IsA("BasePart") and string.sub(d.Name, 1, 4) == "RBX_" then
+			local rest = string.sub(d.Name, 5)
+			local group
+			for _, g in groupNames do
+				if string.sub(rest, 1, #g + 1) == g .. "_" then
+					group = g
+					break
+				end
+			end
+			if not group then
+				unknown += 1
+				warn("[TX6] unknown mesh name", d.Name)
+				group = "Body"
+			end
+			local matName = string.gsub(string.sub(rest, #group + 2), "_%d+$", "")
+			local m = Rig.Materials[matName]
+			if m then
+				d.Material = Enum.Material[m.Material]
+				d.Color = m.Color
+				d.Transparency = m.Transparency
+				d.Reflectance = m.Reflectance
+			end
+			d:SetAttribute("TX6Mat", matName)
+			d:SetAttribute("TX6Group", group)
+			d.Name = matName
+			d.Anchored = true
+			d.CanCollide = false
+			d.CanTouch = false
+			d.CanQuery = false
+			d.Massless = true
+			if d:IsA("MeshPart") then
+				pcall(function()
+					d.CollisionFidelity = Enum.CollisionFidelity.Box
+				end)
+			end
+			if m and (m.Material == "Neon" or m.Material == "Glass") then
+				d.CastShadow = false
+			end
+			local vf = visualFolders[group]
+			if not vf then
+				vf = Instance.new("Model")
+				vf.Name = group
+				vf.Parent = folders.Visual
+				visualFolders[group] = vf
+			end
+			d.Parent = vf
+			local joint = Rig.Joints[group]
+			local anchorPart
+			if group == "Body" then
+				anchorPart = chassis
+			elseif joint and joint.Physics == "Strut" then
+				anchorPart = strutOf[string.sub(group, -2)]
+			elseif joint and joint.Physics == "Wheel" then
+				anchorPart = wheelOf[string.sub(group, -2)]
+			else
+				anchorPart = jointPart[group] or chassis
+			end
+			weld(anchorPart, d)
+			count += 1
+		end
+	end
+
+	-- ------------------------------------------------------------------ seats
+	for seatName, s in Rig.Seats do
+		local cls = seatName == "DriverSeat" and "VehicleSeat" or "Seat"
+		local seat = Instance.new(cls)
+		seat.Name = seatName
+		seat.Size = Vector3.new(2, 0.8, 2)
+		seat.CFrame = CFrame.new(s.Position - Vector3.new(0, 0.4, 0))
+		seat.Anchored = true
+		seat.CanCollide = false
+		seat.CanTouch = false -- players get in through the prompts, never by bumping into a seat
+		seat.CanQuery = false
+		seat.Transparency = 1
+		seat.Massless = true
+		if cls == "VehicleSeat" then
+			seat.HeadsUpDisplay = false
+			seat.MaxSpeed = 0
+			seat.Torque = 0
+			seat.TurnSpeed = 0
+		end
+		seat:SetAttribute("Role", s.Role)
+		seat.Parent = folders.Seats
+		weld(seatName == "GunnerSeat" and jointPart.Turret_Rotor or chassis, seat)
+	end
+
+	-- ------------------------------------------------------------------ prompts
+	local P = Rig.Points
+	local function prompt(point: string, action: string, kind: string, target: string, key: Enum.KeyCode, pad: Enum.KeyCode)
+		local a = chassis:FindFirstChild(point)
+		if not a then
+			a = attach(point, chassis, CFrame.new(P[point]))
+		end
+		local pp = Instance.new("ProximityPrompt")
+		pp.Name = kind .. "_" .. target
+		pp.ActionText = action
+		pp.ObjectText = "TX-6 Bastion"
+		pp.KeyboardKeyCode = key
+		pp.GamepadKeyCode = pad
+		pp.HoldDuration = 0
+		pp.MaxActivationDistance = 9
+		pp.RequiresLineOfSight = false
+		pp:SetAttribute("Kind", kind)
+		pp:SetAttribute("Target", target)
+		pp.Parent = a
+		return pp
+	end
+	local E, F, T = Enum.KeyCode.E, Enum.KeyCode.F, Enum.KeyCode.T
+	local BX, BY, BB = Enum.KeyCode.ButtonX, Enum.KeyCode.ButtonY, Enum.KeyCode.ButtonB
+	prompt("P_DriverDoor", "Drive", "Seat", "DriverSeat", E, BX)
+	prompt("P_DriverDoor", "Open / close door", "Channel", "Door_FL", F, BY)
+	prompt("P_PassengerDoor", "Ride", "Seat", "PassengerSeat", E, BX)
+	prompt("P_PassengerDoor", "Open / close door", "Channel", "Door_FR", F, BY)
+	prompt("P_RearLeftDoor", "Ride", "Seat", "RearLeftSeat", E, BX)
+	prompt("P_RearLeftDoor", "Man the turret", "Seat", "GunnerSeat", T, BB)
+	prompt("P_RearLeftDoor", "Open / close door", "Channel", "Door_RL", F, BY)
+	prompt("P_RearRightDoor", "Ride", "Seat", "RearRightSeat", E, BX)
+	prompt("P_RearRightDoor", "Man the turret", "Seat", "GunnerSeat", T, BB)
+	prompt("P_RearRightDoor", "Open / close door", "Channel", "Door_RR", F, BY)
+	prompt("P_Rear", "Rear door + spare carrier", "Channel", "Rear", F, BY)
+	prompt("P_LockerL", "Equipment bay (drone)", "Channel", "Locker_L", F, BY)
+	prompt("P_LockerR", "Equipment bay (supplies)", "Channel", "Locker_R", F, BY)
+	prompt("P_Hood", "Open / close hood", "Channel", "Hood", F, BY)
+	prompt("P_Fuel", "Fuel door", "Channel", "Fuel", F, BY)
+
+	-- ------------------------------------------------------------------ lights (start switched off)
+	local function lightPart(name: string, point: string, anchor: BasePart, cls: string, props)
+		local lp = part(name, Vector3.new(0.3, 0.3, 0.3), CFrame.new(P[point]), folders.Lights)
+		lp.Massless = true
+		weld(anchor, lp)
+		local l = Instance.new(cls)
+		for k, v in props do
+			l[k] = v
+		end
+		l.Enabled = false
+		l.Parent = lp
+		return lp
+	end
+	local warm = Color3.fromRGB(255, 244, 225)
+	lightPart("HeadlightL", "HeadlightL", chassis, "SpotLight", { Face = Enum.NormalId.Front, Range = 70, Angle = 70, Brightness = 4, Color = warm, Shadows = true })
+	lightPart("HeadlightR", "HeadlightR", chassis, "SpotLight", { Face = Enum.NormalId.Front, Range = 70, Angle = 70, Brightness = 4, Color = warm, Shadows = true })
+	lightPart("LightBar", "LightBar", chassis, "SpotLight", { Face = Enum.NormalId.Front, Range = 90, Angle = 100, Brightness = 3, Color = Color3.fromRGB(235, 240, 255) })
+	lightPart("Searchlight", "SearchlightLamp", jointPart.Searchlight or chassis, "SpotLight", { Face = Enum.NormalId.Front, Range = 140, Angle = 16, Brightness = 7, Color = warm })
+	for i = 1, 4 do
+		lightPart("Beacon" .. i, "Beacon" .. i, chassis, "PointLight", { Range = 14, Brightness = 5, Color = Color3.fromRGB(255, 140, 25) })
+	end
+	lightPart("TailL", "TailL", chassis, "PointLight", { Range = 7, Brightness = 2, Color = Color3.fromRGB(255, 30, 20) })
+	lightPart("TailR", "TailR", chassis, "PointLight", { Range = 7, Brightness = 2, Color = Color3.fromRGB(255, 30, 20) })
+	lightPart("Dome", "Dome", chassis, "PointLight", { Range = 6, Brightness = 1, Color = Color3.fromRGB(255, 40, 30) })
+
+	-- ------------------------------------------------------------------ scripts + remote
+	local remote = Instance.new("RemoteEvent")
+	remote.Name = "TX6Remote"
+	remote.Parent = car
+	kit.Vehicle.TX6_Server:Clone().Parent = car
+	kit.Vehicle.TX6_DriverClient:Clone().Parent = folders.Templates
+	kit.Vehicle.TX6_GunnerClient:Clone().Parent = folders.Templates
+
+	-- ------------------------------------------------------------------ finish: unanchor, tag, store
+	for _, d in car:GetDescendants() do
+		if d:IsA("BasePart") then
+			d.Anchored = false
+		end
+	end
+	car.WorldPivot = CFrame.identity -- pivot = ground under the vehicle centre
+	CollectionService:AddTag(car, "TX6_Vehicle")
+	local store = ServerStorage:FindFirstChild("AdminVehicles")
+	if not store then
+		store = Instance.new("Folder")
+		store.Name = "AdminVehicles"
+		store.Parent = ServerStorage
+	end
+	local prev = store:FindFirstChild("TX6_Bastion")
+	if prev then
+		prev:Destroy()
+	end
+	car.Parent = store
+	source:Destroy()
+
+	print(string.format("[TX6] Installed: %d meshes, %d joints, %d unknown names. Vehicle stored in "
+		.. "ServerStorage.AdminVehicles.TX6_Bastion. Press Play, then F4 (admin) to spawn it.",
+		count, #folders.Joints:GetChildren(), unknown))
+	return car
+end
+
+return install
+]]></ProtectedString></Properties></Item><Item class="Folder" referent="RBX0000000B"><Properties><string name="Name">Shared</string></Properties><Item class="ModuleScript" referent="RBX00000002"><Properties><string name="Name">Config</string><ProtectedString name="Source"><![CDATA[--!nonstrict
+--[[
+	TX-6 "Bastion" - settings you can tune.
+
+	This ModuleScript lives in ReplicatedStorage.TX6 so the server AND every client read the same numbers.
+	Units: studs (1 stud = 0.28 m), seconds, degrees unless noted.
+	Change a number, press Play, and the vehicle uses it - no other script needs editing.
+]]
+
+local Config = {}
+
+-- ===================================================================== who can spawn it
+Config.SpawnKey = Enum.KeyCode.F4            -- admins: F4 = spawn in front of you, Shift+F4 = remove it
+Config.ChatCommand = "/tx6"                  -- admins: "/tx6" spawns, "/tx6 remove" removes
+Config.OneVehiclePerAdmin = true
+Config.RestrictSeatsToAdmins = false         -- true = only admins may drive / use the turret
+
+-- ===================================================================== driving (4x4)
+Config.MaxSpeed = 95                         -- studs/s forward  (95 studs/s = 96 km/h)
+Config.ReverseSpeed = 30                     -- studs/s
+Config.Acceleration = 34                     -- studs/s^2 when you press W
+Config.BrakeDecel = 70                       -- studs/s^2 when braking / handbrake
+Config.CoastDecel = 6                        -- engine braking when no key is pressed
+Config.SteerMaxDeg = 32                      -- front wheel angle when slow
+Config.SteerMaxDegAtSpeed = 9                -- front wheel angle at top speed (stops roll-overs)
+Config.SteerSpeed = 3.5                      -- how fast the wheels turn (rad/s)
+Config.HandbrakeKey = Enum.KeyCode.X
+Config.FlipKey = Enum.KeyCode.R              -- driver: puts the vehicle back on its wheels when tipped over
+
+-- suspension (the code computes spring stiffness from the real mass, these shape the feel)
+Config.SuspensionSag = 0.55                  -- studs the springs compress under the vehicle's weight
+Config.SuspensionDamping = 0.55              -- 0.3 = bouncy, 1.0 = very stiff damping
+Config.SuspensionUp = 0.9                    -- studs of bump travel
+Config.SuspensionDown = 1.1                  -- studs of droop travel
+Config.ChassisDensity = 4.0                  -- heavier = more planted, slower to accelerate
+Config.TireFriction = 1.6
+
+-- ===================================================================== driver keys
+Config.LightsKey = Enum.KeyCode.L
+Config.BeaconsKey = Enum.KeyCode.B
+Config.ArmorKey = Enum.KeyCode.G             -- windshield shield + window shutters
+Config.MastKey = Enum.KeyCode.M              -- sensor / radar mast (driver or gunner)
+Config.HornKey = Enum.KeyCode.H
+Config.HornSoundId = ""                      -- paste a sound asset id like "rbxassetid://123" to enable the horn
+Config.EngineSoundId = ""                    -- optional looping engine sound
+
+-- ===================================================================== turret + rotary cannon (gunner)
+Config.TurretPitchMin = -8
+Config.TurretPitchMax = 40
+Config.GunFireRate = 16                      -- rounds per second
+Config.GunDamage = 9                         -- per hit
+Config.GunHeadshotMultiplier = 1.5
+Config.GunRange = 900
+Config.GunSpreadDeg = 1.1
+Config.GunHeatPerShot = 0.011                -- 1.0 = overheated
+Config.GunCoolPerSecond = 0.28
+Config.GunOverheatResume = 0.35              -- heat must fall below this after an overheat
+Config.GunSpinUpTime = 0.35                  -- barrels must spin this long before firing
+
+-- ===================================================================== lock-on missiles (gunner)
+Config.MissileKeyDeploy = Enum.KeyCode.R     -- open the roof bays / stow them again
+Config.MissileKeyFire = Enum.KeyCode.F       -- fire at the locked target (right mouse button also fires)
+Config.MissilesPerPod = 6
+Config.MissileReloadTime = 8                 -- seconds to reload one missile (into whichever pod is not full)
+Config.MissileCooldown = 0.6                 -- seconds between launches
+Config.MissileLockTime = 1.0                 -- seconds the target must stay in the lock cone
+Config.MissileLockConeDeg = 6
+Config.MissileKeepLockConeDeg = 14
+Config.MissileRange = 550                    -- doubled while the sensor mast is raised
+Config.MissileSpeedStart = 70
+Config.MissileSpeedMax = 230
+Config.MissileAccel = 260
+Config.MissileTurnRateDeg = 140              -- degrees per second it can turn
+Config.MissileLifetime = 7
+Config.MissileDamage = 120                   -- at the centre of the blast
+Config.MissileBlastRadius = 16
+
+-- ===================================================================== damage
+Config.DamagePlayers = true                  -- false = weapons only hurt NPCs / zombies
+-- Every hit goes through this function, so it can be wired into CombatService later.
+-- It tags the Humanoid with a "creator" ObjectValue (classic Roblox kill credit) then applies damage.
+function Config.DealDamage(attacker: Player?, humanoid: Humanoid, amount: number, weapon: string)
+	if humanoid.Health <= 0 then
+		return
+	end
+	if attacker then
+		local old = humanoid:FindFirstChild("creator")
+		if old then
+			old:Destroy()
+		end
+		local tag = Instance.new("ObjectValue")
+		tag.Name = "creator"
+		tag.Value = attacker
+		tag.Parent = humanoid
+		game:GetService("Debris"):AddItem(tag, 3)
+	end
+	humanoid:SetAttribute("LastHitWeapon", weapon)
+	humanoid:TakeDamage(amount)
+end
+
+-- ===================================================================== admin check (mirrors AdminService.Allowed)
+function Config.IsAdmin(player: Player): boolean
+	if game:GetService("RunService"):IsStudio() then
+		return true
+	end
+	if player:GetAttribute("IsAdmin") == true then
+		return true
+	end
+	if game.CreatorType == Enum.CreatorType.User then
+		return player.UserId == game.CreatorId
+	end
+	local ok, rank = pcall(function()
+		return player:GetRankInGroupAsync(game.CreatorId)
+	end)
+	return ok and rank >= 255
+end
+
+return Config
+]]></ProtectedString></Properties></Item><Item class="ModuleScript" referent="RBX00000003"><Properties><string name="Name">RigData</string><ProtectedString name="Source"><![CDATA[--!nonstrict
+-- GENERATED by roblox/build_kit.py from the Blender model - do not edit by hand.
+-- Vehicle space: studs, origin on the ground under the vehicle centre, nose = -Z, vehicle right = +X.
+
+local Rig = {}
+Rig.S = 3.5714285714 -- studs per metre
+Rig.ImportCenter = Vector3.new(0.0000, 6.8359, 0.1249)
+Rig.ImportSize = Vector3.new(11.2143, 13.6935, 25.0895)
+Rig.ChassisCenter = Vector3.new(0, 2.95, 0)
+Rig.ChassisSize = Vector3.new(8, 1.4, 19)
+Rig.WheelRadius = 2.1429
+Rig.WheelWidth = 1.5714
+Rig.SpringTop = 3
+
+Rig.Joints = {
+	Door_FL = { Pivot = Vector3.new(-4.5357, 4.2857, -3.7857), Parent = "Body", Drive = { Channel = "Door_FL", T0 = 0, T1 = 1, Kind = "rot", Axis = "Y", Amount = -70.0000 } },
+	Door_FR = { Pivot = Vector3.new(4.5357, 4.2857, -3.7857), Parent = "Body", Drive = { Channel = "Door_FR", T0 = 0, T1 = 1, Kind = "rot", Axis = "Y", Amount = 70.0000 } },
+	Door_RL = { Pivot = Vector3.new(-4.5357, 4.2857, -0.0714), Parent = "Body", Drive = { Channel = "Door_RL", T0 = 0, T1 = 1, Kind = "rot", Axis = "Y", Amount = -70.0000 } },
+	Door_RR = { Pivot = Vector3.new(4.5357, 4.2857, -0.0714), Parent = "Body", Drive = { Channel = "Door_RR", T0 = 0, T1 = 1, Kind = "rot", Axis = "Y", Amount = 70.0000 } },
+	Door_Rear = { Pivot = Vector3.new(-3.0000, 5.0000, 10.7857), Parent = "Body", Drive = { Channel = "Rear", T0 = 0.35, T1 = 1, Kind = "rot", Axis = "Y", Amount = -100.0000 } },
+	Fuel_Door_L = { Pivot = Vector3.new(-4.2759, 7.0000, 9.1786), Parent = "Body", Drive = { Channel = "Fuel", T0 = 0, T1 = 1, Kind = "rot", Axis = "Y", Amount = -95.0000 } },
+	Hood = { Pivot = Vector3.new(0.0000, 6.0357, -4.2857), Parent = "Body", Drive = { Channel = "Hood", T0 = 0, T1 = 1, Kind = "rot", Axis = "X", Amount = 55.0000 } },
+	Locker_Door_L = { Pivot = Vector3.new(-4.0451, 8.2143, 6.4286), Parent = "Body", Drive = { Channel = "Locker_L", T0 = 0, T1 = 0.7, Kind = "rot", Axis = "Z", Amount = -100.0000 } },
+	Locker_Door_R = { Pivot = Vector3.new(4.0451, 8.2143, 6.4286), Parent = "Body", Drive = { Channel = "Locker_R", T0 = 0, T1 = 1, Kind = "rot", Axis = "Z", Amount = 100.0000 } },
+	Locker_Tray_L = { Pivot = Vector3.new(-3.4286, 6.0714, 5.2143), Parent = "Body", Drive = { Channel = "Locker_L", T0 = 0.6, T1 = 1, Kind = "loc", Axis = "X", Amount = -1.5000 } },
+	Missile_Hatch_L = { Pivot = Vector3.new(-3.4286, 8.8571, 6.7857), Parent = "Body", Drive = { Channel = "Missiles", T0 = 0, T1 = 0.35, Kind = "rot", Axis = "Z", Amount = 120.0000 } },
+	Missile_Hatch_R = { Pivot = Vector3.new(3.4286, 8.8571, 6.7857), Parent = "Body", Drive = { Channel = "Missiles", T0 = 0, T1 = 0.35, Kind = "rot", Axis = "Z", Amount = -120.0000 } },
+	Missile_Lift_L = { Pivot = Vector3.new(-2.3929, 7.4643, 6.7857), Parent = "Body", Drive = { Channel = "Missiles", T0 = 0.35, T1 = 0.7, Kind = "loc", Axis = "Y", Amount = 1.6429 } },
+	Missile_Lift_R = { Pivot = Vector3.new(2.3929, 7.4643, 6.7857), Parent = "Body", Drive = { Channel = "Missiles", T0 = 0.35, T1 = 0.7, Kind = "loc", Axis = "Y", Amount = 1.6429 } },
+	Searchlight = { Pivot = Vector3.new(2.8571, 8.8571, -1.2500), Parent = "Body" },
+	Sensor_Mast = { Pivot = Vector3.new(0.0000, 9.2857, 4.1071), Parent = "Body", Drive = { Channel = "Mast", T0 = 0, T1 = 0.55, Kind = "rot", Axis = "X", Amount = -90.0000 } },
+	Spare_Carrier = { Pivot = Vector3.new(4.1071, 5.0000, 10.8393), Parent = "Body", Drive = { Channel = "Rear", T0 = 0, T1 = 0.5, Kind = "rot", Axis = "Y", Amount = 95.0000 } },
+	Turret_Rotor = { Pivot = Vector3.new(0.0000, 9.1071, 1.0714), Parent = "Body" },
+	Upright_FL = { Pivot = Vector3.new(-3.9286, 2.1429, -7.3214), Parent = "Body", Physics = "Strut" },
+	Upright_FR = { Pivot = Vector3.new(3.9286, 2.1429, -7.3214), Parent = "Body", Physics = "Strut" },
+	Upright_RL = { Pivot = Vector3.new(-3.9286, 2.1429, 6.7857), Parent = "Body", Physics = "Strut" },
+	Upright_RR = { Pivot = Vector3.new(3.9286, 2.1429, 6.7857), Parent = "Body", Physics = "Strut" },
+	Utility_Hatch_R = { Pivot = Vector3.new(4.2759, 7.0000, 9.1786), Parent = "Body", Drive = { Channel = "Utility", T0 = 0, T1 = 1, Kind = "rot", Axis = "Y", Amount = 95.0000 } },
+	Deploy_Shutter_FL = { Pivot = Vector3.new(-4.5893, 6.0893, -1.7487), Parent = "Door_FL", Drive = { Channel = "Armor", T0 = 0.2, T1 = 0.95, Kind = "rot", Axis = "Z", Amount = 171.0000 } },
+	Deploy_Shutter_FR = { Pivot = Vector3.new(4.5893, 6.0893, -1.7487), Parent = "Door_FR", Drive = { Channel = "Armor", T0 = 0.2, T1 = 0.95, Kind = "rot", Axis = "Z", Amount = -171.0000 } },
+	Deploy_Shutter_RL = { Pivot = Vector3.new(-4.5893, 6.0893, 1.5714), Parent = "Door_RL", Drive = { Channel = "Armor", T0 = 0.3, T1 = 1, Kind = "rot", Axis = "Z", Amount = 171.0000 } },
+	Deploy_Shutter_RR = { Pivot = Vector3.new(4.5893, 6.0893, 1.5714), Parent = "Door_RR", Drive = { Channel = "Armor", T0 = 0.3, T1 = 1, Kind = "rot", Axis = "Z", Amount = -171.0000 } },
+	Deploy_WindshieldShield = { Pivot = Vector3.new(0.0000, 6.1250, -4.3393), Parent = "Hood", Drive = { Channel = "Armor", T0 = 0, T1 = 0.75, Kind = "rot", Axis = "X", Amount = 113.6000 } },
+	Missile_Pod_L = { Pivot = Vector3.new(-2.3929, 7.5000, 8.7857), Parent = "Missile_Lift_L", Drive = { Channel = "Missiles", T0 = 0.7, T1 = 1, Kind = "rot", Axis = "X", Amount = 18.0000 } },
+	Missile_Pod_R = { Pivot = Vector3.new(2.3929, 7.5000, 8.7857), Parent = "Missile_Lift_R", Drive = { Channel = "Missiles", T0 = 0.7, T1 = 1, Kind = "rot", Axis = "X", Amount = 18.0000 } },
+	Sensor_MastUpper = { Pivot = Vector3.new(0.0000, 9.2857, 8.0714), Parent = "Sensor_Mast", Drive = { Channel = "Mast", T0 = 0.55, T1 = 0.85, Kind = "loc", Axis = "Z", Amount = 1.9643 } },
+	Turret_Cradle = { Pivot = Vector3.new(0.0000, 10.5714, -0.9643), Parent = "Turret_Rotor" },
+	Wheel_FL = { Pivot = Vector3.new(-3.9286, 2.1429, -7.3214), Parent = "Upright_FL", Physics = "Wheel" },
+	Wheel_FR = { Pivot = Vector3.new(3.9286, 2.1429, -7.3214), Parent = "Upright_FR", Physics = "Wheel" },
+	Wheel_RL = { Pivot = Vector3.new(-3.9286, 2.1429, 6.7857), Parent = "Upright_RL", Physics = "Wheel" },
+	Wheel_RR = { Pivot = Vector3.new(3.9286, 2.1429, 6.7857), Parent = "Upright_RR", Physics = "Wheel" },
+	Sensor_Head = { Pivot = Vector3.new(0.0000, 9.2857, 8.3929), Parent = "Sensor_MastUpper" },
+	Turret_Barrels = { Pivot = Vector3.new(0.0000, 10.5714, -3.3929), Parent = "Turret_Cradle" },
+	Sensor_EOBall = { Pivot = Vector3.new(0.0000, 9.2857, 9.4643), Parent = "Sensor_Head", Drive = { Channel = "Mast", T0 = 0.85, T1 = 1, Kind = "rot", Axis = "X", Amount = 20.0000 } },
+}
+Rig.JointOrder = { "Door_FL", "Door_FR", "Door_RL", "Door_RR", "Door_Rear", "Fuel_Door_L", "Hood", "Locker_Door_L", "Locker_Door_R", "Locker_Tray_L", "Missile_Hatch_L", "Missile_Hatch_R", "Missile_Lift_L", "Missile_Lift_R", "Searchlight", "Sensor_Mast", "Spare_Carrier", "Turret_Rotor", "Upright_FL", "Upright_FR", "Upright_RL", "Upright_RR", "Utility_Hatch_R", "Deploy_Shutter_FL", "Deploy_Shutter_FR", "Deploy_Shutter_RL", "Deploy_Shutter_RR", "Deploy_WindshieldShield", "Missile_Pod_L", "Missile_Pod_R", "Sensor_MastUpper", "Turret_Cradle", "Wheel_FL", "Wheel_FR", "Wheel_RL", "Wheel_RR", "Sensor_Head", "Turret_Barrels", "Sensor_EOBall" }
+
+Rig.Wheels = {
+	FL = { Center = Vector3.new(-3.9286, 2.1429, -7.3214), Steer = true, Side = -1 },
+	FR = { Center = Vector3.new(3.9286, 2.1429, -7.3214), Steer = true, Side = 1 },
+	RL = { Center = Vector3.new(-3.9286, 2.1429, 6.7857), Steer = false, Side = -1 },
+	RR = { Center = Vector3.new(3.9286, 2.1429, 6.7857), Steer = false, Side = 1 },
+}
+
+Rig.Seats = {
+	GunnerSeat = { Position = Vector3.new(0.0000, 6.5714, 1.7857), Role = "gunner (second player): sits on the sling seat, operates the turret" },
+	DriverSeat = { Position = Vector3.new(-1.9643, 3.7857, -1.0714), Role = "driver (drives the vehicle)" },
+	PassengerSeat = { Position = Vector3.new(1.9643, 3.7857, -1.0714), Role = "front passenger" },
+	RearLeftSeat = { Position = Vector3.new(-2.2143, 3.7857, 2.2143), Role = "rear left passenger" },
+	RearRightSeat = { Position = Vector3.new(2.2143, 3.7857, 2.2143), Role = "rear right passenger" },
+}
+
+Rig.Points = {
+	Muzzle = Vector3.new(0.0000, 10.5714, -4.7321),
+	PodTube_L = Vector3.new(-2.3929, 8.0000, 4.7143),
+	PodTube_R = Vector3.new(2.3929, 8.0000, 4.7143),
+	HeadlightL = Vector3.new(-3.1429, 4.5714, -10.8214),
+	HeadlightR = Vector3.new(3.1429, 4.5714, -10.8214),
+	LightBar = Vector3.new(0.0000, 9.2321, -2.6071),
+	Beacon1 = Vector3.new(-3.0714, 9.2857, -2.2500),
+	Beacon2 = Vector3.new(3.0714, 9.2857, -2.2500),
+	Beacon3 = Vector3.new(-3.0714, 9.2857, 9.9286),
+	Beacon4 = Vector3.new(3.0714, 9.2857, 9.9286),
+	SearchlightLamp = Vector3.new(2.8571, 9.5714, -1.6429),
+	Dome = Vector3.new(0.0000, 8.4643, -2.0357),
+	TailL = Vector3.new(-3.6786, 2.3929, 11.6786),
+	TailR = Vector3.new(3.6786, 2.3929, 11.6786),
+	RearClusterL = Vector3.new(-3.4286, 7.7857, 10.7857),
+	RearClusterR = Vector3.new(3.4286, 7.7857, 10.7857),
+	Horn = Vector3.new(0.0000, 4.2857, -7.8571),
+	P_DriverDoor = Vector3.new(-4.7857, 4.1071, -1.2500),
+	P_PassengerDoor = Vector3.new(4.7857, 4.1071, -1.2500),
+	P_RearLeftDoor = Vector3.new(-4.7857, 4.1071, 2.1429),
+	P_RearRightDoor = Vector3.new(4.7857, 4.1071, 2.1429),
+	P_Rear = Vector3.new(-1.0714, 4.4643, 11.8571),
+	P_LockerL = Vector3.new(-4.7143, 6.9643, 6.6071),
+	P_LockerR = Vector3.new(4.7143, 6.9643, 6.6071),
+	P_Hood = Vector3.new(0.0000, 5.3571, -11.8571),
+	P_Fuel = Vector3.new(-4.5000, 7.0000, 9.5714),
+	Exit_Driver = Vector3.new(-7.3214, 3.3929, -1.9643),
+	Exit_Passenger = Vector3.new(7.3214, 3.3929, -1.9643),
+	Exit_RearL = Vector3.new(-7.3214, 3.3929, 1.7857),
+	Exit_RearR = Vector3.new(7.3214, 3.3929, 1.7857),
+	Exit_Gunner = Vector3.new(-7.3214, 3.3929, 5.7143),
+}
+
+Rig.Collision = {
+	{ Name = "HullLower", Center = Vector3.new(0.0000, 4.0000, 0.0000), Size = Vector3.new(8.7143, 3.5714, 21.4286) },
+	{ Name = "Cabin", Center = Vector3.new(0.0000, 7.3214, 3.8750), Size = Vector3.new(8.0000, 3.0714, 13.3214) },
+	{ Name = "Cowl", Center = Vector3.new(0.0000, 6.4643, -3.4107), Size = Vector3.new(8.2143, 1.3571, 1.2500) },
+	{ Name = "BumperFront", Center = Vector3.new(0.0000, 2.5714, -11.2500), Size = Vector3.new(9.5714, 1.5714, 1.0714) },
+	{ Name = "RearBlock", Center = Vector3.new(0.0000, 4.5893, 11.6429), Size = Vector3.new(9.2857, 5.4643, 1.8571) },
+	{ Name = "Turret", Center = Vector3.new(0.0000, 10.2143, 1.0714), Size = Vector3.new(5.3571, 2.7143, 5.3571) },
+	{ Name = "Underbody", Center = Vector3.new(0.0000, 1.9286, -0.2679), Size = Vector3.new(9.8571, 0.5714, 7.6786) },
+}
+
+Rig.Materials = {
+	Alu = { Material = "Metal", Color = Color3.fromRGB(185, 188, 192), Transparency = 0, Reflectance = 0.08 },
+	Amber = { Material = "Neon", Color = Color3.fromRGB(255, 140, 25), Transparency = 0, Reflectance = 0 },
+	ArmorPaint = { Material = "SmoothPlastic", Color = Color3.fromRGB(63, 67, 52), Transparency = 0, Reflectance = 0 },
+	Brass = { Material = "Metal", Color = Color3.fromRGB(190, 150, 70), Transparency = 0, Reflectance = 0.05 },
+	Canvas = { Material = "Fabric", Color = Color3.fromRGB(80, 77, 62), Transparency = 0, Reflectance = 0 },
+	Coating = { Material = "Plastic", Color = Color3.fromRGB(34, 34, 34), Transparency = 0, Reflectance = 0 },
+	Copper = { Material = "Metal", Color = Color3.fromRGB(203, 149, 97), Transparency = 0, Reflectance = 0 },
+	Engine = { Material = "Metal", Color = Color3.fromRGB(56, 56, 58), Transparency = 0, Reflectance = 0 },
+	Exhaust = { Material = "Metal", Color = Color3.fromRGB(124, 115, 108), Transparency = 0, Reflectance = 0 },
+	ExtRed = { Material = "SmoothPlastic", Color = Color3.fromRGB(188, 33, 25), Transparency = 0, Reflectance = 0 },
+	Fabric = { Material = "Fabric", Color = Color3.fromRGB(47, 48, 43), Transparency = 0, Reflectance = 0 },
+	Floor = { Material = "Plastic", Color = Color3.fromRGB(39, 39, 39), Transparency = 0, Reflectance = 0 },
+	Glass = { Material = "Glass", Color = Color3.fromRGB(120, 150, 145), Transparency = 0.5, Reflectance = 0.1 },
+	GlassDark = { Material = "Glass", Color = Color3.fromRGB(20, 24, 26), Transparency = 0.25, Reflectance = 0.1 },
+	Gunmetal = { Material = "Metal", Color = Color3.fromRGB(48, 50, 53), Transparency = 0, Reflectance = 0 },
+	Hardware = { Material = "Metal", Color = Color3.fromRGB(63, 63, 62), Transparency = 0, Reflectance = 0 },
+	Hazard = { Material = "SmoothPlastic", Color = Color3.fromRGB(225, 184, 25), Transparency = 0, Reflectance = 0 },
+	Housing = { Material = "SmoothPlastic", Color = Color3.fromRGB(29, 29, 30), Transparency = 0, Reflectance = 0 },
+	IRLens = { Material = "Glass", Color = Color3.fromRGB(40, 6, 8), Transparency = 0.15, Reflectance = 0.05 },
+	LED = { Material = "Neon", Color = Color3.fromRGB(235, 240, 255), Transparency = 0, Reflectance = 0 },
+	LEDOff = { Material = "SmoothPlastic", Color = Color3.fromRGB(203, 206, 211), Transparency = 0, Reflectance = 0 },
+	Lens = { Material = "Glass", Color = Color3.fromRGB(220, 225, 230), Transparency = 0.6, Reflectance = 0.1 },
+	Mesh = { Material = "Metal", Color = Color3.fromRGB(29, 29, 29), Transparency = 0, Reflectance = 0 },
+	Missile = { Material = "SmoothPlastic", Color = Color3.fromRGB(196, 197, 194), Transparency = 0, Reflectance = 0 },
+	Paint = { Material = "SmoothPlastic", Color = Color3.fromRGB(70, 74, 58), Transparency = 0, Reflectance = 0 },
+	PaintDark = { Material = "SmoothPlastic", Color = Color3.fromRGB(48, 51, 41), Transparency = 0, Reflectance = 0 },
+	Plastic = { Material = "SmoothPlastic", Color = Color3.fromRGB(39, 39, 41), Transparency = 0, Reflectance = 0 },
+	RedLens = { Material = "Neon", Color = Color3.fromRGB(255, 35, 25), Transparency = 0, Reflectance = 0 },
+	Rim = { Material = "Metal", Color = Color3.fromRGB(41, 42, 43), Transparency = 0, Reflectance = 0 },
+	Rope = { Material = "Fabric", Color = Color3.fromRGB(60, 60, 62), Transparency = 0, Reflectance = 0 },
+	Rubber = { Material = "Rubber", Color = Color3.fromRGB(29, 29, 29), Transparency = 0, Reflectance = 0 },
+	SafetyRed = { Material = "SmoothPlastic", Color = Color3.fromRGB(173, 29, 18), Transparency = 0, Reflectance = 0 },
+	Screen = { Material = "Neon", Color = Color3.fromRGB(60, 230, 120), Transparency = 0, Reflectance = 0 },
+	ScreenBlue = { Material = "Neon", Color = Color3.fromRGB(40, 150, 255), Transparency = 0, Reflectance = 0 },
+	Steel = { Material = "Metal", Color = Color3.fromRGB(150, 150, 148), Transparency = 0, Reflectance = 0.05 },
+	Stencil = { Material = "SmoothPlastic", Color = Color3.fromRGB(184, 184, 177), Transparency = 0, Reflectance = 0 },
+	Tire = { Material = "Rubber", Color = Color3.fromRGB(34, 34, 34), Transparency = 0, Reflectance = 0 },
+	Wood = { Material = "Wood", Color = Color3.fromRGB(124, 89, 60), Transparency = 0, Reflectance = 0 },
+}
+Rig.LightOff = {
+	LED = { Material = "SmoothPlastic", Color = Color3.fromRGB(150, 155, 160) },
+	Amber = { Material = "SmoothPlastic", Color = Color3.fromRGB(140, 72, 18) },
+	RedLens = { Material = "SmoothPlastic", Color = Color3.fromRGB(95, 12, 10) },
+}
+
+return Rig
+]]></ProtectedString></Properties></Item><Item class="ModuleScript" referent="RBX00000004"><Properties><string name="Name">Shared</string><ProtectedString name="Source"><![CDATA[--!nonstrict
+--[[
+	TX-6 "Bastion" - shared maths used by the server AND the clients so they always agree.
+
+	Vehicle space: origin on the ground under the vehicle centre, nose = -Z, up = +Y, vehicle RIGHT = +X (studs).
+	Every moving group has an invisible joint part ("J_<name>") at its hinge; a Motor6D connects it to its parent.
+	Clients animate by setting Motor6D.Transform; the server only does the maths (aim, muzzle, pods, missiles).
+]]
+
+local Shared = {}
+
+local Config = require(script.Parent:WaitForChild("Config"))
+local Rig = require(script.Parent:WaitForChild("RigData"))
+Shared.Config = Config
+Shared.Rig = Rig
+
+-- how fast each animated "channel" travels from 0 (stowed / closed) to 1 (deployed / open), per second
+Shared.ChannelSpeed = {
+	Armor = 0.7, Missiles = 0.45, Mast = 0.38,
+	Door_FL = 1.6, Door_FR = 1.6, Door_RL = 1.6, Door_RR = 1.6,
+	Rear = 0.75, Locker_L = 0.8, Locker_R = 0.9, Hood = 0.8, Fuel = 1.5, Utility = 1.5,
+}
+Shared.Channels = {}
+for name in Shared.ChannelSpeed do
+	table.insert(Shared.Channels, name)
+end
+table.sort(Shared.Channels)
+
+function Shared.Smooth(t: number): number
+	t = math.clamp(t, 0, 1)
+	return t * t * (3 - 2 * t)
+end
+
+-- move a channel value toward its target at the channel's speed
+function Shared.Advance(channel: string, value: number, target: number, dt: number): number
+	local step = (Shared.ChannelSpeed[channel] or 1) * dt
+	if value < target then
+		return math.min(target, value + step)
+	end
+	return math.max(target, value - step)
+end
+
+local function axisAngles(axis: string, radians: number): CFrame
+	if axis == "X" then
+		return CFrame.Angles(radians, 0, 0)
+	elseif axis == "Y" then
+		return CFrame.Angles(0, radians, 0)
+	end
+	return CFrame.Angles(0, 0, radians)
+end
+
+local function axisVector(axis: string): Vector3
+	if axis == "X" then
+		return Vector3.xAxis
+	elseif axis == "Y" then
+		return Vector3.yAxis
+	end
+	return Vector3.zAxis
+end
+
+-- local transform of one joint. progress = {channel = 0..1}; live = {Yaw, Pitch, Spin, HeadSpin} in radians
+function Shared.JointTransform(name: string, progress, live): CFrame
+	live = live or {}
+	if name == "Turret_Rotor" then
+		return CFrame.Angles(0, live.Yaw or 0, 0)
+	elseif name == "Turret_Cradle" then
+		return CFrame.Angles(live.Pitch or 0, 0, 0)
+	elseif name == "Turret_Barrels" then
+		return CFrame.Angles(0, 0, live.Spin or 0)
+	elseif name == "Sensor_Head" then
+		return CFrame.Angles(0, 0, live.HeadSpin or 0)
+	end
+	local joint = Rig.Joints[name]
+	local drive = joint and joint.Drive
+	if not drive then
+		return CFrame.identity
+	end
+	local p = progress[drive.Channel] or 0
+	local k = Shared.Smooth((p - drive.T0) / (drive.T1 - drive.T0))
+	if drive.Kind == "rot" then
+		return axisAngles(drive.Axis, math.rad(drive.Amount * k))
+	end
+	return CFrame.new(axisVector(drive.Axis) * (drive.Amount * k))
+end
+
+-- world frame of a joint (origin at its hinge, axes = vehicle axes at rest)
+function Shared.JointWorld(vehicleCF: CFrame, name: string, progress, live): CFrame
+	local joint = Rig.Joints[name]
+	local parent = joint.Parent
+	local parentCF, parentPivot
+	if Rig.Joints[parent] then
+		parentCF = Shared.JointWorld(vehicleCF, parent, progress, live)
+		parentPivot = Rig.Joints[parent].Pivot
+	else
+		parentCF = vehicleCF
+		parentPivot = Vector3.zero
+	end
+	return parentCF * CFrame.new(joint.Pivot - parentPivot) * Shared.JointTransform(name, progress, live)
+end
+
+-- the vehicle-space reference frame from the physics chassis part
+function Shared.VehicleCF(chassis: BasePart): CFrame
+	return chassis.CFrame * CFrame.new(-Rig.ChassisCenter)
+end
+
+-- muzzle of the rotary cannon: position at the barrel tips, LookVector = firing direction
+function Shared.Muzzle(vehicleCF: CFrame, yaw: number, pitch: number): CFrame
+	local cradle = Shared.JointWorld(vehicleCF, "Turret_Cradle", {}, { Yaw = yaw, Pitch = pitch })
+	local pos = cradle:PointToWorldSpace(Rig.Points.Muzzle - Rig.Joints.Turret_Cradle.Pivot)
+	return CFrame.lookAt(pos, pos + cradle.LookVector)
+end
+
+-- yaw / pitch (radians, vehicle space) that point the cannon at a world position
+function Shared.AimAngles(vehicleCF: CFrame, worldPoint: Vector3): (number, number)
+	local yaw, pitch = 0, 0
+	for _ = 1, 3 do
+		local cradle = Shared.JointWorld(vehicleCF, "Turret_Cradle", {}, { Yaw = yaw, Pitch = 0 })
+		local rel = vehicleCF:VectorToObjectSpace(worldPoint - cradle.Position)
+		yaw = math.atan2(-rel.X, -rel.Z)
+		pitch = math.atan2(rel.Y, math.sqrt(rel.X * rel.X + rel.Z * rel.Z))
+	end
+	pitch = math.clamp(pitch, math.rad(Config.TurretPitchMin), math.rad(Config.TurretPitchMax))
+	return yaw, pitch
+end
+
+-- launch tube exit of a missile pod ("L" or "R") when the bays are fully deployed
+function Shared.PodLaunch(vehicleCF: CFrame, side: string): CFrame
+	local name = "Missile_Pod_" .. side
+	local pod = Shared.JointWorld(vehicleCF, name, { Missiles = 1 }, {})
+	local pos = pod:PointToWorldSpace(Rig.Points["PodTube_" .. side] - Rig.Joints[name].Pivot)
+	return CFrame.lookAt(pos, pos + pod.LookVector)
+end
+
+-- one homing-missile step (identical on server and clients). m = {Pos, Vel, Speed, Age}
+function Shared.MissileStep(m, targetPos: Vector3?, dt: number): Vector3
+	m.Age += dt
+	m.Speed = math.min(Config.MissileSpeedMax, m.Speed + Config.MissileAccel * dt)
+	local dir = m.Vel.Magnitude > 1e-3 and m.Vel.Unit or Vector3.zAxis
+	if targetPos and m.Age > 0.25 then
+		local to = targetPos - m.Pos
+		if to.Magnitude > 1e-3 then
+			local want = to.Unit
+			local angle = math.acos(math.clamp(dir:Dot(want), -1, 1))
+			if angle > 1e-4 then
+				local axis = dir:Cross(want)
+				if axis.Magnitude < 1e-6 then
+					axis = dir:Cross(Vector3.yAxis)
+					if axis.Magnitude < 1e-6 then
+						axis = Vector3.xAxis
+					end
+				end
+				local turn = math.min(angle, math.rad(Config.MissileTurnRateDeg) * dt)
+				dir = CFrame.fromAxisAngle(axis.Unit, turn):VectorToWorldSpace(dir)
+			end
+		end
+	end
+	m.Vel = dir * m.Speed
+	return m.Pos + m.Vel * dt
+end
+
+-- where a living target should be aimed at (nil if gone / dead)
+function Shared.TargetPosition(model: Instance?): Vector3?
+	if not model or not model.Parent then
+		return nil
+	end
+	local hum = model:FindFirstChildOfClass("Humanoid")
+	if hum and hum.Health <= 0 then
+		return nil
+	end
+	local root = model:FindFirstChild("HumanoidRootPart") or model:FindFirstChild("Torso")
+		or model:FindFirstChild("UpperTorso") or (model:IsA("Model") and model.PrimaryPart)
+	if root and root:IsA("BasePart") then
+		return root.Position
+	end
+	return nil
+end
+
+-- the Humanoid that owns a hit part (nil if none)
+function Shared.HumanoidFromPart(part: Instance?): Humanoid?
+	local node = part
+	while node and node ~= workspace do
+		local hum = node:FindFirstChildOfClass("Humanoid")
+		if hum then
+			return hum
+		end
+		node = node.Parent
+	end
+	return nil
+end
+
+return Shared
+]]></ProtectedString></Properties></Item></Item><Item class="Folder" referent="RBX0000000C"><Properties><string name="Name">Server</string></Properties><Item class="Script" referent="RBX00000005"><Properties><string name="Name">TX6_Spawner</string><ProtectedString name="Source"><![CDATA[--!nonstrict
+--[[
+	TX-6 "Bastion" - admin spawner (ServerScriptService).
+
+	Admins (same rule as AdminService: Studio, IsAdmin attribute, game owner or group rank 255) can:
+	  F4 / chat "/tx6"            -> spawn a TX-6 26 studs in front of them
+	  Shift+F4 / "/tx6 remove"    -> remove their TX-6
+	The server checks admin rights on every request.
+]]
+
+local Players = game:GetService("Players")
+local ServerStorage = game:GetService("ServerStorage")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local PhysicsService = game:GetService("PhysicsService")
+
+local folder = ReplicatedStorage:WaitForChild("TX6")
+local Shared = require(folder:WaitForChild("Shared"))
+local Config = Shared.Config
+
+for _, g in { "TX6_Body", "TX6_Wheels" } do
+	pcall(function()
+		if not PhysicsService:IsCollisionGroupRegistered(g) then
+			PhysicsService:RegisterCollisionGroup(g)
+		end
+	end)
+end
+pcall(function()
+	PhysicsService:CollisionGroupSetCollidable("TX6_Body", "TX6_Wheels", false)
+	PhysicsService:CollisionGroupSetCollidable("TX6_Wheels", "TX6_Wheels", false)
+end)
+
+local request = folder:FindFirstChild("TX6_SpawnRequest")
+if not request then
+	request = Instance.new("RemoteEvent")
+	request.Name = "TX6_SpawnRequest"
+	request.Parent = folder
+end
+
+local owned: { [Player]: Model } = {}
+local lastRequest: { [Player]: number } = {}
+
+local function template(): Model?
+	local store = ServerStorage:FindFirstChild("AdminVehicles")
+	local t = store and store:FindFirstChild("TX6_Bastion")
+	if t and t:IsA("Model") then
+		return t
+	end
+	warn("[TX6] ServerStorage.AdminVehicles.TX6_Bastion is missing - run the installer again")
+	return nil
+end
+
+local function despawn(player: Player)
+	local car = owned[player]
+	if car then
+		owned[player] = nil
+		car:Destroy()
+	end
+end
+
+local function spawnFor(player: Player)
+	if not Config.IsAdmin(player) then
+		return
+	end
+	local t = template()
+	local char = player.Character
+	local root = char and char:FindFirstChild("HumanoidRootPart")
+	if not t or not root or not root:IsA("BasePart") then
+		return
+	end
+	if Config.OneVehiclePerAdmin then
+		despawn(player)
+	end
+	local look = root.CFrame.LookVector
+	local flat = Vector3.new(look.X, 0, look.Z)
+	if flat.Magnitude < 0.1 then
+		flat = Vector3.new(0, 0, -1)
+	end
+	flat = flat.Unit
+	local spot = root.Position + flat * 26
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Exclude
+	params.FilterDescendantsInstances = { char }
+	local hit = workspace:Raycast(spot + Vector3.new(0, 40, 0), Vector3.new(0, -250, 0), params)
+	local ground = hit and hit.Position or Vector3.new(spot.X, root.Position.Y - 3, spot.Z)
+	local base = ground + Vector3.new(0, 1.0, 0)
+	local car = t:Clone()
+	car.Name = "TX6_Bastion_" .. player.Name
+	car:SetAttribute("Owner", player.UserId)
+	car:PivotTo(CFrame.lookAt(base, base + flat)) -- nose points the way you are looking
+	car.Parent = workspace
+	owned[player] = car
+	car.Destroying:Connect(function()
+		if owned[player] == car then
+			owned[player] = nil
+		end
+	end)
+end
+
+local function handle(player: Player, action)
+	local now = os.clock()
+	if lastRequest[player] and now - lastRequest[player] < 1.5 then
+		return
+	end
+	lastRequest[player] = now
+	if action == "Spawn" then
+		spawnFor(player)
+	elseif action == "Despawn" and Config.IsAdmin(player) then
+		despawn(player)
+	end
+end
+
+request.OnServerEvent:Connect(handle)
+
+local function hookChat(player: Player)
+	player.Chatted:Connect(function(msg)
+		local m = string.lower(msg)
+		if m == Config.ChatCommand then
+			handle(player, "Spawn")
+		elseif m == Config.ChatCommand .. " remove" then
+			handle(player, "Despawn")
+		end
+	end)
+end
+for _, p in Players:GetPlayers() do
+	hookChat(p)
+end
+Players.PlayerAdded:Connect(hookChat)
+Players.PlayerRemoving:Connect(function(player)
+	despawn(player)
+	lastRequest[player] = nil
+end)
+]]></ProtectedString></Properties></Item></Item><Item class="Folder" referent="RBX0000000D"><Properties><string name="Name">Client</string></Properties><Item class="LocalScript" referent="RBX00000006"><Properties><string name="Name">TX6_Visuals</string><ProtectedString name="Source"><![CDATA[--!nonstrict
+--[[
+	TX-6 "Bastion" - client visuals (StarterPlayerScripts). Runs on every player's machine.
+
+	For every vehicle tagged "TX6_Vehicle" it smoothly animates all moving parts from the server's attributes
+	(Motor6D.Transform), switches the lights / beacons / brake lights, hides the vehicle's prompts while you sit
+	inside it, and draws weapon effects (tracers, muzzle flash, impacts, missiles, explosions).
+	Visual only - nothing here can change gameplay.
+]]
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local CollectionService = game:GetService("CollectionService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Debris = game:GetService("Debris")
+
+local Shared = require(ReplicatedStorage:WaitForChild("TX6"):WaitForChild("Shared"))
+local Config, Rig = Shared.Config, Shared.Rig
+local player = Players.LocalPlayer
+local camera = workspace.CurrentCamera
+
+local fxFolder = Instance.new("Folder")
+fxFolder.Name = "TX6_FX"
+fxFolder.Parent = workspace
+
+-- ====================================================================== notices (toast)
+local toastGui = Instance.new("ScreenGui")
+toastGui.Name = "TX6_Toast"
+toastGui.ResetOnSpawn = false
+toastGui.Parent = player:WaitForChild("PlayerGui")
+local toast = Instance.new("TextLabel")
+toast.BackgroundColor3 = Color3.fromRGB(18, 20, 16)
+toast.BackgroundTransparency = 0.25
+toast.Size = UDim2.fromOffset(460, 34)
+toast.Position = UDim2.new(0.5, -230, 0, 90)
+toast.Font = Enum.Font.GothamBold
+toast.TextSize = 15
+toast.TextColor3 = Color3.fromRGB(255, 210, 120)
+toast.Visible = false
+toast.Parent = toastGui
+Instance.new("UICorner").Parent = toast
+local toastId = 0
+local function showToast(msg: string)
+	toastId += 1
+	local id = toastId
+	toast.Text = msg
+	toast.Visible = true
+	task.delay(2.6, function()
+		if toastId == id then
+			toast.Visible = false
+		end
+	end)
+end
+
+-- ====================================================================== effects
+local function fxPart(size: Vector3, cf: CFrame, color: Color3, material: Enum.Material?): Part
+	local p = Instance.new("Part")
+	p.Anchored = true
+	p.CanCollide = false
+	p.CanQuery = false
+	p.CanTouch = false
+	p.CastShadow = false
+	p.Size = size
+	p.CFrame = cf
+	p.Color = color
+	p.Material = material or Enum.Material.Neon
+	p.Parent = fxFolder
+	return p
+end
+
+local function near(pos: Vector3, dist: number): boolean
+	return (camera.CFrame.Position - pos).Magnitude < dist
+end
+
+local function tracer(from: Vector3, to: Vector3, hit: boolean)
+	if not near(from, 1500) then
+		return
+	end
+	local len = (to - from).Magnitude
+	if len < 0.5 then
+		return
+	end
+	local mid = from:Lerp(to, 0.5)
+	local t = fxPart(Vector3.new(0.14, 0.14, len), CFrame.lookAt(mid, to), Color3.fromRGB(255, 196, 96))
+	t.Transparency = 0.15
+	Debris:AddItem(t, 0.05)
+	local flash = fxPart(Vector3.new(1.1, 1.1, 1.1), CFrame.new(from), Color3.fromRGB(255, 220, 140))
+	flash.Shape = Enum.PartType.Ball
+	local pl = Instance.new("PointLight")
+	pl.Range = 14
+	pl.Brightness = 4
+	pl.Color = Color3.fromRGB(255, 200, 120)
+	pl.Parent = flash
+	Debris:AddItem(flash, 0.045)
+	if hit then
+		local spark = fxPart(Vector3.new(0.2, 0.2, 0.2), CFrame.new(to), Color3.new(1, 1, 1))
+		spark.Transparency = 1
+		local pe = Instance.new("ParticleEmitter")
+		pe.Rate = 0
+		pe.Lifetime = NumberRange.new(0.15, 0.35)
+		pe.Speed = NumberRange.new(12, 26)
+		pe.SpreadAngle = Vector2.new(180, 180)
+		pe.LightEmission = 1
+		pe.Color = ColorSequence.new(Color3.fromRGB(255, 220, 120), Color3.fromRGB(255, 120, 40))
+		pe.Size = NumberSequence.new(0.18, 0)
+		pe.Parent = spark
+		pe:Emit(8)
+		Debris:AddItem(spark, 0.6)
+	end
+end
+
+local missiles = {}
+local function missileModel(cf: CFrame)
+	local body = fxPart(Vector3.new(0.38, 0.38, 2.3), cf, Color3.fromRGB(205, 208, 200), Enum.Material.SmoothPlastic)
+	local nose = fxPart(Vector3.new(0.26, 0.26, 0.45), cf * CFrame.new(0, 0, -1.3), Color3.fromRGB(40, 40, 40),
+		Enum.Material.SmoothPlastic)
+	local a0 = Instance.new("Attachment")
+	a0.Position = Vector3.new(0.15, 0, 1.15)
+	a0.Parent = body
+	local a1 = Instance.new("Attachment")
+	a1.Position = Vector3.new(-0.15, 0, 1.15)
+	a1.Parent = body
+	local trail = Instance.new("Trail")
+	trail.Attachment0 = a0
+	trail.Attachment1 = a1
+	trail.Lifetime = 1.4
+	trail.MinLength = 0.1
+	trail.WidthScale = NumberSequence.new(1, 6)
+	trail.Color = ColorSequence.new(Color3.fromRGB(235, 225, 210), Color3.fromRGB(120, 120, 120))
+	trail.Transparency = NumberSequence.new(0.2, 1)
+	trail.LightEmission = 0.2
+	trail.Parent = body
+	local glow = Instance.new("PointLight")
+	glow.Range = 12
+	glow.Brightness = 3
+	glow.Color = Color3.fromRGB(255, 150, 60)
+	glow.Parent = body
+	return body, nose
+end
+
+local function launchFx(id: number, start: CFrame, target: Instance?)
+	local body, nose = missileModel(start)
+	missiles[id] = {
+		body = body, nose = nose, target = target,
+		m = { Pos = start.Position, Vel = start.LookVector * Config.MissileSpeedStart, Speed = Config.MissileSpeedStart, Age = 0 },
+	}
+	local puff = fxPart(Vector3.new(2, 2, 2), start, Color3.fromRGB(200, 200, 200), Enum.Material.SmoothPlastic)
+	puff.Transparency = 1
+	local pe = Instance.new("ParticleEmitter")
+	pe.Rate = 0
+	pe.Lifetime = NumberRange.new(0.6, 1.2)
+	pe.Speed = NumberRange.new(4, 10)
+	pe.SpreadAngle = Vector2.new(40, 40)
+	pe.Size = NumberSequence.new(1.2, 4)
+	pe.Transparency = NumberSequence.new(0.3, 1)
+	pe.Parent = puff
+	pe:Emit(14)
+	Debris:AddItem(puff, 1.5)
+end
+
+local function removeMissile(id: number)
+	local ms = missiles[id]
+	if ms then
+		missiles[id] = nil
+		ms.nose:Destroy()
+		ms.body.Transparency = 1
+		Debris:AddItem(ms.body, 1.4) -- let the smoke trail fade
+	end
+end
+
+local function hitFx(id: number, pos: Vector3)
+	removeMissile(id)
+	local ex = Instance.new("Explosion")
+	ex.Position = pos
+	ex.BlastRadius = Config.MissileBlastRadius
+	ex.BlastPressure = 0 -- visual only, the server applies the damage
+	ex.DestroyJointRadiusPercent = 0
+	ex.ExplosionType = Enum.ExplosionType.NoCraters
+	ex.Parent = fxFolder
+	local light = fxPart(Vector3.new(1, 1, 1), CFrame.new(pos), Color3.fromRGB(255, 180, 90))
+	light.Transparency = 1
+	local pl = Instance.new("PointLight")
+	pl.Range = 40
+	pl.Brightness = 8
+	pl.Color = Color3.fromRGB(255, 170, 80)
+	pl.Parent = light
+	Debris:AddItem(light, 0.25)
+end
+
+-- ====================================================================== vehicles
+local tracked = {}
+
+local function setLight(st, name: string, on: boolean, brightness: number?)
+	local l = st.lights[name]
+	if l then
+		l.Enabled = on
+		if brightness then
+			l.Brightness = brightness
+		end
+	end
+end
+
+local function paintParts(list, on: boolean, matName: string)
+	local onSpec, offSpec = Rig.Materials[matName], Rig.LightOff[matName]
+	local spec = on and onSpec or offSpec
+	if not spec then
+		return
+	end
+	for _, p in list do
+		p.Material = Enum.Material[spec.Material]
+		p.Color = spec.Color
+	end
+end
+
+local function track(v: Model)
+	if tracked[v] then
+		return
+	end
+	local jointsFolder = v:WaitForChild("Joints", 10)
+	local remote = v:WaitForChild("TX6Remote", 10)
+	if not jointsFolder or not remote then
+		return
+	end
+	local st = {
+		joints = {}, progress = {}, lights = {}, prompts = {},
+		parts = { LED = {}, Amber = {}, RedLens = {} },
+		yaw = 0, pitch = 0, spin = 0, spinSpeed = 0, headSpin = 0,
+		lightsKey = nil, conns = {},
+	}
+	for _, jp in jointsFolder:GetChildren() do
+		local m = jp:FindFirstChild("Motor")
+		if m and m:IsA("Motor6D") then
+			st.joints[string.sub(jp.Name, 3)] = m
+		end
+	end
+	for _, ch in Shared.Channels do
+		st.progress[ch] = v:GetAttribute("T_" .. ch) or 0
+	end
+	for _, d in v:GetDescendants() do
+		if d:IsA("BasePart") then
+			local mat = d:GetAttribute("TX6Mat")
+			if mat and st.parts[mat] then
+				table.insert(st.parts[mat], d)
+			end
+		elseif d:IsA("Light") and d.Parent then
+			st.lights[d.Parent.Name] = d
+		elseif d:IsA("ProximityPrompt") then
+			table.insert(st.prompts, d)
+		end
+	end
+	table.insert(st.conns, remote.OnClientEvent:Connect(function(kind, a, b, c)
+		if kind == "Tracer" then
+			tracer(a, b, c)
+		elseif kind == "MissileLaunch" then
+			launchFx(a, b, c)
+		elseif kind == "MissileHit" then
+			hitFx(a, b)
+		elseif kind == "Notice" then
+			showToast(tostring(a))
+		end
+	end))
+	tracked[v] = st
+end
+
+local function untrack(v: Model)
+	local st = tracked[v]
+	if st then
+		for _, c in st.conns do
+			c:Disconnect()
+		end
+		tracked[v] = nil
+	end
+end
+
+for _, v in CollectionService:GetTagged("TX6_Vehicle") do
+	if v:IsDescendantOf(workspace) then
+		task.spawn(track, v)
+	end
+end
+CollectionService:GetInstanceAddedSignal("TX6_Vehicle"):Connect(function(v)
+	if v:IsDescendantOf(workspace) then
+		task.spawn(track, v)
+	end
+end)
+CollectionService:GetInstanceRemovedSignal("TX6_Vehicle"):Connect(untrack)
+
+local function lerpAngle(a: number, b: number, t: number): number
+	local d = (b - a + math.pi) % (2 * math.pi) - math.pi
+	return a + d * t
+end
+
+RunService.Stepped:Connect(function(_, dt)
+	local myHum = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+	local mySeat = myHum and myHum.SeatPart
+	for v, st in tracked do
+		if not v.Parent then
+			untrack(v)
+			continue
+		end
+		local chassis = v.PrimaryPart
+		if not chassis then
+			continue
+		end
+		for _, ch in Shared.Channels do
+			st.progress[ch] = Shared.Advance(ch, st.progress[ch], v:GetAttribute("T_" .. ch) or 0, dt)
+		end
+		-- turret: my own aim if I am the gunner, otherwise the server's (smoothed)
+		local cy, cp = v:GetAttribute("ClientYaw"), v:GetAttribute("ClientPitch")
+		if cy ~= nil and cp ~= nil then
+			st.yaw, st.pitch = cy, cp
+		else
+			local k = 1 - math.exp(-10 * dt)
+			st.yaw = lerpAngle(st.yaw, v:GetAttribute("TurretYaw") or 0, k)
+			st.pitch = lerpAngle(st.pitch, v:GetAttribute("TurretPitch") or 0, k)
+		end
+		local firing = v:GetAttribute("Firing") == true
+		local targetSpin = firing and 42 or 0
+		st.spinSpeed += math.clamp(targetSpin - st.spinSpeed, -25 * dt, 90 * dt)
+		st.spin = (st.spin + st.spinSpeed * dt) % (2 * math.pi)
+		if (st.progress.Mast or 0) >= 0.99 then
+			st.headSpin = (st.headSpin + 1.6 * dt) % (2 * math.pi)
+		else
+			st.headSpin = lerpAngle(st.headSpin, 0, math.min(1, 3 * dt))
+		end
+		if near(chassis.Position, 900) then
+			local live = { Yaw = st.yaw, Pitch = st.pitch, Spin = st.spin, HeadSpin = st.headSpin }
+			for name, motor in st.joints do
+				motor.Transform = Shared.JointTransform(name, st.progress, live)
+			end
+		end
+
+		-- lights: only touch parts when something changed
+		local lightsOn = v:GetAttribute("LightsOn") == true
+		local braking = v:GetAttribute("Braking") == true
+		local beacons = v:GetAttribute("BeaconsOn") == true
+		local phase = beacons and (math.floor(os.clock() * 4) % 2 == 0) or false
+		local key = (lightsOn and "1" or "0") .. (braking and "1" or "0") .. (phase and "1" or "0")
+		if key ~= st.lightsKey then
+			st.lightsKey = key
+			paintParts(st.parts.LED, lightsOn, "LED")
+			paintParts(st.parts.RedLens, lightsOn or braking, "RedLens")
+			paintParts(st.parts.Amber, phase, "Amber")
+			for _, n in { "HeadlightL", "HeadlightR", "LightBar", "Searchlight", "Dome" } do
+				setLight(st, n, lightsOn)
+			end
+			for i = 1, 4 do
+				setLight(st, "Beacon" .. i, phase)
+			end
+			setLight(st, "TailL", lightsOn or braking, braking and 4 or 1.5)
+			setLight(st, "TailR", lightsOn or braking, braking and 4 or 1.5)
+		end
+
+		-- hide this vehicle's prompts while I sit in it
+		local inside = mySeat ~= nil and mySeat:IsDescendantOf(v)
+		if st.inside ~= inside then
+			st.inside = inside
+			for _, pp in st.prompts do
+				pp.Enabled = not inside
+			end
+		end
+	end
+
+	-- missiles in flight (same maths as the server)
+	for id, ms in missiles do
+		local tpos = Shared.TargetPosition(ms.target)
+		local pos = Shared.MissileStep(ms.m, tpos, dt)
+		ms.m.Pos = pos
+		local cf = CFrame.lookAt(pos, pos + ms.m.Vel)
+		ms.body.CFrame = cf
+		ms.nose.CFrame = cf * CFrame.new(0, 0, -1.3)
+		if ms.m.Age > Config.MissileLifetime + 1 then
+			removeMissile(id)
+		end
+	end
+end)
+]]></ProtectedString></Properties></Item><Item class="LocalScript" referent="RBX00000007"><Properties><string name="Name">TX6_SpawnClient</string><ProtectedString name="Source"><![CDATA[--!nonstrict
+--[[
+	TX-6 "Bastion" - admin spawn key (StarterPlayerScripts).
+	F4 = spawn a TX-6 in front of you, Shift+F4 = remove it. The server decides if you are allowed.
+]]
+
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local folder = ReplicatedStorage:WaitForChild("TX6")
+local Config = require(folder:WaitForChild("Config"))
+local request = folder:WaitForChild("TX6_SpawnRequest", 30)
+local player = Players.LocalPlayer
+
+if not request then
+	warn("[TX6] spawn remote not found - is TX6_Spawner in ServerScriptService?")
+	return
+end
+
+UserInputService.InputBegan:Connect(function(input, processed)
+	if processed or input.KeyCode ~= Config.SpawnKey then
+		return
+	end
+	local shift = UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) or UserInputService:IsKeyDown(Enum.KeyCode.RightShift)
+	request:FireServer(shift and "Despawn" or "Spawn")
+end)
+
+-- small hint for admins
+task.spawn(function()
+	local ok, admin = pcall(Config.IsAdmin, player)
+	if not ok or not admin then
+		return
+	end
+	local gui = Instance.new("ScreenGui")
+	gui.Name = "TX6_AdminHint"
+	gui.ResetOnSpawn = false
+	local l = Instance.new("TextLabel")
+	l.BackgroundColor3 = Color3.fromRGB(18, 20, 16)
+	l.BackgroundTransparency = 0.3
+	l.Size = UDim2.fromOffset(420, 28)
+	l.Position = UDim2.new(0, 16, 1, -150)
+	l.Font = Enum.Font.GothamBold
+	l.TextSize = 13
+	l.TextColor3 = Color3.fromRGB(200, 215, 170)
+	l.Text = string.format("ADMIN  TX-6 Bastion: %s spawn  -  Shift+%s remove  -  chat %s",
+		Config.SpawnKey.Name, Config.SpawnKey.Name, Config.ChatCommand)
+	l.Parent = gui
+	Instance.new("UICorner").Parent = l
+	gui.Parent = player:WaitForChild("PlayerGui")
+	task.wait(12)
+	gui:Destroy()
+end)
+]]></ProtectedString></Properties></Item></Item><Item class="Folder" referent="RBX0000000E"><Properties><string name="Name">Vehicle</string></Properties><Item class="Script" referent="RBX00000008"><Properties><string name="Name">TX6_Server</string><ProtectedString name="Source"><![CDATA[--!nonstrict
+--[[
+	TX-6 "Bastion" - server brain (runs inside every spawned vehicle).
+
+	Server-authoritative: clients only ASK (remote events); this script checks who is asking (which seat they are in),
+	clamps every number, runs the weapons, applies damage and tells all clients what to show.
+	Animated parts are driven by attributes ("T_<channel>" = 0/1 targets, TurretYaw/Pitch, Firing ...);
+	every client animates them smoothly with TX6_Visuals.
+]]
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local PhysicsService = game:GetService("PhysicsService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local vehicle = script.Parent
+local Shared = require(ReplicatedStorage:WaitForChild("TX6"):WaitForChild("Shared"))
+local Config, Rig = Shared.Config, Shared.Rig
+
+local chassis: BasePart = vehicle:WaitForChild("Chassis")
+local seatsFolder = vehicle:WaitForChild("Seats")
+local wheels = vehicle:WaitForChild("Wheels")
+local templates = vehicle:WaitForChild("Templates")
+local remote: RemoteEvent = vehicle:WaitForChild("TX6Remote")
+
+-- ====================================================================== collision groups
+for _, g in { "TX6_Body", "TX6_Wheels" } do
+	pcall(function()
+		if not PhysicsService:IsCollisionGroupRegistered(g) then
+			PhysicsService:RegisterCollisionGroup(g)
+		end
+	end)
+end
+pcall(function()
+	PhysicsService:CollisionGroupSetCollidable("TX6_Body", "TX6_Wheels", false)
+	PhysicsService:CollisionGroupSetCollidable("TX6_Wheels", "TX6_Wheels", false)
+end)
+
+-- ====================================================================== state
+local targets, progress = {}, {}
+for _, ch in Shared.Channels do
+	targets[ch] = 0
+	progress[ch] = 0
+	vehicle:SetAttribute("T_" .. ch, 0)
+end
+local pods = { L = Config.MissilesPerPod, R = Config.MissilesPerPod }
+vehicle:SetAttribute("MissilesL", pods.L)
+vehicle:SetAttribute("MissilesR", pods.R)
+vehicle:SetAttribute("TurretYaw", 0)
+vehicle:SetAttribute("TurretPitch", 0)
+vehicle:SetAttribute("Firing", false)
+vehicle:SetAttribute("Heat", 0)
+vehicle:SetAttribute("Overheated", false)
+vehicle:SetAttribute("LightsOn", false)
+vehicle:SetAttribute("BeaconsOn", false)
+vehicle:SetAttribute("Braking", false)
+
+local function setChannel(ch: string, value: number)
+	targets[ch] = value
+	vehicle:SetAttribute("T_" .. ch, value)
+end
+
+local function notice(player: Player?, text: string)
+	if player then
+		remote:FireClient(player, "Notice", text)
+	end
+end
+
+-- ====================================================================== drivetrain helpers
+local struts = {}
+for _, tag in { "FL", "FR", "RL", "RR" } do
+	struts[tag] = wheels:WaitForChild("Strut_" .. tag)
+end
+
+local function sprungMass(): number
+	local ok, m = pcall(function()
+		return chassis.AssemblyMass
+	end)
+	return (ok and m and m > 0) and m or chassis:GetMass()
+end
+
+local function brakeAll()
+	local mass = sprungMass()
+	for tag, strut in struts do
+		local motor = strut:FindFirstChild("Motor")
+		if motor then
+			motor.AngularVelocity = 0
+			motor.MotorMaxTorque = mass * Config.BrakeDecel * Rig.WheelRadius / 4 * 1.5
+			motor.MotorMaxAcceleration = 400
+		end
+		local susp = strut:FindFirstChild("Susp")
+		if susp and susp:IsA("CylindricalConstraint") then
+			susp.TargetAngle = 0
+		end
+	end
+end
+
+local function tuneSuspension()
+	local mass = sprungMass()
+	local perWheel = mass / 4
+	local k = perWheel * workspace.Gravity / Config.SuspensionSag
+	local c = 2 * Config.SuspensionDamping * math.sqrt(k * perWheel)
+	for _, strut in struts do
+		local spring = strut:FindFirstChild("Spring")
+		if spring then
+			spring.Stiffness = k
+			spring.Damping = c
+			spring.FreeLength = Rig.SpringTop + Config.SuspensionSag
+		end
+	end
+	vehicle:SetAttribute("SprungMass", math.floor(mass))
+end
+
+task.defer(function()
+	RunService.Heartbeat:Wait()
+	tuneSuspension()
+	brakeAll()
+	pcall(function()
+		chassis:SetNetworkOwner(nil) -- parked: the server simulates it (no jitter)
+	end)
+end)
+
+-- ====================================================================== seats
+local SEATS = {
+	DriverSeat = { Door = "Door_FL", Exit = "Exit_Driver", Client = "TX6_DriverClient", Crew = true },
+	PassengerSeat = { Door = "Door_FR", Exit = "Exit_Passenger" },
+	RearLeftSeat = { Door = "Door_RL", Exit = "Exit_RearL" },
+	RearRightSeat = { Door = "Door_RR", Exit = "Exit_RearR" },
+	GunnerSeat = { Door = "Door_RL", Exit = "Exit_Gunner", Client = "TX6_GunnerClient", Crew = true },
+}
+local occupant: { [string]: Player? } = {}
+local givenGui: { [string]: Instance? } = {}
+local gun = { firing = false, heat = 0, overheated = false, spin = 0, acc = 0 }
+
+local function occupantCharacters()
+	local list = {}
+	for _, seat in seatsFolder:GetChildren() do
+		if seat:IsA("Seat") or seat:IsA("VehicleSeat") then
+			local hum = seat.Occupant
+			if hum and hum.Parent then
+				table.insert(list, hum.Parent)
+			end
+		end
+	end
+	return list
+end
+
+local function giveClient(seatName: string, player: Player)
+	local info = SEATS[seatName]
+	if not info.Client then
+		return
+	end
+	local gui = Instance.new("ScreenGui")
+	gui.Name = "TX6_" .. seatName
+	gui.ResetOnSpawn = false
+	gui.IgnoreGuiInset = true
+	gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+	local ref = Instance.new("ObjectValue")
+	ref.Name = "Vehicle"
+	ref.Value = vehicle
+	ref.Parent = gui
+	templates:WaitForChild(info.Client):Clone().Parent = gui
+	gui.Parent = player:WaitForChild("PlayerGui")
+	givenGui[seatName] = gui
+end
+
+local function exitTo(char: Model?, exitName: string)
+	task.delay(0.1, function()
+		local root = char and char:FindFirstChild("HumanoidRootPart")
+		if not root or not vehicle.Parent then
+			return
+		end
+		local vcf = Shared.VehicleCF(chassis)
+		local p = vcf:PointToWorldSpace(Rig.Points[exitName])
+		local _, yaw = vcf:ToEulerAnglesYXZ()
+		root.CFrame = CFrame.new(p) * CFrame.Angles(0, yaw, 0)
+		root.AssemblyLinearVelocity = chassis.AssemblyLinearVelocity
+	end)
+end
+
+for seatName, info in SEATS do
+	local seat = seatsFolder:WaitForChild(seatName)
+	seat:GetPropertyChangedSignal("Occupant"):Connect(function()
+		local hum = seat.Occupant
+		local prev = occupant[seatName]
+		if hum then
+			local player = Players:GetPlayerFromCharacter(hum.Parent)
+			occupant[seatName] = player
+			if player then
+				if seatName == "DriverSeat" then
+					pcall(function()
+						chassis:SetNetworkOwner(player) -- the driver simulates the physics = no input lag
+					end)
+				end
+				giveClient(seatName, player)
+			end
+		else
+			occupant[seatName] = nil
+			local gui = givenGui[seatName]
+			if gui then
+				gui:Destroy()
+				givenGui[seatName] = nil
+			end
+			if seatName == "DriverSeat" then
+				vehicle:SetAttribute("Braking", false)
+				brakeAll()
+				pcall(function()
+					chassis:SetNetworkOwner(nil)
+				end)
+			elseif seatName == "GunnerSeat" then
+				gun.firing = false
+			end
+			if prev then
+				exitTo(prev.Character, info.Exit)
+			end
+		end
+	end)
+end
+
+-- ====================================================================== prompts (doors, bays, getting in)
+local function pulseDoor(ch: string)
+	if targets[ch] == 1 then
+		return
+	end
+	setChannel(ch, 1)
+	task.delay(1.5, function()
+		if vehicle.Parent then
+			setChannel(ch, 0)
+		end
+	end)
+end
+
+local function toggleChannel(ch: string, player: Player?)
+	local value = targets[ch] == 1 and 0 or 1
+	if ch == "Hood" and value == 1 and targets.Armor == 1 then
+		notice(player, "Lower the windshield armour first (driver presses " .. Config.ArmorKey.Name .. ")")
+		return
+	end
+	setChannel(ch, value)
+end
+
+local function onPrompt(pp: ProximityPrompt, player: Player)
+	local char = player.Character
+	local hum = char and char:FindFirstChildOfClass("Humanoid")
+	if not hum or hum.Health <= 0 or hum.SeatPart then
+		return
+	end
+	local root = char:FindFirstChild("HumanoidRootPart")
+	local holder = pp.Parent
+	if root and holder and holder:IsA("Attachment") and (root.Position - holder.WorldPosition).Magnitude > pp.MaxActivationDistance + 4 then
+		return
+	end
+	local kind, target = pp:GetAttribute("Kind"), pp:GetAttribute("Target")
+	if kind == "Seat" then
+		local seat = seatsFolder:FindFirstChild(target)
+		local info = SEATS[target]
+		if not seat or not info then
+			return
+		end
+		if seat.Occupant then
+			notice(player, "That seat is taken")
+			return
+		end
+		if info.Crew and Config.RestrictSeatsToAdmins and not Config.IsAdmin(player) then
+			notice(player, "Only admins can crew the TX-6")
+			return
+		end
+		local door = info.Door
+		if target == "GunnerSeat" and holder and holder.Name == "P_RearRightDoor" then
+			door = "Door_RR"
+		end
+		pulseDoor(door)
+		task.delay(0.35, function()
+			if seat.Parent and not seat.Occupant and hum.Parent and hum.Health > 0 and not hum.SeatPart then
+				seat:Sit(hum)
+			end
+		end)
+	elseif kind == "Channel" and targets[target] ~= nil then
+		toggleChannel(target, player)
+	end
+end
+
+for _, d in chassis:GetDescendants() do
+	if d:IsA("ProximityPrompt") then
+		d.Triggered:Connect(function(player)
+			onPrompt(d, player)
+		end)
+	end
+end
+
+-- ====================================================================== weapons
+local rng = Random.new()
+local aimYaw, aimPitch = 0, 0
+
+local function excludeParams()
+	local p = RaycastParams.new()
+	p.FilterType = Enum.RaycastFilterType.Exclude
+	local list = { vehicle }
+	for _, c in occupantCharacters() do
+		table.insert(list, c)
+	end
+	p.FilterDescendantsInstances = list
+	p.IgnoreWater = true
+	return p
+end
+
+local function canDamage(hum: Humanoid?): boolean
+	if not hum or hum.Health <= 0 then
+		return false
+	end
+	local char = hum.Parent
+	for _, c in occupantCharacters() do
+		if c == char then
+			return false
+		end
+	end
+	if not Config.DamagePlayers and Players:GetPlayerFromCharacter(char) then
+		return false
+	end
+	return true
+end
+
+local function fireRound()
+	local muzzle = Shared.Muzzle(Shared.VehicleCF(chassis), aimYaw, aimPitch)
+	local spread = math.rad(Config.GunSpreadDeg)
+	local dir = (muzzle * CFrame.Angles(rng:NextNumber(-spread, spread), rng:NextNumber(-spread, spread), 0)).LookVector
+	local result = workspace:Raycast(muzzle.Position, dir * Config.GunRange, excludeParams())
+	local hitPos = result and result.Position or (muzzle.Position + dir * Config.GunRange)
+	if result then
+		local hum = Shared.HumanoidFromPart(result.Instance)
+		if canDamage(hum) then
+			local mult = (result.Instance.Name == "Head") and Config.GunHeadshotMultiplier or 1
+			Config.DealDamage(occupant.GunnerSeat, hum, Config.GunDamage * mult, "TX-6 rotary cannon")
+		end
+	end
+	remote:FireAllClients("Tracer", muzzle.Position, hitPos, result ~= nil)
+end
+
+-- missiles: simulated here (authoritative); every client flies an identical visual copy
+local live = {}
+local nextId = 0
+local nextSide = "L"
+local lastLaunch = 0
+local reloadClock = 0
+
+local function explode(m, pos: Vector3)
+	live[m.Id] = nil
+	remote:FireAllClients("MissileHit", m.Id, pos)
+	local params = OverlapParams.new()
+	params.FilterType = Enum.RaycastFilterType.Exclude
+	params.FilterDescendantsInstances = { vehicle }
+	local done = {}
+	for _, p in workspace:GetPartBoundsInRadius(pos, Config.MissileBlastRadius, params) do
+		local hum = Shared.HumanoidFromPart(p)
+		if hum and not done[hum] then
+			done[hum] = true
+			if canDamage(hum) then
+				local tp = Shared.TargetPosition(hum.Parent) or p.Position
+				local k = math.clamp(1 - (tp - pos).Magnitude / Config.MissileBlastRadius, 0.25, 1)
+				Config.DealDamage(m.Attacker, hum, Config.MissileDamage * k, "TX-6 lock-on missile")
+			end
+		end
+	end
+end
+
+local function launch(player: Player, target: Instance?)
+	if typeof(target) ~= "Instance" or not target:IsA("Model") then
+		return
+	end
+	if targets.Missiles ~= 1 or progress.Missiles < 0.999 then
+		notice(player, "Open the missile bays first (" .. Config.MissileKeyDeploy.Name .. ")")
+		return
+	end
+	if os.clock() - lastLaunch < Config.MissileCooldown then
+		return
+	end
+	local side = pods[nextSide] > 0 and nextSide or (nextSide == "L" and "R" or "L")
+	if pods[side] <= 0 then
+		notice(player, "Missile pods empty - reloading")
+		return
+	end
+	local tpos = Shared.TargetPosition(target)
+	if not tpos or not canDamage(target:FindFirstChildOfClass("Humanoid")) then
+		return
+	end
+	local range = Config.MissileRange * ((progress.Mast >= 0.99) and 2 or 1)
+	if (tpos - chassis.Position).Magnitude > range * 1.15 then
+		notice(player, "Target out of range")
+		return
+	end
+	pods[side] -= 1
+	nextSide = side == "L" and "R" or "L"
+	lastLaunch = os.clock()
+	vehicle:SetAttribute("MissilesL", pods.L)
+	vehicle:SetAttribute("MissilesR", pods.R)
+	local start = Shared.PodLaunch(Shared.VehicleCF(chassis), side)
+	nextId += 1
+	live[nextId] = {
+		Id = nextId, Pos = start.Position, Vel = start.LookVector * Config.MissileSpeedStart,
+		Speed = Config.MissileSpeedStart, Age = 0, Target = target, Attacker = player,
+	}
+	remote:FireAllClients("MissileLaunch", nextId, start, target)
+end
+
+local missileParams = RaycastParams.new()
+missileParams.FilterType = Enum.RaycastFilterType.Exclude
+missileParams.FilterDescendantsInstances = { vehicle }
+
+-- ====================================================================== driver / gunner requests
+local buckets = {}
+local function allow(player: Player, action: string): boolean
+	local key = player.UserId .. action
+	local now = os.clock()
+	local b = buckets[key]
+	local rate = action == "Aim" and 40 or 8
+	if not b then
+		b = { t = now, n = rate }
+		buckets[key] = b
+	end
+	b.n = math.min(rate, b.n + (now - b.t) * rate)
+	b.t = now
+	if b.n < 1 then
+		return false
+	end
+	b.n -= 1
+	return true
+end
+Players.PlayerRemoving:Connect(function(player)
+	for k in buckets do
+		if string.sub(k, 1, #tostring(player.UserId)) == tostring(player.UserId) then
+			buckets[k] = nil
+		end
+	end
+end)
+
+local horn: Sound? = nil
+if Config.HornSoundId ~= "" then
+	local h = Instance.new("Sound")
+	h.Name = "Horn"
+	h.SoundId = Config.HornSoundId
+	h.RollOffMaxDistance = 400
+	h.Parent = chassis
+	horn = h
+end
+
+local function flip()
+	local cf = chassis.CFrame
+	if cf.UpVector.Y > 0.6 or chassis.AssemblyLinearVelocity.Magnitude > 15 then
+		return
+	end
+	local look = cf.LookVector
+	local flat = Vector3.new(look.X, 0, look.Z)
+	if flat.Magnitude < 0.1 then
+		flat = Vector3.new(0, 0, -1)
+	end
+	local pos = Shared.VehicleCF(chassis).Position + Vector3.new(0, 6, 0)
+	vehicle:PivotTo(CFrame.lookAt(pos, pos + flat.Unit))
+	for _, p in vehicle:GetDescendants() do
+		if p:IsA("BasePart") then
+			p.AssemblyLinearVelocity = Vector3.zero
+			p.AssemblyAngularVelocity = Vector3.zero
+		end
+	end
+end
+
+local function toggleArmor(player: Player)
+	if targets.Armor == 1 then
+		setChannel("Armor", 0)
+		return
+	end
+	if targets.Hood == 1 then
+		setChannel("Hood", 0)
+		task.spawn(function()
+			local t0 = os.clock()
+			while progress.Hood > 0.01 and os.clock() - t0 < 3 do
+				RunService.Heartbeat:Wait()
+			end
+			setChannel("Armor", 1)
+		end)
+		return
+	end
+	setChannel("Armor", 1)
+end
+
+remote.OnServerEvent:Connect(function(player: Player, action, a, b)
+	if typeof(action) ~= "string" or not allow(player, action) then
+		return
+	end
+	local isDriver = occupant.DriverSeat == player
+	local isGunner = occupant.GunnerSeat == player
+	if action == "Aim" and isGunner then
+		if typeof(a) == "number" and typeof(b) == "number" and a == a and b == b then
+			aimYaw = (a + math.pi) % (2 * math.pi) - math.pi
+			aimPitch = math.clamp(b, math.rad(Config.TurretPitchMin), math.rad(Config.TurretPitchMax))
+		end
+	elseif action == "Fire" and isGunner then
+		gun.firing = a == true
+	elseif action == "MissileDeploy" and isGunner then
+		setChannel("Missiles", targets.Missiles == 1 and 0 or 1)
+	elseif action == "Launch" and isGunner then
+		launch(player, a)
+	elseif action == "Mast" and (isDriver or isGunner) then
+		setChannel("Mast", targets.Mast == 1 and 0 or 1)
+	elseif action == "Lights" and isDriver then
+		vehicle:SetAttribute("LightsOn", not vehicle:GetAttribute("LightsOn"))
+	elseif action == "Beacons" and isDriver then
+		vehicle:SetAttribute("BeaconsOn", not vehicle:GetAttribute("BeaconsOn"))
+	elseif action == "Armor" and isDriver then
+		toggleArmor(player)
+	elseif action == "Brake" and isDriver then
+		vehicle:SetAttribute("Braking", a == true)
+	elseif action == "Horn" and isDriver then
+		if horn then
+			horn:Play()
+		end
+	elseif action == "Flip" and isDriver then
+		flip()
+	end
+end)
+
+-- ====================================================================== main loop
+local attrClock = 0
+RunService.Heartbeat:Connect(function(dt)
+	for _, ch in Shared.Channels do
+		progress[ch] = Shared.Advance(ch, progress[ch], targets[ch], dt)
+	end
+
+	-- rotary cannon: spin-up, rate of fire, heat
+	local manned = occupant.GunnerSeat ~= nil
+	local trying = gun.firing and manned and not gun.overheated
+	if trying then
+		gun.spin = math.min(Config.GunSpinUpTime, gun.spin + dt)
+	else
+		gun.spin = math.max(0, gun.spin - dt * 0.5)
+	end
+	if trying and gun.spin >= Config.GunSpinUpTime then
+		gun.acc += dt * Config.GunFireRate
+		while gun.acc >= 1 do
+			gun.acc -= 1
+			fireRound()
+			gun.heat += Config.GunHeatPerShot
+			if gun.heat >= 1 then
+				gun.heat = 1
+				gun.overheated = true
+				gun.acc = 0
+				break
+			end
+		end
+	else
+		gun.acc = 0
+		gun.heat = math.max(0, gun.heat - Config.GunCoolPerSecond * dt)
+	end
+	if gun.overheated and gun.heat <= Config.GunOverheatResume then
+		gun.overheated = false
+	end
+
+	-- missiles in flight
+	for _, m in live do
+		local tpos = Shared.TargetPosition(m.Target)
+		local from = m.Pos
+		local to = Shared.MissileStep(m, tpos, dt)
+		local hit = workspace:Raycast(from, to - from, missileParams)
+		if hit then
+			explode(m, hit.Position)
+		elseif tpos and (to - tpos).Magnitude < 4 then
+			explode(m, to)
+		elseif m.Age > Config.MissileLifetime then
+			explode(m, to)
+		else
+			m.Pos = to
+		end
+	end
+
+	-- missile reload (one at a time into the emptier pod)
+	if pods.L < Config.MissilesPerPod or pods.R < Config.MissilesPerPod then
+		reloadClock += dt
+		if reloadClock >= Config.MissileReloadTime then
+			reloadClock = 0
+			local side = pods.L <= pods.R and "L" or "R"
+			pods[side] += 1
+			vehicle:SetAttribute("MissilesL", pods.L)
+			vehicle:SetAttribute("MissilesR", pods.R)
+		end
+	else
+		reloadClock = 0
+	end
+
+	-- replicate the gunner state ~10 times a second
+	attrClock += dt
+	if attrClock >= 0.1 then
+		attrClock = 0
+		vehicle:SetAttribute("TurretYaw", aimYaw)
+		vehicle:SetAttribute("TurretPitch", aimPitch)
+		vehicle:SetAttribute("Firing", trying)
+		vehicle:SetAttribute("Heat", math.floor(gun.heat * 100 + 0.5) / 100)
+		vehicle:SetAttribute("Overheated", gun.overheated)
+	end
+end)
+]]></ProtectedString></Properties></Item><Item class="LocalScript" referent="RBX00000009"><Properties><string name="Name">TX6_DriverClient</string><ProtectedString name="Source"><![CDATA[--!nonstrict
+--[[
+	TX-6 "Bastion" - driver controls (given to the player in the driver's seat, removed when they leave).
+
+	The server hands physics ownership to the driver, so this script sets the wheel motors and steering directly
+	for lag-free driving. Works with keyboard, gamepad and touch (VehicleSeat throttle/steer values).
+]]
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local ContextActionService = game:GetService("ContextActionService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local gui = script.Parent
+local vehicleRef = gui:WaitForChild("Vehicle") :: ObjectValue
+local vehicle = vehicleRef.Value
+local waited = 0
+while not vehicle and waited < 10 do
+	waited += task.wait(0.1)
+	vehicle = vehicleRef.Value
+end
+if not vehicle then
+	return
+end
+local Shared = require(ReplicatedStorage:WaitForChild("TX6"):WaitForChild("Shared"))
+local Config, Rig = Shared.Config, Shared.Rig
+
+local player = Players.LocalPlayer
+local chassis = vehicle:WaitForChild("Chassis") :: BasePart
+local seat = vehicle:WaitForChild("Seats"):WaitForChild("DriverSeat") :: VehicleSeat
+local remote = vehicle:WaitForChild("TX6Remote") :: RemoteEvent
+local wheelsFolder = vehicle:WaitForChild("Wheels")
+
+local motors: { [string]: HingeConstraint } = {}
+local steering: { [string]: CylindricalConstraint } = {}
+local wheelParts: { BasePart } = {}
+for _, tag in { "FL", "FR", "RL", "RR" } do
+	local strut = wheelsFolder:WaitForChild("Strut_" .. tag)
+	motors[tag] = strut:WaitForChild("Motor") :: HingeConstraint
+	local susp = strut:WaitForChild("Susp")
+	if susp:IsA("CylindricalConstraint") then
+		steering[tag] = susp
+	end
+	table.insert(wheelParts, wheelsFolder:WaitForChild("Wheel_" .. tag) :: BasePart)
+end
+
+local character = player.Character
+local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+
+-- ====================================================================== HUD
+local function label(parent: Instance, text: string, size: UDim2, pos: UDim2, textSize: number, color: Color3?)
+	local l = Instance.new("TextLabel")
+	l.BackgroundTransparency = 1
+	l.Size = size
+	l.Position = pos
+	l.Font = Enum.Font.GothamBold
+	l.TextSize = textSize
+	l.TextColor3 = color or Color3.fromRGB(230, 235, 220)
+	l.Text = text
+	l.Parent = parent
+	return l
+end
+
+local panel = Instance.new("Frame")
+panel.Name = "DriverPanel"
+panel.AnchorPoint = Vector2.new(0.5, 1)
+panel.Position = UDim2.new(0.5, 0, 1, -18)
+panel.Size = UDim2.fromOffset(420, 92)
+panel.BackgroundColor3 = Color3.fromRGB(18, 20, 16)
+panel.BackgroundTransparency = 0.25
+panel.Parent = gui
+Instance.new("UICorner").Parent = panel
+local stroke = Instance.new("UIStroke")
+stroke.Color = Color3.fromRGB(120, 130, 90)
+stroke.Transparency = 0.4
+stroke.Parent = panel
+
+local speedLabel = label(panel, "0", UDim2.fromOffset(110, 52), UDim2.fromOffset(12, 6), 46)
+local unitLabel = label(panel, "km/h", UDim2.fromOffset(60, 20), UDim2.fromOffset(120, 34), 14, Color3.fromRGB(160, 170, 140))
+local gearLabel = label(panel, "N", UDim2.fromOffset(40, 40), UDim2.fromOffset(180, 10), 32, Color3.fromRGB(255, 200, 80))
+local statusLabel = label(panel, "", UDim2.fromOffset(200, 40), UDim2.fromOffset(214, 10), 13)
+statusLabel.TextXAlignment = Enum.TextXAlignment.Left
+statusLabel.TextWrapped = true
+statusLabel.RichText = true
+local hint = label(panel, string.format("W/S drive  A/D steer  %s handbrake  %s lights  %s beacons  %s armour  %s mast  %s flip  Space exit",
+	Config.HandbrakeKey.Name, Config.LightsKey.Name, Config.BeaconsKey.Name, Config.ArmorKey.Name, Config.MastKey.Name,
+	Config.FlipKey.Name), UDim2.new(1, -20, 0, 18), UDim2.fromOffset(10, 66), 11, Color3.fromRGB(150, 160, 130))
+hint.TextXAlignment = Enum.TextXAlignment.Left
+unitLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+-- ====================================================================== input
+local handbrake = false
+local bound = {}
+local function bindPress(name: string, action: string, ...)
+	ContextActionService:BindAction(name, function(_, state)
+		if state == Enum.UserInputState.Begin then
+			remote:FireServer(action)
+		end
+		return Enum.ContextActionResult.Sink
+	end, false, ...)
+	table.insert(bound, name)
+end
+bindPress("TX6_Lights", "Lights", Config.LightsKey, Enum.KeyCode.DPadUp)
+bindPress("TX6_Beacons", "Beacons", Config.BeaconsKey, Enum.KeyCode.DPadDown)
+bindPress("TX6_Armor", "Armor", Config.ArmorKey, Enum.KeyCode.DPadLeft)
+bindPress("TX6_Mast", "Mast", Config.MastKey, Enum.KeyCode.DPadRight)
+bindPress("TX6_Horn", "Horn", Config.HornKey, Enum.KeyCode.ButtonL3)
+bindPress("TX6_Flip", "Flip", Config.FlipKey, Enum.KeyCode.ButtonY)
+ContextActionService:BindAction("TX6_Handbrake", function(_, state)
+	handbrake = state == Enum.UserInputState.Begin or state == Enum.UserInputState.Change
+	return Enum.ContextActionResult.Sink
+end, true, Config.HandbrakeKey, Enum.KeyCode.ButtonB)
+ContextActionService:SetTitle("TX6_Handbrake", "BRAKE")
+table.insert(bound, "TX6_Handbrake")
+
+-- pull the camera out a bit: the TX-6 is big
+local savedMinZoom = player.CameraMinZoomDistance
+player.CameraMinZoomDistance = math.max(savedMinZoom, 18)
+
+-- ====================================================================== drive loop
+local lastBrake = false
+local hudClock = 0
+local conn: RBXScriptConnection? = nil
+local cleaned = false
+
+local function cleanup()
+	if cleaned then
+		return
+	end
+	cleaned = true
+	if conn then
+		conn:Disconnect()
+	end
+	for _, name in bound do
+		ContextActionService:UnbindAction(name)
+	end
+	player.CameraMinZoomDistance = savedMinZoom
+end
+script.Destroying:Connect(cleanup)
+
+conn = RunService.Heartbeat:Connect(function(dt)
+	if not vehicle.Parent or not humanoid or seat.Occupant ~= humanoid then
+		cleanup()
+		return
+	end
+	local throttle = seat.ThrottleFloat
+	local steerIn = seat.SteerFloat
+	local cf = chassis.CFrame
+	local speed = chassis.AssemblyLinearVelocity:Dot(cf.LookVector) -- studs/s, + = forward
+	local mass = chassis.AssemblyMass
+	for _, w in wheelParts do
+		mass += w.AssemblyMass
+	end
+	local r = Rig.WheelRadius
+
+	local targetW, accel, braking = 0, Config.CoastDecel, false
+	if handbrake then
+		targetW, accel, braking = 0, Config.BrakeDecel, true
+	elseif throttle > 0.05 then
+		if speed < -1.5 then
+			targetW, accel, braking = 0, Config.BrakeDecel, true
+		else
+			targetW, accel = throttle * Config.MaxSpeed / r, Config.Acceleration
+		end
+	elseif throttle < -0.05 then
+		if speed > 1.5 then
+			targetW, accel, braking = 0, Config.BrakeDecel, true
+		else
+			targetW, accel = throttle * Config.ReverseSpeed / r, Config.Acceleration * 0.7
+		end
+	end
+	-- torque each wheel needs for that acceleration (+40% for hills / grip losses)
+	local torque = mass * accel * r / 4 * 1.4
+	for _, m in motors do
+		m.AngularVelocity = targetW
+		m.MotorMaxTorque = torque
+		m.MotorMaxAcceleration = math.max(accel / r * 2, 5)
+	end
+
+	-- speed-sensitive steering with Ackermann geometry (inner wheel turns more)
+	local frac = math.clamp(math.abs(speed) / Config.MaxSpeed, 0, 1)
+	local maxDeg = Config.SteerMaxDeg + (Config.SteerMaxDegAtSpeed - Config.SteerMaxDeg) * frac
+	local angle = -steerIn * maxDeg -- positive = turn left
+	local inner, outer = angle * 1.12, angle * 0.88
+	if steering.FL then
+		steering.FL.TargetAngle = angle > 0 and inner or outer
+	end
+	if steering.FR then
+		steering.FR.TargetAngle = angle > 0 and outer or inner
+	end
+
+	if braking ~= lastBrake then
+		lastBrake = braking
+		remote:FireServer("Brake", braking)
+	end
+
+	hudClock += dt
+	if hudClock > 0.1 then
+		hudClock = 0
+		speedLabel.Text = tostring(math.floor(math.abs(speed) * 0.28 * 3.6 + 0.5))
+		gearLabel.Text = (speed < -1 or throttle < -0.05) and "R" or ((throttle > 0.05 or speed > 1) and "D" or "N")
+		local function chip(on: boolean, text: string)
+			return string.format('<font color="%s">%s</font>', on and "#9BE564" or "#5E6652", text)
+		end
+		statusLabel.Text = table.concat({
+			chip(vehicle:GetAttribute("LightsOn") == true, "LIGHTS"),
+			chip(vehicle:GetAttribute("BeaconsOn") == true, "BEACONS"),
+			chip(vehicle:GetAttribute("T_Armor") == 1, "ARMOUR"),
+			chip(vehicle:GetAttribute("T_Mast") == 1, "MAST"),
+			chip(handbrake, "HANDBRAKE"),
+		}, "  ")
+	end
+end)
+
+-- touch players get a horn / lights button through ContextActionService automatically when createTouchButton is true
+if UserInputService.TouchEnabled then
+	ContextActionService:BindAction("TX6_TouchLights", function(_, state)
+		if state == Enum.UserInputState.Begin then
+			remote:FireServer("Lights")
+		end
+		return Enum.ContextActionResult.Sink
+	end, true)
+	ContextActionService:SetTitle("TX6_TouchLights", "LIGHTS")
+	table.insert(bound, "TX6_TouchLights")
+end
+]]></ProtectedString></Properties></Item><Item class="LocalScript" referent="RBX0000000A"><Properties><string name="Name">TX6_GunnerClient</string><ProtectedString name="Source"><![CDATA[--!nonstrict
+--[[
+	TX-6 "Bastion" - gunner controls (given to the player in the turret's sling seat).
+
+	Mouse / right stick aims (the turret follows the crosshair at a realistic traverse speed),
+	Left mouse / R2 = rotary cannon, R = open / close missile bays, hold the crosshair on a target to lock,
+	F / right mouse / L2 = fire missile, M = sensor mast (radar appears when it is up).
+	The server re-checks everything; this script only aims, asks and draws the HUD.
+]]
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local ContextActionService = game:GetService("ContextActionService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local gui = script.Parent
+local vehicleRef = gui:WaitForChild("Vehicle") :: ObjectValue
+local vehicle = vehicleRef.Value
+local waited = 0
+while not vehicle and waited < 10 do
+	waited += task.wait(0.1)
+	vehicle = vehicleRef.Value
+end
+if not vehicle then
+	return
+end
+local Shared = require(ReplicatedStorage:WaitForChild("TX6"):WaitForChild("Shared"))
+local Config = Shared.Config
+
+local player = Players.LocalPlayer
+local camera = workspace.CurrentCamera
+local chassis = vehicle:WaitForChild("Chassis") :: BasePart
+local seat = vehicle:WaitForChild("Seats"):WaitForChild("GunnerSeat") :: Seat
+local seatsFolder = vehicle:WaitForChild("Seats")
+local remote = vehicle:WaitForChild("TX6Remote") :: RemoteEvent
+local character = player.Character
+local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+
+-- ====================================================================== HUD
+local function frame(parent: Instance, size: UDim2, pos: UDim2, color: Color3, transparency: number?)
+	local f = Instance.new("Frame")
+	f.Size = size
+	f.Position = pos
+	f.BackgroundColor3 = color
+	f.BackgroundTransparency = transparency or 0
+	f.BorderSizePixel = 0
+	f.Parent = parent
+	return f
+end
+local function text(parent: Instance, s: string, size: UDim2, pos: UDim2, ts: number, color: Color3?)
+	local l = Instance.new("TextLabel")
+	l.BackgroundTransparency = 1
+	l.Size = size
+	l.Position = pos
+	l.Font = Enum.Font.GothamBold
+	l.TextSize = ts
+	l.TextColor3 = color or Color3.fromRGB(230, 235, 220)
+	l.Text = s
+	l.Parent = parent
+	return l
+end
+
+local green = Color3.fromRGB(155, 229, 100)
+local cross = frame(gui, UDim2.fromOffset(44, 44), UDim2.new(0.5, -22, 0.5, -22), Color3.new(0, 0, 0), 1)
+for _, spec in { { 20, 2, 0, 21 }, { 20, 2, 24, 21 }, { 2, 20, 21, 0 }, { 2, 20, 21, 24 } } do
+	frame(cross, UDim2.fromOffset(spec[1], spec[2]), UDim2.fromOffset(spec[3], spec[4]), green)
+end
+frame(cross, UDim2.fromOffset(4, 4), UDim2.fromOffset(20, 20), green)
+
+local panel = frame(gui, UDim2.fromOffset(360, 84), UDim2.new(0.5, -180, 1, -102), Color3.fromRGB(18, 20, 16), 0.25)
+Instance.new("UICorner").Parent = panel
+text(panel, "CANNON HEAT", UDim2.fromOffset(110, 18), UDim2.fromOffset(10, 6), 12).TextXAlignment = Enum.TextXAlignment.Left
+local heatBack = frame(panel, UDim2.fromOffset(220, 10), UDim2.fromOffset(126, 10), Color3.fromRGB(50, 55, 45))
+local heatBar = frame(heatBack, UDim2.fromScale(0, 1), UDim2.fromScale(0, 0), green)
+local missileText = text(panel, "", UDim2.new(1, -20, 0, 20), UDim2.fromOffset(10, 28), 13)
+missileText.TextXAlignment = Enum.TextXAlignment.Left
+missileText.RichText = true
+local hint = text(panel, string.format("LMB fire   %s bays   hold on target to lock   %s / RMB missile   %s mast   Space exit",
+	Config.MissileKeyDeploy.Name, Config.MissileKeyFire.Name, Config.MastKey.Name), UDim2.new(1, -20, 0, 18),
+	UDim2.fromOffset(10, 58), 11, Color3.fromRGB(150, 160, 130))
+hint.TextXAlignment = Enum.TextXAlignment.Left
+
+local lockBox = frame(gui, UDim2.fromOffset(64, 64), UDim2.fromOffset(0, 0), Color3.new(0, 0, 0), 1)
+lockBox.AnchorPoint = Vector2.new(0.5, 0.5)
+lockBox.Visible = false
+local lockStroke = Instance.new("UIStroke")
+lockStroke.Thickness = 2
+lockStroke.Parent = lockBox
+local lockText = text(lockBox, "", UDim2.new(1, 40, 0, 16), UDim2.new(0, -20, 1, 4), 12)
+
+local radar = frame(gui, UDim2.fromOffset(180, 180), UDim2.new(1, -200, 1, -220), Color3.fromRGB(10, 20, 12), 0.3)
+local radarCorner = Instance.new("UICorner")
+radarCorner.CornerRadius = UDim.new(0.5, 0)
+radarCorner.Parent = radar
+local radarStroke = Instance.new("UIStroke")
+radarStroke.Color = green
+radarStroke.Transparency = 0.4
+radarStroke.Parent = radar
+frame(radar, UDim2.fromOffset(6, 6), UDim2.fromOffset(87, 87), green)
+text(radar, "RADAR 600", UDim2.fromOffset(180, 14), UDim2.fromOffset(0, 4), 10, green)
+radar.Visible = false
+local blips = {}
+
+
+-- ====================================================================== targets (every Humanoid in the world)
+local humanoids: { [Humanoid]: boolean } = {}
+for _, d in workspace:GetDescendants() do
+	if d:IsA("Humanoid") then
+		humanoids[d] = true
+	end
+end
+local addConn = workspace.DescendantAdded:Connect(function(d)
+	if d:IsA("Humanoid") then
+		humanoids[d] = true
+	end
+end)
+local remConn = workspace.DescendantRemoving:Connect(function(d)
+	if d:IsA("Humanoid") then
+		humanoids[d] = nil
+	end
+end)
+
+local function isCrew(model: Instance): boolean
+	for _, s in seatsFolder:GetChildren() do
+		if (s:IsA("Seat") or s:IsA("VehicleSeat")) and s.Occupant and s.Occupant.Parent == model then
+			return true
+		end
+	end
+	return false
+end
+
+local function validTarget(h: Humanoid): boolean
+	local model = h.Parent
+	if not model or h.Health <= 0 or model == player.Character or model:IsDescendantOf(vehicle) or isCrew(model) then
+		return false
+	end
+	if not Config.DamagePlayers and Players:GetPlayerFromCharacter(model) then
+		return false
+	end
+	return true
+end
+
+-- ====================================================================== input
+local bound = {}
+local firing = false
+local lockTarget: Model? = nil
+local function setFiring(on: boolean)
+	if firing ~= on then
+		firing = on
+		remote:FireServer("Fire", on)
+	end
+end
+local function launch()
+	if lockTarget then
+		remote:FireServer("Launch", lockTarget)
+	end
+end
+ContextActionService:BindActionAtPriority("TX6_Fire", function(_, state)
+	setFiring(state == Enum.UserInputState.Begin or state == Enum.UserInputState.Change)
+	return Enum.ContextActionResult.Sink
+end, true, 3000, Enum.UserInputType.MouseButton1, Enum.KeyCode.ButtonR2)
+ContextActionService:SetTitle("TX6_Fire", "FIRE")
+ContextActionService:BindActionAtPriority("TX6_Launch", function(_, state)
+	if state == Enum.UserInputState.Begin then
+		launch()
+	end
+	return Enum.ContextActionResult.Sink
+end, true, 3000, Config.MissileKeyFire, Enum.UserInputType.MouseButton2, Enum.KeyCode.ButtonL2)
+ContextActionService:SetTitle("TX6_Launch", "MISSILE")
+ContextActionService:BindAction("TX6_Bays", function(_, state)
+	if state == Enum.UserInputState.Begin then
+		remote:FireServer("MissileDeploy")
+	end
+	return Enum.ContextActionResult.Sink
+end, true, Config.MissileKeyDeploy, Enum.KeyCode.ButtonY)
+ContextActionService:SetTitle("TX6_Bays", "BAYS")
+ContextActionService:BindAction("TX6_GunnerMast", function(_, state)
+	if state == Enum.UserInputState.Begin then
+		remote:FireServer("Mast")
+	end
+	return Enum.ContextActionResult.Sink
+end, false, Config.MastKey, Enum.KeyCode.DPadRight)
+bound = { "TX6_Fire", "TX6_Launch", "TX6_Bays", "TX6_GunnerMast" }
+
+-- ====================================================================== aim + lock loop
+local aimYaw = vehicle:GetAttribute("TurretYaw") or 0
+local aimPitch = vehicle:GetAttribute("TurretPitch") or 0
+local sentYaw, sentPitch, sendClock = 999, 999, 0
+local candidate: Model? = nil
+local lockTimer = 0
+local missilesProgress = 0
+local mastProgress = 0
+local conn: RBXScriptConnection? = nil
+local cleaned = false
+
+local function cleanup()
+	if cleaned then
+		return
+	end
+	cleaned = true
+	if conn then
+		conn:Disconnect()
+	end
+	addConn:Disconnect()
+	remConn:Disconnect()
+	for _, n in bound do
+		ContextActionService:UnbindAction(n)
+	end
+	if firing then
+		remote:FireServer("Fire", false)
+	end
+	vehicle:SetAttribute("ClientYaw", nil)
+	vehicle:SetAttribute("ClientPitch", nil)
+	UserInputService.MouseBehavior = Enum.MouseBehavior.Default
+	UserInputService.MouseIconEnabled = true
+end
+script.Destroying:Connect(cleanup)
+
+local function angleTo(a: number, b: number, maxStep: number): number
+	local d = (b - a + math.pi) % (2 * math.pi) - math.pi
+	return a + math.clamp(d, -maxStep, maxStep)
+end
+
+conn = RunService.RenderStepped:Connect(function(dt)
+	if not vehicle.Parent or not humanoid or seat.Occupant ~= humanoid then
+		cleanup()
+		return
+	end
+	if not UserInputService.TouchEnabled then
+		UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter
+		UserInputService.MouseIconEnabled = false
+	end
+
+	-- 1) aim point = what the crosshair (screen centre) is looking at
+	local camCF = camera.CFrame
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Exclude
+	params.FilterDescendantsInstances = { vehicle, player.Character }
+	local hit = workspace:Raycast(camCF.Position, camCF.LookVector * 1500, params)
+	local aimPoint = hit and hit.Position or (camCF.Position + camCF.LookVector * 1500)
+	local vcf = Shared.VehicleCF(chassis)
+	local wantYaw, wantPitch = Shared.AimAngles(vcf, aimPoint)
+	aimYaw = angleTo(aimYaw, wantYaw, math.rad(140) * dt)          -- turret traverse 140 deg/s
+	aimPitch = angleTo(aimPitch, wantPitch, math.rad(90) * dt)     -- elevation 90 deg/s
+	vehicle:SetAttribute("ClientYaw", aimYaw)                       -- local only: smooth turret on this screen
+	vehicle:SetAttribute("ClientPitch", aimPitch)
+	sendClock += dt
+	if sendClock > 1 / 15 and (math.abs(aimYaw - sentYaw) > 0.002 or math.abs(aimPitch - sentPitch) > 0.002) then
+		sendClock = 0
+		sentYaw, sentPitch = aimYaw, aimPitch
+		remote:FireServer("Aim", aimYaw, aimPitch)
+	end
+
+	-- 2) lock-on: keep the crosshair on a target for MissileLockTime seconds
+	missilesProgress = Shared.Advance("Missiles", missilesProgress, vehicle:GetAttribute("T_Missiles") or 0, dt)
+	mastProgress = Shared.Advance("Mast", mastProgress, vehicle:GetAttribute("T_Mast") or 0, dt)
+	local range = Config.MissileRange * (mastProgress >= 0.99 and 2 or 1)
+	local look = camCF.LookVector
+	local function coneAngle(model: Model): number?
+		local pos = Shared.TargetPosition(model)
+		if not pos or (pos - chassis.Position).Magnitude > range then
+			return nil
+		end
+		return math.deg(math.acos(math.clamp((pos - camCF.Position).Unit:Dot(look), -1, 1)))
+	end
+	if lockTarget then
+		local h = lockTarget:FindFirstChildOfClass("Humanoid")
+		local a = coneAngle(lockTarget)
+		if not h or not validTarget(h) or not a or a > Config.MissileKeepLockConeDeg then
+			lockTarget = nil
+		end
+	end
+	if not lockTarget then
+		local best, bestA = nil, nil
+		for h in humanoids do
+			if h.Parent and validTarget(h) then
+				local a = coneAngle(h.Parent)
+				if a and a < Config.MissileLockConeDeg and (not bestA or a < bestA) then
+					best, bestA = h.Parent, a
+				end
+			end
+		end
+		if best and best == candidate then
+			lockTimer += dt
+			if lockTimer >= Config.MissileLockTime then
+				local pos = Shared.TargetPosition(best)
+				local los = pos and workspace:Raycast(camCF.Position, pos - camCF.Position, params)
+				if pos and (not los or los.Instance:IsDescendantOf(best)) then
+					lockTarget = best
+				end
+			end
+		else
+			candidate = best
+			lockTimer = 0
+		end
+	end
+
+	-- 3) HUD
+	local heat = vehicle:GetAttribute("Heat") or 0
+	heatBar.Size = UDim2.fromScale(heat, 1)
+	heatBar.BackgroundColor3 = vehicle:GetAttribute("Overheated") and Color3.fromRGB(240, 60, 40)
+		or Color3.fromRGB(155 + 100 * heat, 229 - 120 * heat, 100 - 60 * heat)
+	local bays = vehicle:GetAttribute("T_Missiles") == 1
+	local state = bays and (missilesProgress >= 0.999 and '<font color="#9BE564">READY</font>' or "OPENING...")
+		or (missilesProgress > 0.001 and "CLOSING..." or '<font color="#8A8F7E">BAYS CLOSED</font>')
+	missileText.Text = string.format("MISSILES  L %d  |  R %d     %s     range %d",
+		vehicle:GetAttribute("MissilesL") or 0, vehicle:GetAttribute("MissilesR") or 0, state, range)
+	local shown = lockTarget or candidate
+	local showPos = shown and Shared.TargetPosition(shown)
+	if showPos then
+		local sp, onScreen = camera:WorldToViewportPoint(showPos)
+		lockBox.Visible = onScreen
+		lockBox.Position = UDim2.fromOffset(sp.X, sp.Y)
+		if lockTarget then
+			lockStroke.Color = Color3.fromRGB(255, 60, 40)
+			lockText.Text = "LOCKED"
+			lockBox.Size = UDim2.fromOffset(48, 48)
+		else
+			local k = math.clamp(lockTimer / Config.MissileLockTime, 0, 1)
+			lockStroke.Color = Color3.fromRGB(255, 210, 80)
+			lockText.Text = "LOCKING"
+			lockBox.Size = UDim2.fromOffset(90 - 42 * k, 90 - 42 * k)
+		end
+	else
+		lockBox.Visible = false
+	end
+
+	-- 4) radar while the mast is up
+	radar.Visible = mastProgress >= 0.99
+	if radar.Visible then
+		local i = 0
+		for h in humanoids do
+			if h.Parent and h.Health > 0 and h.Parent ~= player.Character then
+				local pos = Shared.TargetPosition(h.Parent)
+				if pos then
+					local rel = vcf:PointToObjectSpace(pos)
+					local d = Vector2.new(rel.X, rel.Z)
+					if d.Magnitude < 600 then
+						i += 1
+						local b = blips[i]
+						if not b then
+							b = frame(radar, UDim2.fromOffset(5, 5), UDim2.fromOffset(0, 0), Color3.fromRGB(255, 90, 60))
+							b.AnchorPoint = Vector2.new(0.5, 0.5)
+							blips[i] = b
+						end
+						b.Visible = true
+						b.Position = UDim2.fromOffset(90 + d.X / 600 * 86, 90 + d.Y / 600 * 86)
+						b.BackgroundColor3 = Players:GetPlayerFromCharacter(h.Parent) and Color3.fromRGB(90, 170, 255)
+							or Color3.fromRGB(255, 90, 60)
+					end
+				end
+			end
+		end
+		for j = i + 1, #blips do
+			blips[j].Visible = false
+		end
+	end
+end)
+]]></ProtectedString></Properties></Item></Item><Item class="StringValue" referent="RBX0000000F"><Properties><string name="Name">README</string><string name="Value"># TX-6 "Bastion" — make it drive in Roblox Studio
+
+You need two files from this repository:
+
+| File | What it is |
+|---|---|
+| `exports/TX6_Bastion_Roblox.fbx` | the 3D model (all 172 meshes, already in studs) |
+| `roblox/TX6_Kit.rbxmx` | the code kit (installer + driving, turret, missiles, doors, lights, spawner) |
+
+## 1. Download
+
+On the GitHub page of the repo, press the green **Code** button → **Download ZIP**, then unzip it
+(right-click → Extract All). Make sure the branch picker (top-left of the file list) shows the branch with the
+`roblox` and `exports` folders.
+
+## 2. Import the 3D model (once)
+
+1. Open **Survival Island** in Roblox Studio.
+2. **Home** tab → **Import 3D** → pick `exports/TX6_Bastion_Roblox.fbx`.
+3. Check the settings (same as the VX-9): *Scale Unit* **Stud**, *Scale Factor* **1**, *World Forward* **Front**,
+   *World Up* **Top**, *Set Pivot to Scene Origin* ✔, *Upload to Roblox* ✔.
+   *File Dimensions* should read about **11.21 × 13.69 × 25.09**.
+4. Press **Import**. A model called `TX6_Bastion_Roblox` appears in Workspace. Don't move it.
+
+## 3. Insert the code kit
+
+In the **Explorer** window: right-click **ServerStorage** → **Insert from File…** → pick `roblox/TX6_Kit.rbxmx`.
+A folder `TX6_Kit` appears inside ServerStorage.
+
+## 4. Run the installer (one line)
+
+**View** tab → **Command Bar**. Paste this and press Enter:
+
+```lua
+require(game.ServerStorage.TX6_Kit.Install)()
+```
+
+The **Output** window should say:
+`[TX6] Installed: 172 meshes, 31 joints, 0 unknown names. Vehicle stored in ServerStorage.AdminVehicles.TX6_Bastion …`
+
+It also installs these (you don't need to touch them):
+- `ReplicatedStorage.TX6` → `Config` (all the numbers you can tune), `RigData`, `Shared`
+- `ServerScriptService.TX6_Spawner`
+- `StarterPlayer.StarterPlayerScripts.TX6_Visuals` and `TX6_SpawnClient`
+- `ServerStorage.TX6_ImportBackup` (so you can re-run the installer later without importing again)
+
+Then **File → Save** (and **Publish** when you are happy).
+
+## 5. Test it
+
+Press **Play** (F5), then:
+
+| Who | Key | What it does |
+|---|---|---|
+| Admin | **F4** (or chat `/tx6`) | spawns the TX-6 in front of you · **Shift+F4** / `/tx6 remove` removes it |
+| Anyone | **E** at the front-left door | get in as **driver** |
+| Anyone | **E** at the other doors | ride as passenger |
+| Anyone | **T** at a rear door | climb into the **turret** (gunner) |
+| Anyone | **F** at doors, rear, side bays, hood, fuel door | open / close it |
+| Driver | **W A S D** | drive (4×4, speed-sensitive steering), **X** handbrake |
+| Driver | **L** / **B** / **G** / **M** / **H** / **R** | lights / beacons / armour mode / sensor mast / horn / flip upright |
+| Gunner | mouse | aim the turret (it follows your crosshair) |
+| Gunner | **left click** (hold) | rotary cannon — watch the heat bar |
+| Gunner | **R** | open / close the missile bays |
+| Gunner | keep the crosshair on a zombie/target for 1 s | **lock on** (red box) |
+| Gunner | **F** or **right click** | fire a homing missile (12 missiles, they reload) |
+| Gunner | **M** | sensor mast → radar on screen + double missile range |
+| Everyone | **Space** | get out |
+
+Gamepads and phones work too (on-screen buttons for brake, fire, missile and bays).
+
+## 6. Tuning
+
+Open `ReplicatedStorage.TX6.Config`. Every number has a comment, for example:
+`MaxSpeed`, `Acceleration`, `SteerMaxDeg`, `SuspensionSag` (lower = stiffer), `SuspensionDamping` (higher = less
+bounce), `GunDamage`, `MissileDamage`, `DamagePlayers`, `RestrictSeatsToAdmins`, `HornSoundId`.
+Weapon hits go through `Config.DealDamage` — that is the one place to connect it to CombatService later.
+
+## 7. If something goes wrong
+
+| Problem | Fix |
+|---|---|
+| Output: `Import … first` | the imported model isn't in Workspace — do step 2 again (or keep `ServerStorage.TX6_ImportBackup`) |
+| Output: `unexpected import size` | re-import with Scale Unit **Stud**, Scale **1**, Forward **Front**, Up **Top** |
+| F4 does nothing | you are not an admin in a live server (Studio always counts as admin), or `TX6_Spawner` is missing → run step 4 again |
+| Bounces / sits too low | raise `SuspensionDamping` (e.g. 0.8) / lower `SuspensionSag` (e.g. 0.4) |
+| Feels slow / too fast | `Acceleration`, `MaxSpeed`, `ChassisDensity` |
+| Want to update the code later | insert the new `TX6_Kit.rbxmx`, delete the old `TX6_Kit`, run step 4 again |
+
+All code is server-checked: clients only ask, the server decides (who sits where, aim limits, fire rate, heat,
+missile lock range, damage).
+</string></Properties></Item></Item></roblox>

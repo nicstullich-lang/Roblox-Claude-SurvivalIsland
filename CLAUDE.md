@@ -481,3 +481,34 @@ rig JSON and replace welds with Motor6D/HingeConstraints for the moving groups.
 4. Packaging: the missile bays and side lockers overlapped inside the hull → lockers are L-shaped (deep low, shallow high).
 5. Brake hoses must route inside the wheel barrel (radius < rim inner radius) or they cut through the tyre.
 6. `boolean()` applies *all* modifiers — add bevels after booleans, never before (double-bevel bug).
+
+---
+
+## 11. TX-6 Roblox kit (drivable + all systems) — `roblox/`
+
+Built 4 Oct 2026 in a cloud session (no Studio access there): code is type-checked against the Roblox API with
+**luau-lsp** (`python3 roblox/analyze.py`, built from source in /tmp) but has **not yet been play-tested in Studio**.
+
+| File | Purpose |
+|---|---|
+| `roblox/TX6_Kit.rbxmx` | the kit Nic inserts into ServerStorage (packed by `bpy-run roblox/build_kit.py`) |
+| `roblox/src/Install.luau` | `require(game.ServerStorage.TX6_Kit.Install)()` — builds the vehicle from the FBX import |
+| `roblox/src/TX6/Config.luau` | all tunables + `IsAdmin` + `DealDamage` hook (→ ReplicatedStorage.TX6) |
+| `roblox/src/TX6/RigData.luau` | GENERATED from the rig JSON: joints/pivots/drives, seats, points, collision boxes, materials |
+| `roblox/src/TX6/Shared.luau` | maths shared by server + clients: joint transforms, muzzle, pod launch, missile step |
+| `roblox/src/Vehicle/TX6_Server.server.luau` | per-vehicle server: seats, network ownership, prompts, channels, cannon, missiles |
+| `roblox/src/Vehicle/TX6_DriverClient.client.luau` | driver: motors/steering (driver owns physics), HUD, keys |
+| `roblox/src/Vehicle/TX6_GunnerClient.client.luau` | gunner: aim, fire, lock-on, radar HUD |
+| `roblox/src/Client/TX6_Visuals.client.luau` | every client: Motor6D animation, lights, FX, prompt hiding |
+| `roblox/src/Server/TX6_Spawner.server.luau` + `Client/TX6_SpawnClient` | admin F4 / `/tx6` spawn |
+
+Design: invisible `Chassis` (RootPriority 127, density 4) + 7 collision boxes (group `TX6_Body`); 4 cylinder wheels
+(group `TX6_Wheels`, no collision with the body) on `Strut_*` parts — front `CylindricalConstraint` (slide + servo
+steer, InclinationAngle 0), rear `PrismaticConstraint`, `SpringConstraint` tuned from `AssemblyMass` at spawn,
+`HingeConstraint` motors (attachment X = −X so +AngularVelocity = forward). Visual MeshParts are massless, welded to
+`J_<group>` joint parts linked by Motor6Ds; clients set `Motor6D.Transform` from attributes (`T_<channel>` 0/1,
+`TurretYaw/Pitch`, `Firing`, `LightsOn`, `BeaconsOn`, `Braking`). Channels: Armor, Missiles, Mast, Door_FL/FR/RL/RR,
+Rear, Locker_L/R, Hood, Fuel, Utility. Blender→Roblox motion: rot X a → rot X −a; rot Y a → rot Z a; rot Z a → rot Y a;
+loc X d → X −d·S; loc Y d → Z d·S; loc Z d → Y d·S. Model is `ModelStreamingMode.Atomic`.
+Next steps once tested in Studio: tune feel in Config, add engine/horn sound ids, wire `Config.DealDamage` into
+CombatService, optional vehicle health.

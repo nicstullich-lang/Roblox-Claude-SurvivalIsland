@@ -1,0 +1,171 @@
+{
+ "name": "Game",
+ "className": "DataModel",
+ "children": [
+  {
+   "name": "ReplicatedStorage",
+   "className": "ReplicatedStorage",
+   "children": [
+    {
+     "name": "TX6",
+     "className": "Folder",
+     "children": [
+      {
+       "name": "Config",
+       "className": "ModuleScript",
+       "filePaths": [
+        "src/TX6/Config.luau"
+       ]
+      },
+      {
+       "name": "RigData",
+       "className": "ModuleScript",
+       "filePaths": [
+        "src/TX6/RigData.luau"
+       ]
+      },
+      {
+       "name": "Shared",
+       "className": "ModuleScript",
+       "filePaths": [
+        "src/TX6/Shared.luau"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "name": "ServerStorage",
+   "className": "ServerStorage",
+   "children": [
+    {
+     "name": "TX6_Kit",
+     "className": "Folder",
+     "children": [
+      {
+       "name": "Install",
+       "className": "ModuleScript",
+       "filePaths": [
+        "src/Install.luau"
+       ]
+      },
+      {
+       "name": "Shared",
+       "className": "Folder",
+       "children": [
+        {
+         "name": "Config",
+         "className": "ModuleScript",
+         "filePaths": [
+          "src/TX6/Config.luau"
+         ]
+        },
+        {
+         "name": "RigData",
+         "className": "ModuleScript",
+         "filePaths": [
+          "src/TX6/RigData.luau"
+         ]
+        },
+        {
+         "name": "Shared",
+         "className": "ModuleScript",
+         "filePaths": [
+          "src/TX6/Shared.luau"
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "name": "ServerScriptService",
+   "className": "ServerScriptService",
+   "children": [
+    {
+     "name": "TX6_Spawner",
+     "className": "Script",
+     "filePaths": [
+      "src/Server/TX6_Spawner.server.luau"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "StarterPlayer",
+   "className": "StarterPlayer",
+   "children": [
+    {
+     "name": "StarterPlayerScripts",
+     "className": "StarterPlayerScripts",
+     "children": [
+      {
+       "name": "TX6_Visuals",
+       "className": "LocalScript",
+       "filePaths": [
+        "src/Client/TX6_Visuals.client.luau"
+       ]
+      },
+      {
+       "name": "TX6_SpawnClient",
+       "className": "LocalScript",
+       "filePaths": [
+        "src/Client/TX6_SpawnClient.client.luau"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "name": "Workspace",
+   "className": "Workspace",
+   "children": [
+    {
+     "name": "TX6_Bastion",
+     "className": "Model",
+     "children": [
+      {
+       "name": "TX6_Server",
+       "className": "Script",
+       "filePaths": [
+        "src/Vehicle/TX6_Server.server.luau"
+       ]
+      },
+      {
+       "name": "Chassis",
+       "className": "Part"
+      },
+      {
+       "name": "TX6Remote",
+       "className": "RemoteEvent"
+      },
+      {
+       "name": "Templates",
+       "className": "Folder",
+       "children": [
+        {
+         "name": "TX6_DriverClient",
+         "className": "LocalScript",
+         "filePaths": [
+          "src/Vehicle/TX6_DriverClient.client.luau"
+         ]
+        },
+        {
+         "name": "TX6_GunnerClient",
+         "className": "LocalScript",
+         "filePaths": [
+          "src/Vehicle/TX6_GunnerClient.client.luau"
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}
