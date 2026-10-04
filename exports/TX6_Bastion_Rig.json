@@ -1,0 +1,656 @@
+{
+ "vehicle": "TX-6 Bastion",
+ "scale": "1 stud = 0.28 m",
+ "axes": "Roblox = (-x, z, y)/0.28 of Blender; nose = -Z",
+ "groups": {
+  "Fuel_Door_L": {
+   "pivot_studs": [
+    -4.2759,
+    7.0,
+    9.1786
+   ],
+   "parent_group": "Body",
+   "motion": "rotate -95 deg about Z",
+   "deploy_key": "rot Z -95 between frames 95-115",
+   "meshes": [
+    "RBX_Fuel_Door_L_Hardware",
+    "RBX_Fuel_Door_L_Paint"
+   ]
+  },
+  "Utility_Hatch_R": {
+   "pivot_studs": [
+    4.2759,
+    7.0,
+    9.1786
+   ],
+   "parent_group": "Body",
+   "motion": "rotate +95 deg about Z",
+   "deploy_key": "rot Z +95 between frames 95-115",
+   "meshes": [
+    "RBX_Utility_Hatch_R_Hardware",
+    "RBX_Utility_Hatch_R_Paint"
+   ]
+  },
+  "Hood": {
+   "pivot_studs": [
+    -0.0,
+    6.0357,
+    -4.2857
+   ],
+   "parent_group": "Body",
+   "motion": "rear-hinged armoured hood: rotate -55 deg about X",
+   "deploy_key": "",
+   "meshes": [
+    "RBX_Hood_ArmorPaint",
+    "RBX_Hood_Hardware",
+    "RBX_Hood_Mesh",
+    "RBX_Hood_Paint",
+    "RBX_Hood_PaintDark",
+    "RBX_Hood_Rubber",
+    "RBX_Hood_Stencil"
+   ]
+  },
+  "Door_FL": {
+   "pivot_studs": [
+    -4.5357,
+    4.2857,
+    -3.7857
+   ],
+   "parent_group": "Body",
+   "motion": "front-hinged armoured door: rotate -70 deg about Z",
+   "deploy_key": "rot Z -70 between frames 95-120",
+   "meshes": [
+    "RBX_Door_FL_ArmorPaint",
+    "RBX_Door_FL_Glass",
+    "RBX_Door_FL_Hardware",
+    "RBX_Door_FL_Paint",
+    "RBX_Door_FL_Plastic"
+   ]
+  },
+  "Door_RL": {
+   "pivot_studs": [
+    -4.5357,
+    4.2857,
+    -0.0714
+   ],
+   "parent_group": "Body",
+   "motion": "front-hinged armoured door: rotate -70 deg about Z",
+   "deploy_key": "rot Z -70 between frames 98-123",
+   "meshes": [
+    "RBX_Door_RL_ArmorPaint",
+    "RBX_Door_RL_Glass",
+    "RBX_Door_RL_Hardware",
+    "RBX_Door_RL_Paint",
+    "RBX_Door_RL_Plastic"
+   ]
+  },
+  "Door_FR": {
+   "pivot_studs": [
+    4.5357,
+    4.2857,
+    -3.7857
+   ],
+   "parent_group": "Body",
+   "motion": "front-hinged armoured door: rotate +70 deg about Z",
+   "deploy_key": "rot Z +70 between frames 95-120",
+   "meshes": [
+    "RBX_Door_FR_ArmorPaint",
+    "RBX_Door_FR_Glass",
+    "RBX_Door_FR_Hardware",
+    "RBX_Door_FR_Paint",
+    "RBX_Door_FR_Plastic"
+   ]
+  },
+  "Door_RR": {
+   "pivot_studs": [
+    4.5357,
+    4.2857,
+    -0.0714
+   ],
+   "parent_group": "Body",
+   "motion": "front-hinged armoured door: rotate +70 deg about Z",
+   "deploy_key": "rot Z +70 between frames 98-123",
+   "meshes": [
+    "RBX_Door_RR_ArmorPaint",
+    "RBX_Door_RR_Glass",
+    "RBX_Door_RR_Hardware",
+    "RBX_Door_RR_Paint",
+    "RBX_Door_RR_Plastic"
+   ]
+  },
+  "Door_Rear": {
+   "pivot_studs": [
+    -3.0,
+    5.0,
+    10.7857
+   ],
+   "parent_group": "Body",
+   "motion": "side-hinged rear door: rotate -100 deg about Z",
+   "deploy_key": "rot Z -100 between frames 105-130",
+   "meshes": [
+    "RBX_Door_Rear_ArmorPaint",
+    "RBX_Door_Rear_Coating",
+    "RBX_Door_Rear_Glass",
+    "RBX_Door_Rear_Hardware",
+    "RBX_Door_Rear_Paint",
+    "RBX_Door_Rear_PaintDark"
+   ]
+  },
+  "Locker_Door_L": {
+   "pivot_studs": [
+    -4.0451,
+    8.2143,
+    6.4286
+   ],
+   "parent_group": "Body",
+   "motion": "top-hinged equipment locker: rotate -100 deg about Y (swings up into an awning)",
+   "deploy_key": "rot Y -100 between frames 92-118",
+   "meshes": [
+    "RBX_Locker_Door_L_ArmorPaint",
+    "RBX_Locker_Door_L_Hardware",
+    "RBX_Locker_Door_L_Paint",
+    "RBX_Locker_Door_L_Stencil"
+   ]
+  },
+  "Locker_Door_R": {
+   "pivot_studs": [
+    4.0451,
+    8.2143,
+    6.4286
+   ],
+   "parent_group": "Body",
+   "motion": "top-hinged equipment locker: rotate +100 deg about Y (swings up into an awning)",
+   "deploy_key": "rot Y +100 between frames 92-118",
+   "meshes": [
+    "RBX_Locker_Door_R_ArmorPaint",
+    "RBX_Locker_Door_R_Hardware",
+    "RBX_Locker_Door_R_Paint",
+    "RBX_Locker_Door_R_Stencil"
+   ]
+  },
+  "Locker_Tray_L": {
+   "pivot_studs": [
+    -3.4286,
+    6.0714,
+    5.2143
+   ],
+   "parent_group": "Body",
+   "motion": "drone tray: slide +0.42 along X (out of the locker)",
+   "deploy_key": "loc X +0.42 between frames 115-135",
+   "meshes": [
+    "RBX_Locker_Tray_L_GlassDark",
+    "RBX_Locker_Tray_L_Hardware",
+    "RBX_Locker_Tray_L_PaintDark",
+    "RBX_Locker_Tray_L_Plastic"
+   ]
+  },
+  "Spare_Carrier": {
+   "pivot_studs": [
+    4.1071,
+    5.0,
+    10.8393
+   ],
+   "parent_group": "Body",
+   "motion": "spare carrier: rotate +95 deg about Z (swings out before the rear door opens)",
+   "deploy_key": "rot Z +95 between frames 90-110",
+   "meshes": [
+    "RBX_Spare_Carrier_Coating",
+    "RBX_Spare_Carrier_Hardware",
+    "RBX_Spare_Carrier_Rim",
+    "RBX_Spare_Carrier_Steel",
+    "RBX_Spare_Carrier_Tire"
+   ]
+  },
+  "Missile_Hatch_L": {
+   "pivot_studs": [
+    -3.4286,
+    8.8571,
+    6.7857
+   ],
+   "parent_group": "Body",
+   "motion": "armoured roof hatch: rotate +120 deg about Y",
+   "deploy_key": "rot Y +120 between frames 10-35",
+   "meshes": [
+    "RBX_Missile_Hatch_L_Hardware",
+    "RBX_Missile_Hatch_L_Paint"
+   ]
+  },
+  "Missile_Hatch_R": {
+   "pivot_studs": [
+    3.4286,
+    8.8571,
+    6.7857
+   ],
+   "parent_group": "Body",
+   "motion": "armoured roof hatch: rotate -120 deg about Y",
+   "deploy_key": "rot Y -120 between frames 10-35",
+   "meshes": [
+    "RBX_Missile_Hatch_R_Hardware",
+    "RBX_Missile_Hatch_R_Paint"
+   ]
+  },
+  "Missile_Lift_L": {
+   "pivot_studs": [
+    -2.3929,
+    7.4643,
+    6.7857
+   ],
+   "parent_group": "Body",
+   "motion": "launcher lift: move +0.46 along Z (after the hatch opens)",
+   "deploy_key": "loc Z +0.46 between frames 35-60",
+   "meshes": [
+    "RBX_Missile_Lift_L_Gunmetal"
+   ]
+  },
+  "Missile_Pod_L": {
+   "pivot_studs": [
+    -2.3929,
+    7.5,
+    8.7857
+   ],
+   "parent_group": "Missile_Lift_L",
+   "motion": "launch pod elevation: rotate -18 deg about X (nose up), after the lift is up",
+   "deploy_key": "rot X -18 between frames 60-80",
+   "meshes": [
+    "RBX_Missile_Pod_L_ArmorPaint",
+    "RBX_Missile_Pod_L_GlassDark",
+    "RBX_Missile_Pod_L_Gunmetal",
+    "RBX_Missile_Pod_L_Hardware",
+    "RBX_Missile_Pod_L_Hazard",
+    "RBX_Missile_Pod_L_Mesh",
+    "RBX_Missile_Pod_L_Missile"
+   ]
+  },
+  "Missile_Lift_R": {
+   "pivot_studs": [
+    2.3929,
+    7.4643,
+    6.7857
+   ],
+   "parent_group": "Body",
+   "motion": "launcher lift: move +0.46 along Z (after the hatch opens)",
+   "deploy_key": "loc Z +0.46 between frames 35-60",
+   "meshes": [
+    "RBX_Missile_Lift_R_Gunmetal"
+   ]
+  },
+  "Missile_Pod_R": {
+   "pivot_studs": [
+    2.3929,
+    7.5,
+    8.7857
+   ],
+   "parent_group": "Missile_Lift_R",
+   "motion": "launch pod elevation: rotate -18 deg about X (nose up), after the lift is up",
+   "deploy_key": "rot X -18 between frames 60-80",
+   "meshes": [
+    "RBX_Missile_Pod_R_ArmorPaint",
+    "RBX_Missile_Pod_R_GlassDark",
+    "RBX_Missile_Pod_R_Gunmetal",
+    "RBX_Missile_Pod_R_Hardware",
+    "RBX_Missile_Pod_R_Hazard",
+    "RBX_Missile_Pod_R_Mesh",
+    "RBX_Missile_Pod_R_Missile"
+   ]
+  },
+  "Upright_FL": {
+   "pivot_studs": [
+    -3.9286,
+    2.1429,
+    -7.3214
+   ],
+   "parent_group": "Body",
+   "motion": "steering pivot: rotate about Z (front only, +-32 deg)",
+   "deploy_key": "",
+   "meshes": [
+    "RBX_Upright_FL_Gunmetal"
+   ]
+  },
+  "Wheel_FL": {
+   "pivot_studs": [
+    -3.9286,
+    2.1429,
+    -7.3214
+   ],
+   "parent_group": "Upright_FL",
+   "motion": "wheel spin: rotate about X",
+   "deploy_key": "",
+   "meshes": [
+    "RBX_Wheel_FL_Brass",
+    "RBX_Wheel_FL_Hardware",
+    "RBX_Wheel_FL_Rim",
+    "RBX_Wheel_FL_Rubber",
+    "RBX_Wheel_FL_Steel",
+    "RBX_Wheel_FL_Tire"
+   ]
+  },
+  "Upright_FR": {
+   "pivot_studs": [
+    3.9286,
+    2.1429,
+    -7.3214
+   ],
+   "parent_group": "Body",
+   "motion": "steering pivot: rotate about Z (front only, +-32 deg)",
+   "deploy_key": "",
+   "meshes": [
+    "RBX_Upright_FR_Gunmetal"
+   ]
+  },
+  "Wheel_FR": {
+   "pivot_studs": [
+    3.9286,
+    2.1429,
+    -7.3214
+   ],
+   "parent_group": "Upright_FR",
+   "motion": "wheel spin: rotate about X",
+   "deploy_key": "",
+   "meshes": [
+    "RBX_Wheel_FR_Brass",
+    "RBX_Wheel_FR_Hardware",
+    "RBX_Wheel_FR_Rim",
+    "RBX_Wheel_FR_Rubber",
+    "RBX_Wheel_FR_Steel",
+    "RBX_Wheel_FR_Tire"
+   ]
+  },
+  "Upright_RL": {
+   "pivot_studs": [
+    -3.9286,
+    2.1429,
+    6.7857
+   ],
+   "parent_group": "Body",
+   "motion": "rear upright (fixed)",
+   "deploy_key": "",
+   "meshes": [
+    "RBX_Upright_RL_Gunmetal"
+   ]
+  },
+  "Wheel_RL": {
+   "pivot_studs": [
+    -3.9286,
+    2.1429,
+    6.7857
+   ],
+   "parent_group": "Upright_RL",
+   "motion": "wheel spin: rotate about X",
+   "deploy_key": "",
+   "meshes": [
+    "RBX_Wheel_RL_Brass",
+    "RBX_Wheel_RL_Hardware",
+    "RBX_Wheel_RL_Rim",
+    "RBX_Wheel_RL_Rubber",
+    "RBX_Wheel_RL_Steel",
+    "RBX_Wheel_RL_Tire"
+   ]
+  },
+  "Upright_RR": {
+   "pivot_studs": [
+    3.9286,
+    2.1429,
+    6.7857
+   ],
+   "parent_group": "Body",
+   "motion": "rear upright (fixed)",
+   "deploy_key": "",
+   "meshes": [
+    "RBX_Upright_RR_Gunmetal"
+   ]
+  },
+  "Wheel_RR": {
+   "pivot_studs": [
+    3.9286,
+    2.1429,
+    6.7857
+   ],
+   "parent_group": "Upright_RR",
+   "motion": "wheel spin: rotate about X",
+   "deploy_key": "",
+   "meshes": [
+    "RBX_Wheel_RR_Brass",
+    "RBX_Wheel_RR_Hardware",
+    "RBX_Wheel_RR_Rim",
+    "RBX_Wheel_RR_Rubber",
+    "RBX_Wheel_RR_Steel",
+    "RBX_Wheel_RR_Tire"
+   ]
+  },
+  "Deploy_WindshieldShield": {
+   "pivot_studs": [
+    -0.0,
+    6.125,
+    -4.3393
+   ],
+   "parent_group": "Hood",
+   "motion": "windshield armour: rotate -113.6 deg about X (flips up in front of the windshield)",
+   "deploy_key": "rot X -113.6 between frames 1-30",
+   "meshes": [
+    "RBX_Deploy_WindshieldShield_ArmorPaint",
+    "RBX_Deploy_WindshieldShield_Glass",
+    "RBX_Deploy_WindshieldShield_Hardware"
+   ]
+  },
+  "Deploy_Shutter_FL": {
+   "pivot_studs": [
+    -4.5893,
+    6.0893,
+    -1.7487
+   ],
+   "parent_group": "Door_FL",
+   "motion": "window shutter: rotate +171 deg about Y (flips up over the window)",
+   "deploy_key": "rot Y +171 between frames 5-35",
+   "meshes": [
+    "RBX_Deploy_Shutter_FL_ArmorPaint",
+    "RBX_Deploy_Shutter_FL_Glass",
+    "RBX_Deploy_Shutter_FL_Hardware"
+   ]
+  },
+  "Deploy_Shutter_RL": {
+   "pivot_studs": [
+    -4.5893,
+    6.0893,
+    1.5714
+   ],
+   "parent_group": "Door_RL",
+   "motion": "window shutter: rotate +171 deg about Y (flips up over the window)",
+   "deploy_key": "rot Y +171 between frames 8-38",
+   "meshes": [
+    "RBX_Deploy_Shutter_RL_ArmorPaint",
+    "RBX_Deploy_Shutter_RL_Glass",
+    "RBX_Deploy_Shutter_RL_Hardware"
+   ]
+  },
+  "Deploy_Shutter_FR": {
+   "pivot_studs": [
+    4.5893,
+    6.0893,
+    -1.7487
+   ],
+   "parent_group": "Door_FR",
+   "motion": "window shutter: rotate -171 deg about Y (flips up over the window)",
+   "deploy_key": "rot Y -171 between frames 5-35",
+   "meshes": [
+    "RBX_Deploy_Shutter_FR_ArmorPaint",
+    "RBX_Deploy_Shutter_FR_Glass",
+    "RBX_Deploy_Shutter_FR_Hardware"
+   ]
+  },
+  "Deploy_Shutter_RR": {
+   "pivot_studs": [
+    4.5893,
+    6.0893,
+    1.5714
+   ],
+   "parent_group": "Door_RR",
+   "motion": "window shutter: rotate -171 deg about Y (flips up over the window)",
+   "deploy_key": "rot Y -171 between frames 8-38",
+   "meshes": [
+    "RBX_Deploy_Shutter_RR_ArmorPaint",
+    "RBX_Deploy_Shutter_RR_Glass",
+    "RBX_Deploy_Shutter_RR_Hardware"
+   ]
+  },
+  "Searchlight": {
+   "pivot_studs": [
+    2.8571,
+    8.8571,
+    -1.25
+   ],
+   "parent_group": "Body",
+   "motion": "searchlight: pan about Z",
+   "deploy_key": "rot Z +30 between frames 20-50",
+   "meshes": [
+    "RBX_Searchlight_Gunmetal",
+    "RBX_Searchlight_LED",
+    "RBX_Searchlight_Lens"
+   ]
+  },
+  "Turret_Rotor": {
+   "pivot_studs": [
+    -0.0,
+    9.1071,
+    1.0714
+   ],
+   "parent_group": "Body",
+   "motion": "turret traverse: rotate about Z (360 deg)",
+   "deploy_key": "rot Z -35 between frames 30-70",
+   "meshes": [
+    "RBX_Turret_Rotor_ArmorPaint",
+    "RBX_Turret_Rotor_Canvas",
+    "RBX_Turret_Rotor_Fabric",
+    "RBX_Turret_Rotor_Glass",
+    "RBX_Turret_Rotor_Gunmetal",
+    "RBX_Turret_Rotor_Hardware",
+    "RBX_Turret_Rotor_PaintDark"
+   ]
+  },
+  "Turret_Cradle": {
+   "pivot_studs": [
+    -0.0,
+    10.5714,
+    -0.9643
+   ],
+   "parent_group": "Turret_Rotor",
+   "motion": "gun elevation: rotate about X (negative = barrels up), -35 to +8 deg",
+   "deploy_key": "rot X -15 between frames 50-75",
+   "meshes": [
+    "RBX_Turret_Cradle_GlassDark",
+    "RBX_Turret_Cradle_Gunmetal",
+    "RBX_Turret_Cradle_Housing"
+   ]
+  },
+  "Turret_Barrels": {
+   "pivot_studs": [
+    -0.0,
+    10.5714,
+    -3.3929
+   ],
+   "parent_group": "Turret_Cradle",
+   "motion": "barrel cluster spin: rotate about local Y (gun axis)",
+   "deploy_key": "",
+   "meshes": [
+    "RBX_Turret_Barrels_Gunmetal"
+   ]
+  },
+  "Sensor_Mast": {
+   "pivot_studs": [
+    -0.0,
+    9.2857,
+    4.1071
+   ],
+   "parent_group": "Body",
+   "motion": "mast raise: rotate +90 deg about X (stowed flat -> vertical)",
+   "deploy_key": "rot X +90 between frames 15-45",
+   "meshes": [
+    "RBX_Sensor_Mast_ArmorPaint"
+   ]
+  },
+  "Sensor_MastUpper": {
+   "pivot_studs": [
+    -0.0,
+    9.2857,
+    8.0714
+   ],
+   "parent_group": "Sensor_Mast",
+   "motion": "telescopic section: slide +0.55 along local Y (mast axis)",
+   "deploy_key": "loc Y +0.55 between frames 45-65",
+   "meshes": [
+    "RBX_Sensor_MastUpper_Alu"
+   ]
+  },
+  "Sensor_Head": {
+   "pivot_studs": [
+    -0.0,
+    9.2857,
+    8.3929
+   ],
+   "parent_group": "Sensor_MastUpper",
+   "motion": "sensor head: continuous rotation about local Y (mast axis)",
+   "deploy_key": "",
+   "meshes": [
+    "RBX_Sensor_Head_ArmorPaint",
+    "RBX_Sensor_Head_Gunmetal",
+    "RBX_Sensor_Head_Housing",
+    "RBX_Sensor_Head_Plastic"
+   ]
+  },
+  "Sensor_EOBall": {
+   "pivot_studs": [
+    -0.0,
+    9.2857,
+    9.4643
+   ],
+   "parent_group": "Sensor_Head",
+   "motion": "EO/IR gimbal: tilt about local X",
+   "deploy_key": "rot X -20 between frames 65-80",
+   "meshes": [
+    "RBX_Sensor_EOBall_ArmorPaint",
+    "RBX_Sensor_EOBall_GlassDark"
+   ]
+  }
+ },
+ "seats": {
+  "Seat_Gunner": {
+   "position_studs": [
+    -0.0,
+    6.5714,
+    1.7857
+   ],
+   "role": "gunner (second player): sits on the sling seat, operates the turret"
+  },
+  "Seat_Driver": {
+   "position_studs": [
+    -1.9643,
+    3.7857,
+    -1.0714
+   ],
+   "role": "driver (drives the vehicle)"
+  },
+  "Seat_Passenger": {
+   "position_studs": [
+    1.9643,
+    3.7857,
+    -1.0714
+   ],
+   "role": "passenger"
+  },
+  "Seat_RearL": {
+   "position_studs": [
+    -2.2143,
+    3.7857,
+    2.2143
+   ],
+   "role": "rearl"
+  },
+  "Seat_RearR": {
+   "position_studs": [
+    2.2143,
+    3.7857,
+    2.2143
+   ],
+   "role": "rearr"
+  }
+ }
+}
