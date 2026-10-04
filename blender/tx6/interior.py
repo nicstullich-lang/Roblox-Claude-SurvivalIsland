@@ -97,7 +97,8 @@ def build():
         bv.append(seat_base_vf(c))
         hv.append(harness_vf(c))
         e = empty('Seat_' + nm, c + V((0, 0, 0.02)), 'Interior', size=0.15)
-        e['tx_seat'] = nm.lower() + (' (drives the vehicle)' if nm == 'Driver' else '')
+        e['tx_seat'] = {'Driver': 'driver (drives the vehicle)', 'Passenger': 'front passenger',
+                        'RearL': 'rear left passenger', 'RearR': 'rear right passenger'}[nm]
     mk('Int_Seats', merge_vf(*sv), 'Fabric', 'Interior', bev=(0.02, 2, 30))
     mk('Int_SeatBases', merge_vf(*bv), 'Hardware', 'Interior', bev=(0.004, 1, 30))
     mk('Int_Harnesses', merge_vf(*hv), 'Canvas', 'Interior', sharp=60)

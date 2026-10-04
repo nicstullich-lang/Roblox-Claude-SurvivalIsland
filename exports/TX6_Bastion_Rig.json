@@ -2,6 +2,7 @@
  "vehicle": "TX-6 Bastion",
  "scale": "1 stud = 0.28 m",
  "axes": "Roblox = (-x, z, y)/0.28 of Blender; nose = -Z",
+ "axes_note": "motion / deploy_key text uses BLENDER local axes: Blender X -> Roblox -X, Blender Y -> Roblox Z, Blender Z -> Roblox Y (rotation signs flip with the mirrored X axis)",
  "groups": {
   "Fuel_Door_L": {
    "pivot_studs": [
@@ -634,7 +635,7 @@
     3.7857,
     -1.0714
    ],
-   "role": "passenger"
+   "role": "front passenger"
   },
   "Seat_RearL": {
    "position_studs": [
@@ -642,7 +643,7 @@
     3.7857,
     2.2143
    ],
-   "role": "rearl"
+   "role": "rear left passenger"
   },
   "Seat_RearR": {
    "position_studs": [
@@ -650,7 +651,7 @@
     3.7857,
     2.2143
    ],
-   "role": "rearr"
+   "role": "rear right passenger"
   }
  }
 }

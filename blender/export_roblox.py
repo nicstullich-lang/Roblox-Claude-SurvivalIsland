@@ -115,6 +115,8 @@ bpy.ops.export_scene.fbx(filepath=FBX, use_selection=True, object_types={'MESH'}
 
 # ------------------------------------------------------------------ rig description (Roblox coordinates, studs)
 rig = {'vehicle': 'TX-6 Bastion', 'scale': '1 stud = 0.28 m', 'axes': 'Roblox = (-x, z, y)/0.28 of Blender; nose = -Z',
+       'axes_note': 'motion / deploy_key text uses BLENDER local axes: Blender X -> Roblox -X, Blender Y -> Roblox Z, '
+                    'Blender Z -> Roblox Y (rotation signs flip with the mirrored X axis)',
        'groups': {}, 'seats': {}}
 for o in sc.objects:
     if o.name.startswith('Studio') or o.name == 'TX6_Root':

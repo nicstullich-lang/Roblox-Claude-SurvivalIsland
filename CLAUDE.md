@@ -402,3 +402,82 @@ Full details: project doc `claude/World build log.md`.
     viewport screenshots come back black → verify with numeric checks instead. Release the lock when done.
 13. `screen_capture` with `camera_position` / `look_at_position` is the fastest visual check; compute camera points in
     car space with `car:GetPivot():PointToWorldSpace(Vector3.new(x,y,z) * (1/0.28))`.
+
+---
+
+## 10. TX-6 "Bastion" armoured super-SUV (built 4 Oct 2026, cloud session)
+
+Original military super-SUV, *inspired by* the Terradyne Gurkha (general proportions only, not a replica).
+Built entirely by Python scripts in **headless Blender 5.2.2** in a Claude Code cloud container, then committed here.
+
+### 10.1 Files (all in this repo)
+| What | Path |
+|---|---|
+| Blender file (build scripts also stored inside as text blocks `tx6_*.py`) | `blender/TX6_Bastion.blend` |
+| Build scripts (one module per system) | `blender/tx6/*.py` — `lib, body, wheels, armor, bumpers, lights, roof, equipment, details, interior, engine, poses` |
+| Rebuild everything from scratch (~3 s) | `bpy-run blender/build.py` (writes the .blend) |
+| Automated inspection | `bpy-run blender/checks.py rest|combat|deploy|hood` (floating parts, moving-part collisions, low points, tri budget) |
+| Renders / contact sheets | `bpy-run blender/render.py OUT.png "front34;side;..." [width] [samples] [pose]` (OUT ending in `/` = one file per view) |
+| Roblox export | `bpy-run blender/export_roblox.py` → `exports/TX6_Bastion_Roblox.fbx` + `exports/TX6_Bastion_Rig.json` |
+| Showcase renders | `renders/01..09_*.png` |
+
+Cloud setup (container is temporary, redo each new session): Blender comes from PyPI, not blender.org (blocked):
+`uv venv --python 3.13 /root/blender-env && uv pip install --python /root/blender-env/bin/python bpy==5.2.2 pillow numpy`,
+then `printf '#!/bin/sh\nexec /root/blender-env/bin/python "$@"\n' > /usr/local/bin/bpy-run && chmod +x /usr/local/bin/bpy-run`.
+EEVEE needs `apt-get install libegl1 libegl-mesa0 libgl1-mesa-dri`; renders use **Cycles CPU** (faster here).
+
+### 10.2 Conventions (different from the VX-9!)
+- Metres, Z up, nose → **−Y**. **`_L` = vehicle LEFT = +X, `_R` = vehicle RIGHT = −X** (true sides, no side-label trap).
+- Front/rear: `F`/`R` (e.g. `Door_FL`, `Wheel_RR`). Materials prefixed `TX6_` (`lib.M('Paint')`).
+- Every top-level part is parented to empty `TX6_Root`; collections `TX6_Body, Armor, Doors, Glass, Wheels, Suspension,
+  Lights, Turret, Missiles, Sensor, Equipment, Details, Interior, Engine`.
+- All moving parts have **identity rotation at rest** and their **origin on the real hinge**; each carries `tx_anim`
+  (plain English) and, if keyed, `tx_deploy` (e.g. `rot Y +120 between frames 10-35`).
+- Build in world coordinates, parent with `lib.parent_keep` (computes the parent inverse without a depsgraph update).
+
+### 10.3 Size
+Body 6.00 m long (7.03 m incl. bumpers, hook and spare), 2.44 m body / 2.71 m over flares / 3.14 m over mirrors,
+roof 2.48 m, turret shield top 3.24 m. Wheelbase 3.95 m, track ±1.10 m, 47" tyres (R 0.60 m) on 22.5" beadlocks.
+Roblox: **11.21 × 25.09 × 13.69 studs** (X × Z × Y incl. mirrors and whip antennas). ~224k triangles, 172 export meshes,
+largest 15,000 tris.
+
+### 10.4 How the body is made (`body.py`)
+Outer + inner (60 mm armour) lofts of 12-point cross-sections → closed shell. Openings and panels are cut with EXACT
+booleans: each door/hatch = shell ∩ (outline shrunk 3.5 mm), body = shell − (outline grown 3.5 mm) → real 7 mm gaps.
+Outlines are in `body.py` (`FD_OUT, RD_OUT, LK_OUT, FU_OUT, FW_WIN, RW_WIN, REAR_DOOR, HOOD_OUT, MB_OUT`).
+Key helpers in `lib.py`: `xs(z)` side surface x (tumblehome above the 1.62 m beltline), `zh(y)` hood height,
+`y_ws(z)` windshield, `side_pt/side_n`, `prism, ring_prism, loft, lathe_vf, sweep_vf, tube_vf, offset2, bolts`.
+
+### 10.5 Moving parts (Blender pivots → see `exports/TX6_Bastion_Rig.json` for Roblox studs)
+| Part | Motion | Keyed frames |
+|---|---|---|
+| `Turret_Rotor` → `Turret_Cradle` → `Turret_Minigun` → `Turret_Barrels` | traverse Z / elevate X (negative = up) / barrels spin local Y | 30-70 / 50-75 / 60-180 |
+| `Missile_Hatch_L/R` | ±120° about Y (flip outward) | 10-35 |
+| `Missile_Lift_L/R` → `Missile_Pod_L/R` | +0.46 m Z, then −18° X (nose up) | 35-60, 60-80 |
+| `Sensor_Mast` → `Sensor_MastUpper` → `Sensor_Head` → `Sensor_EOBall` | +90° X raise / +0.55 m local Y / spin local Y / tilt X | 15-45 / 45-65 / 65-180 / 65-80 |
+| `Deploy_WindshieldShield` (child of `Hood`) | −113.6° X (flips up in front of the windshield) | 1-30 |
+| `Deploy_Shutter_FL/FR/RL/RR` (children of doors) | ±171° Y (flip up over the windows) | 5-38 |
+| `Door_FL/FR/RL/RR`, `Door_Rear`, `Spare_Carrier` | ∓70° Z, −100° Z, +95° Z | 95-130 |
+| `Locker_Door_L/R`, `Locker_Tray_L` | ∓100° Y (awning), +0.42 m X | 92-135 |
+| `Fuel_Door_L`, `Utility_Hatch_R`, `Searchlight`, `Hood` | ∓95° Z, ∓95° Z, pan Z, −55° X (not keyed) | |
+| `Upright_*` → `Wheel_*` | steer Z (front) → spin X | |
+Timeline poses for renders/checks: `rest`=frame 1, `combat`=85, `deploy`=140 (`poses.apply(name)`).
+Seats (empties, `tx_seat`): `Seat_Driver` (left, LHD), `Seat_Passenger`, `Seat_RearL/R`, `Seat_Gunner` (turret sling seat).
+Gameplay notes: hood can only open with the windshield shield stowed (it rides on the hood); don't traverse the gun
+through the raised sensor mast (rear arc) — limit traverse when the mast is up.
+
+### 10.6 Roblox import (not done yet — needs Studio on Nic's PC)
+Import `exports/TX6_Bastion_Roblox.fbx` with the same 3D-Importer settings as §6.1 (Stud, scale 1, Front/Top). Mesh
+names are `RBX_<Group>_<Material>[_n]`; `<Group>` = moving group or `Body`. A `TX6_ImportSetup` module (like
+`VX9_ImportSetup`) still needs writing: weld everything to a Root, set materials (map like §6.4; TX6 colours: Paint
+olive ≈ 74,78,58, ArmorPaint ≈ 66,70,52, Coating near-black textured), add collision boxes, set group pivots from the
+rig JSON and replace welds with Motor6D/HingeConstraints for the moving groups.
+
+### 10.7 Lessons learned (TX-6 session)
+1. `checks.py` found 19 floating parts on the first run (gaps of 2–70 mm); always run it after a change — renders hide it.
+2. Gun shields/flat panels between polar points sit at `r·cos(half-angle)`, not `r` — mount things on the chord plane.
+3. Hinge axes on tumblehome sides must sit outside the surface at the **lowest** point of the door, or the door swings
+   into the body (fuel door bug).
+4. Packaging: the missile bays and side lockers overlapped inside the hull → lockers are L-shaped (deep low, shallow high).
+5. Brake hoses must route inside the wheel barrel (radius < rim inner radius) or they cut through the tyre.
+6. `boolean()` applies *all* modifiers — add bevels after booleans, never before (double-bevel bug).
