@@ -14,6 +14,10 @@ admin-only supercar (built in Blender, imported into Roblox). Everything here wa
   partial work. **Double-check everything** (measure, screenshot, playtest) before calling it done.
 - Project goals: the game must **not look "vibe coded"**. Reference expert-made games for models and game feel
   (DayZ, Rust, Forza Horizon, Minecraft-style building). Fun to play for hours, with incremental progression.
+- **Division of work (Oct 2026): the Blender chat builds MODELS ONLY.** A separate Roblox chat writes all game code.
+  Don't write Roblox/Luau code unless Nic asks. Every model ships as a **handoff package** (`exports/<Model>/`: FBX +
+  `_Rig.json` + `HANDOFF.md` + previews) following `docs/MODEL_HANDOFF_STANDARD.md`, with every moving part hinged,
+  tagged and checked so the Roblox chat can make it fully functional and realistic. See §12 (XR-77) for the reference build.
 - Nic runs AutoElevate (an AI receptionist agency) — unrelated to this repo, ignore unless asked.
 
 ---
@@ -512,3 +516,55 @@ Rear, Locker_L/R, Hood, Fuel, Utility. Blender→Roblox motion: rot X a → rot 
 loc X d → X −d·S; loc Y d → Z d·S; loc Z d → Y d·S. Model is `ModelStreamingMode.Atomic`.
 Next steps once tested in Studio: tune feel in Config, add engine/horn sound ids, wire `Config.DealDamage` into
 CombatService, optional vehicle health.
+
+Known TX-6 model issues found later (not fixed yet — Nic said to park the TX-6): the gunner sling seat clips the
+front-seat headrests at turret yaw ≈ 90/135/220/265 deg; with the sensor mast raised the gun hits the mast at
+yaw 175–185 deg and the smoke launchers hit it at 90–100 / 260–270 deg → limit traverse to ±85 deg while the mast is up.
+
+---
+
+## 12. XR-77 "Umbra" — classified strike-reconnaissance VTOL fighter (built 5 Oct 2026, cloud session)
+
+Original design: SR-71-style chined Mach-3 airframe (long chine nose, spiked round inlets ahead of a 60° delta, canted
+all-moving tails) + next-gen stealth shaping, hybrid-electric lift fan and swivel nozzles for VTOL, XB-70-style
+drooping wing tips for high speed, internal + external fictional weapons. Admin-only game aircraft.
+
+### 12.1 Files
+| What | Path |
+|---|---|
+| Build (≈35 s, writes `blender/XR77_Umbra.blend`) | `bpy-run blender/build_xr77.py` |
+| Build stages | `blender/xr77/`: `lib` (dims, materials, shape functions), `openings` (every cut-out + its doors), `airframe`, `cockpit`, `engines`, `vtol`, `gear`, `weapons`, `sensors`, `defense`, `controls`, `details`, `rigdata` |
+| Shared tools (all models) | `blender/common/`: `geo` (toolkit), `rig` (tags), `poses`, `handoff` (exporter) |
+| Checks (≈5 s, all poses) | `bpy-run blender/check_model.py xr77` → must report floating=0 and 0 clashes in every pose |
+| Renders | `bpy-run blender/render_model.py xr77 OUT.png "view;view" [w] [samples] [pose or JSON state]` |
+| Roblox package | `bpy-run blender/export_handoff.py xr77` → `exports/XR77_Umbra/` (FBX, `XR77_Umbra_Rig.json`, `HANDOFF.md`, `previews/`) |
+| Showcase renders | `renders/xr77/01..15_*.png` |
+
+### 12.2 Size + layout (metres, Blender: front −Y, left +X)
+24.6 m long incl. probe (nose tip y −12.40, decoy stinger 11.48, nozzle exits 11.15), 15.2 m span (12.8 m with tips
+drooped), 5.15 m tall. Roblox: **55.1 × 18.4 × 87.8 studs**, ≈288k triangles, 355 meshes. Wing / chine plane z 2.10.
+Stations: radome joint −10.60, canopy −9.30…−5.15 (rear hinge), lift fan centre −3.60, inlet lips −4.60 (nacelles at
+x ±2.45), fan faces −1.80, main bays −1.6…4.0, main gear 3.40 (track 2.8 m, wheelbase 11.75 m), belly turret 5.45,
+wing TE 7.40, nacelle rims 8.95, swivel joints 9.20 / 9.95.
+
+### 12.3 Moving parts (113 groups, all tagged with `rig_motion`)
+Channels (0 = parked): Canopy, GearUp, VTOL, Flaps, HighSpeed, Speedbrake, MainBays, SideBays, Gun, BellyTurret,
+DorsalLaser, Recon, Countermeasures, Emergency, Radome, EnginePanels, Service, Refuel, EngineRun.
+Poses: rest, service, vtol, cruise, highspeed, combat, recon, landing, allground, controls (`rig.pose`, in the JSON).
+Rest = parked: **gear down with gear doors open** (modelled open; GearUp closes them). Stores (2 LRM, 2 GBU, 6 SRM)
+are separate `fixed` groups so the game can hide/release them. Showcase timeline in the .blend: frames 1–500.
+
+### 12.4 Lessons learned (XR-77 session)
+1. **Hinges must sit just outside the skin along the WHOLE hinge edge** (`airframe.hinge_line` samples the edge):
+   a curved skin otherwise puts part of the door below its axis and that part swings into the surrounding skin.
+2. Ball-joint swivel ducts: every point of a moving segment must be either inside the socket-bore sphere or far
+   enough behind the socket rim — so each duct **necks in right behind its ball** (checked numerically).
+3. A leading-edge flap on a swept hinge needs its ends cut **square to the hinge line**; droop hinges go on the
+   skin side the panel moves away from (lower skin for drooping tips / flaps).
+4. `set_origin` must keep children in place (fixed in `geo.set_origin`) — otherwise moving a pivot after adding
+   details flings them away (seen as floating rims / rings).
+5. Marker names must not reuse a mesh name (`rig._empty` now raises) — a marker once moved the refuel receptacle.
+6. Polygon insets near tight corners blow up (`offset2` now clamps miters); build inset outlines from the shape
+   function when possible (`canopy_outline(inset=…)`).
+7. Packaging: cockpit floor vs nose-gear well, avionics vs nose wheels, bay ceilings vs turret wells — keep every
+   cavity's floor ≥ 5 cm from its neighbours; the checker finds overlaps only once parts move, so run all poses.

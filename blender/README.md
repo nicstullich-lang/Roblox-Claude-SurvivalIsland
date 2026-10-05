@@ -1,3 +1,52 @@
+# Blender models for Survival Island
+
+Every model is built 100 % from Python scripts (Blender 5.2.2) and ships as a **Roblox handoff package** in
+`../exports/<Model>/` — see `../docs/MODEL_HANDOFF_STANDARD.md`. Give that folder to the Roblox chat.
+
+| Model | Build | Package |
+|---|---|---|
+| XR-77 "Umbra" VTOL strike-recon fighter | `bpy-run blender/build_xr77.py` | `exports/XR77_Umbra/` |
+| TX-6 "Bastion" armoured super-SUV | `bpy-run blender/build.py` | `exports/TX6_Bastion_Roblox.fbx` + rig JSON (older format) |
+
+---
+
+# XR-77 "Umbra" — how to use these files
+
+**What this is:** an original, classified-prototype-style strike / reconnaissance fighter: SR-71-style chined Mach-3
+airframe + next-generation stealth shaping, VTOL (lift fan + swivel nozzles), drooping wing tips for high speed, and
+an admin weapons fit. Pictures: `../renders/xr77/`. Roblox package: `../exports/XR77_Umbra/`.
+
+## Open it
+Open `XR77_Umbra.blend` in Blender 5.2 and press **Space**: the showcase timeline (frames 1–500) plays
+parked → service (canopy, radome, engine panels open) → VTOL → cruise (gear up) → high speed (tips droop) → combat
+(every weapon out) → recon → emergency landing → parked.
+
+## The 10 advanced features
+1. **VTOL:** hybrid-electric contra-rotating lift fan (rear-hinged top door, folding belly doors, steering louvres),
+   auxiliary inlets, two-bearing swivel nozzles that turn the exhaust 90° down, wing roll-post jets (`LiftFan_*`, `Nozzle_*`, `RollPost_*`)
+2. **Variable geometry:** outer wing panels droop 60° (XB-70 style) on piano hinges, leading-edge flaps, flaperons (`Wingtip_*`, `LEFlap_*`, `Flaperon_*`)
+3. **Adaptive engines:** translating inlet shock spikes, fan faces, cores with FADEC / pumps / pipes / harnesses, afterburner, heat shields (`Spike_*`, `Engine_*`)
+4. **Internal weapon bays:** two main bays with drop launchers (LRM-9 missiles, GBU-X glide bombs), two side bays (SRM-4) (`MainBay_*`, `SideBay_*`, `Store_*`)
+5. **Sensors:** AESA radar under an opening radome, chin EO targeting window, IRST dome, 5 IR apertures, air-data probes, antennas
+6. **Deployable recon:** chine camera bays (cameras lower out) + belly recon ball turret (`Recon_*`)
+7. **Cockpit:** one-piece gold canopy, ejection seat + harness, panoramic display, HUD, side-stick, throttle, consoles, warnings, oxygen
+8. **Engine / exhaust:** swivel nozzles with petals + actuators, turbine exit + flameholders, burnt-titanium shrouds, ceramic decoy stinger
+9. **Transforming configuration:** VTOL ↔ cruise ↔ high speed through the channels / poses above
+10. **Defensive / emergency:** flare + chaff magazines, pop-out DIRCM laser turrets, towed decoy, arrestor hook, ram-air turbine, nav / strobe / formation lights
+
+Admin weapons: M77 7-barrel rotary cannon (chin blister), belly turret with twin rotary guns, pop-up "Helios" energy
+turret, wing pylons with twin missile rails — all fictional.
+
+## Rebuild / check / render / export
+```
+bpy-run blender/build_xr77.py                       # rebuild the .blend (~35 s)
+bpy-run blender/check_model.py xr77                 # floating parts + clashes in every pose + budget (~5 s)
+bpy-run blender/render_model.py xr77 out.png "front34;rear34" 960 32 combat
+bpy-run blender/export_handoff.py xr77              # -> exports/XR77_Umbra/ (verified by re-importing the FBX)
+```
+
+---
+
 # TX-6 "Bastion" — how to use these files
 
 **What this is:** an original armoured military super-SUV (Terradyne Gurkha *inspired*) for Survival Island,
