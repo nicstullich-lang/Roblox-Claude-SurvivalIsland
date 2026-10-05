@@ -46,7 +46,7 @@ def build():
         hinge(wt, (s * HINGE_X, 4.0, HZ), 'rotate', 'Y', 60 * s, 'HighSpeed', (0.1, 0.9),
               'outer wing panel droops 60 deg at high speed (compression lift + directional stability)')
         hinge(ail, (s * 6.30, 6.70, ZW), 'control', 'X', None, None, (0, 1),
-              'aileron (roll): + = trailing edge up (Blender X)', min=-25, max=25, speed=120, input='roll')
+              'aileron (roll control), +/-25 deg', min=-25, max=25, speed=120, input='roll')
         fl = bpy.data.objects['Flaperon_' + S_]
         hinge(fl, (s * 4.20, 6.55, ZW), 'rotate', 'X', -25, 'Flaps', (0, 1),
               'flaperon: droops 25 deg as a flap (Flaps channel) and also deflects +/-20 deg for roll / pitch',

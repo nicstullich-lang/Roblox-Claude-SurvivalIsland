@@ -46,7 +46,7 @@ for v in views:
         lib.setview(v)
     fl = bpy.data.objects.get('Studio_Floor')
     if fl:
-        fl.hide_render = (name or v).startswith('bottom') or (name or v).startswith('under')
+        fl.hide_render = v == 'bottom' or (name or v).endswith('bottom')
     p = (out + (name or v) + '.png') if single else '/tmp/_view_%d.png' % len(tmp)
     sc.render.filepath = p
     bpy.ops.render.render(write_still=True)

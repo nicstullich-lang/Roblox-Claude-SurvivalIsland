@@ -244,7 +244,7 @@ def build_belly_turret():
         rig.point('Muzzle_Belly_' + S_, (gx, yc - 0.95, 1.61), 'muzzle', attach=gb, direction=(0, -1, 0),
                   weapon='twin 6-barrel rotary guns (fictional)')
     hinge(pit, (0.0, yc, 1.61), 'aim_pitch', 'X', None, None, (0, 1),
-          'belly turret gun elevation (+ = guns down, Blender X)', min=-10, max=90, speed=90)
+          'belly turret gun elevation: from 10 deg up to straight down (90 deg)', min=-10, max=90, speed=90)
     hinge(yaw, (0.0, yc, 1.70), 'aim_yaw', 'Z', None, None, (0, 1), 'belly turret traverse (360 deg)', speed=120)
     hinge(lift, (0.0, yc, 2.27), 'translate', 'Z', -0.80, 'BellyTurret', (0.35, 1.0),
           'turret elevator: lowers the gun turret out of the belly')
@@ -277,7 +277,7 @@ def build_laser():
     mk('Laser_Lens', lens, 'Laser', 'Weapons', pit)
     ring = ylathe([(0.075, -0.92), (0.095, -0.92), (0.095, -0.945), (0.075, -0.945)], pc, 18, ring=True)
     mk('Laser_LensRing', ring, 'Titanium', 'Weapons', pit)
-    hinge(pit, pc, 'aim_pitch', 'X', None, None, (0, 1), 'energy weapon elevation (- = up, Blender X)',
+    hinge(pit, pc, 'aim_pitch', 'X', None, None, (0, 1), 'energy weapon elevation: 5 deg down to 60 deg up',
           min=-60, max=5, speed=70)
     hinge(yaw, (0.0, yc + 0.15, 2.52), 'aim_yaw', 'Z', None, None, (0, 1), 'energy weapon traverse (360 deg)', speed=90)
     hinge(lift, (0.0, yc, 2.36), 'translate', 'Z', 0.62, 'DorsalLaser', (0.35, 1.0),

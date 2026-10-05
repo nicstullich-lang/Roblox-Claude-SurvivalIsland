@@ -991,9 +991,13 @@ def groove_vf(caster, path2d, proj, width=0.005, depth=0.004, step=0.05, closed=
     return loft(loops, True, True)
 
 
-def stamp_vf(caster, text, center2d, proj, size, up2d=(0, 1), lift=0.0025, t=0.0015, rot=0.0):
-    """raised low-visibility stencil text projected on the surface."""
+def stamp_vf(caster, text, center2d, proj, size, up2d=(0, 1), lift=0.0025, t=0.0015, rot=0.0, mirror=False):
+    """raised low-visibility stencil text projected on the surface (mirror=True for surfaces seen from the
+    other side of the projection plane, e.g. the model's right side)."""
     vv, ff = text_vf(text, size, 0.0)
+    if mirror:
+        vv = [V((-v.x, v.y, v.z)) for v in vv]
+        ff = [tuple(reversed(f)) for f in ff]
     a = atan2(up2d[1], up2d[0]) - pi / 2 + rot
     out = []
     for v in vv:
@@ -1086,7 +1090,7 @@ def studio(size=6.0, floor_color=(0.20, 0.19, 0.17)):
     light('Studio_Sun', 'SUN', (0, 0, 10), (38, 0, 145), 3.2, color=(1.0, 0.95, 0.88))
     light('Studio_Key', 'AREA', (-7 * k, -8 * k, 7 * k), (55, 0, -40), 2500 * k * k, 6 * k)
     light('Studio_Fill', 'AREA', (8 * k, 5 * k, 5 * k), (60, 0, 125), 900 * k * k, 6 * k, (0.85, 0.9, 1.0))
-    light('Studio_Under', 'AREA', (0, 0, 0.35 * k), (180, 0, 0), 260 * k * k, 4.5 * k, (0.95, 0.95, 1.0))
+    light('Studio_Under', 'AREA', (0, 0, 0.30), (180, 0, 0), 260 * k * k, 4.5 * k, (0.95, 0.95, 1.0))
     cam_d = bpy.data.cameras.new('Studio_Cam')
     cam = bpy.data.objects.new('Studio_Cam', cam_d)
     sc_coll.objects.link(cam)

@@ -104,20 +104,15 @@ def stencils():
     for s in (1, -1):
         proj = 'left' if s > 0 else 'right'
         # tail number + type on the outer face of each tail (side projection hits the tail)
-        parts_t = [stamp_vf(C, 'XR-77', (8.10, 4.15), proj, 0.20, up2d=(0, 1), rot=0.0 if s > 0 else 0.0)]
-        parts_t.append(stamp_vf(C, '077', (8.25, 3.75), proj, 0.16))
+        parts_t = []
+        for txt, (yc, zc), size in (('XR-77', (8.66, 4.15), 0.20), ('077', (8.72, 3.72), 0.16)):
+            # seen from the right, +y runs right-to-left, so the word is mirrored before projecting
+            parts_t.append(stamp_vf(C, txt, (yc, zc), proj, size, mirror=s < 0))
         vv, ff = merge_vf(*parts_t)
-        if s < 0:      # text seen from the right reads mirrored unless flipped along y
-            vv = [V((v.x, 16.35 - v.y, v.z)) for v in vv]
-            ff = [tuple(reversed(f)) for f in ff]
         mk('Stencil_Tail_' + ('L' if s > 0 else 'R'), (vv, ff), 'Stencil', 'Details', bpy.data.objects['Tail_' + ('L' if s > 0 else 'R')],
            smooth=False)
         # nose name + rescue / danger markings near the cockpit
-        nm = stamp_vf(C, 'UMBRA', (-10.0 if s > 0 else -10.0, 2.18), proj, 0.11)
-        if s < 0:
-            vv, ff = nm
-            nm = ([V((v.x, -20.0 - v.y, v.z)) for v in vv], [tuple(reversed(f)) for f in ff])
-        parts.append(nm)
+        parts.append(stamp_vf(C, 'UMBRA', (-10.0, 2.18), proj, 0.11, mirror=s < 0))
         nostep = stamp_vf(C, 'NO STEP', (s * 4.6, 2.6), 'top', 0.08, up2d=(-s, 0))
         parts.append(nostep)
     resc = stamp_vf(C, 'RESCUE', (-6.30, 2.30), 'left', 0.07)

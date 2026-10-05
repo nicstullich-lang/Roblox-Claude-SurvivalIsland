@@ -142,7 +142,7 @@ def build_recon():
     win = merge_vf(cyl_between((0.0, -2.25, 1.60), (0.0, -2.262, 1.60), 0.07, 20),
                    cyl_between((0.08, -2.24, 1.64), (0.08, -2.252, 1.64), 0.025, 12))
     mk('Recon_HeadWindows', win, 'SensorGlass', 'Sensors', hd)
-    hinge(hd, (0.0, -2.15, 1.60), 'aim_pitch', 'X', None, None, (0, 1), 'recon head tilt (+ = look down, Blender X)',
+    hinge(hd, (0.0, -2.15, 1.60), 'aim_pitch', 'X', None, None, (0, 1), 'recon head tilt: 10 deg up to straight down (90 deg)',
           min=-10, max=90, speed=60)
     hinge(yb, (0.0, -2.15, 1.60), 'aim_yaw', 'Z', None, None, (0, 1), 'recon ball pan (360 deg)', speed=60)
     hinge(m, (0.0, -2.15, 1.96), 'translate', 'Z', -0.45, 'Recon', (0.4, 1.0), 'recon mast: lowers the ball turret')

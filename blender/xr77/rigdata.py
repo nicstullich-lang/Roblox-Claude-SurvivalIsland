@@ -96,7 +96,7 @@ def build():
         centre_of_mass_m_blender=[0.0, 1.2, 2.05], centre_of_mass_studs=[0.0, round(2.05 / 0.28, 3), round(1.2 / 0.28, 3)],
         wing_area_m2=area, wheelbase_m=round(MAIN_GEAR['y'] - NOSE_GEAR['y'], 2), main_gear_track_m=2 * MAIN_GEAR['x_wheel'],
         engines='2 x F-140 adaptive-cycle afterburning turbofan (fictional): 155 kN dry / 225 kN with afterburner each',
-        lift_fan='hybrid-electric contra-rotating lift fan, 110 kN (fictional)', roll_posts='2 x 9 kN bleed-air jets',
+        lift_fan='hybrid-electric contra-rotating lift fan, 190 kN (fictional)', roll_posts='2 x 9 kN bleed-air jets',
         thrust_to_weight_combat=round(2 * 225000 / (30000 * 9.81), 2),
         top_speed='Mach 3.3 at 24,000 m (~3,500 km/h); 1,450 km/h at sea level',
         cruise_speed_kmh=950, stall_speed_kmh_clean=230, vtol_transition_max_kmh=280, ceiling_m=26000, range_km=4800,
@@ -127,7 +127,7 @@ def build():
     rig.system('Belly twin rotary guns', type='turret', lift='BellyTurret_Lift', yaw='BellyTurret_Yaw',
                pitch='BellyTurret_Pitch', spin_groups=['BellyTurret_Barrels_L', 'BellyTurret_Barrels_R'],
                muzzles=['Muzzle_Belly_L', 'Muzzle_Belly_R'], channel='BellyTurret', fire_rate_per_s=2 * 45,
-               suggested_damage=12, range_studs=1200, note='360 deg traverse, -10..+90 deg (down) elevation')
+               suggested_damage=12, range_studs=1200, note='360 deg traverse; elevation from 10 deg up to straight down (90 deg down)')
     rig.system('Helios energy turret', type='beam', lift='Laser_Lift', yaw='Laser_Yaw', pitch='Laser_Pitch',
                muzzle='Muzzle_Laser', channel='DorsalLaser', damage_per_s=120, range_studs=2500, overheat_s=6,
                cooldown_s=4, note='continuous beam (fictional); Laser material glows when firing')
@@ -138,8 +138,9 @@ def build():
                cameras=['Camera_Chine_L', 'Camera_Chine_R', 'Camera_ReconBall', 'Eye_Pilot'],
                note='radar lock cone 60 deg forward; Recon channel gives zoom camera views + marks targets')
     rig.system('VTOL', type='flight', channel='VTOL', thrust_points=['LiftFan_Exhaust', 'Exhaust_L', 'Exhaust_R'],
-               roll_points=['RollPost_L', 'RollPost_R'], note='hover: lift fan carries ~55%, swivel nozzles ~45%; '
-                                                             'roll posts trim roll; transition below 280 km/h')
+               roll_points=['RollPost_L', 'RollPost_R'],
+               note='hover balance about the centre of mass (y 1.2 m): lift fan 4.8 m ahead, swivel nozzles 8.5 m behind '
+                    '-> fan carries ~64 %, nozzles ~36 % of the weight; roll posts trim roll; transition below 280 km/h')
     rig.system('Stealth', type='signature', note='radar signature is low only with GearUp = 1 and MainBays / SideBays / '
                                                  'Gun / BellyTurret / DorsalLaser / Refuel / Recon all at 0')
     # collision proxies (model space at rest)
