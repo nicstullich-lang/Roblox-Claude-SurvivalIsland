@@ -250,8 +250,8 @@ VIEWS = {
     'sideL':     ((34.0, 0.0, 3.0), (0.0, -0.6, 2.2), 45),
     'front':     ((0.0, -40.0, 2.6), (0.0, 0.0, 2.3), 55),
     'rear':      ((0.0, 40.0, 3.0), (0.0, 0.0, 2.3), 55),
-    'top':       ((0.0, -0.3, 42.0), (0.0, -0.3, 0.0), 50),
-    'bottom':    ((0.0, -0.3, -30.0), (0.0, -0.3, 2.0), 45),
+    'top':       ((0.0, -0.8, 40.0), (0.0, -0.8, 0.0), 45, 'X'),
+    'bottom':    ((0.0, -0.8, -36.0), (0.0, -0.8, 2.0), 45, 'X'),
     'low34':     ((-12.0, -15.0, 0.6), (0.0, -2.0, 1.8), 30),
     'high34':    ((-16.0, -12.0, 15.0), (0.0, 0.5, 2.0), 38),
     'cockpit':   ((-2.6, -9.6, 4.6), (0.0, -7.0, 2.6), 32),
@@ -265,7 +265,9 @@ VIEWS = {
 }
 
 
-def setview(name=None, loc=None, target=None, lens=45):
+def setview(name=None, loc=None, target=None, lens=45, up='Y'):
     if name:
-        loc, target, lens = VIEWS[name]
-    look(loc, target, lens)
+        v = VIEWS[name]
+        loc, target, lens = v[:3]
+        up = v[3] if len(v) > 3 else 'Y'
+    look(loc, target, lens, up)

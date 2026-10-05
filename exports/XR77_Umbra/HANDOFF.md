@@ -4,6 +4,8 @@
 
 **XR-77 "Umbra"** · category: **aircraft** · Classified strike-reconnaissance VTOL fighter (original design, admin-only): SR-71-style chined Mach 3+ airframe with stealth shaping, adaptive-cycle engines with spiked inlets, hybrid-electric lift fan and swivel nozzles for VTOL, drooping wing tips for high-speed flight, internal + external weapons.
 
+![rest_front34](previews/rest_front34.png) ![rest_rear34](previews/rest_rear34.png) ![rest_side](previews/rest_side.png)
+
 ## 1. Files
 | File | What |
 |---|---|
@@ -37,8 +39,8 @@ Axes are the joint frame (= model axes at rest). An axis is a letter (X / Y / Z)
 
 | Group | Parent | Pivot (studs) | Motion | Channel · stage | What it is |
 |---|---|---|---|---|---|
-| `Aileron_L` | Wingtip_L | (-22.50, 7.50, 23.93) | control about X, -25 .. 25 deg, 120 deg/s | — | aileron (roll): + = trailing edge up (Blender X) |
-| `Aileron_R` | Wingtip_R | (22.50, 7.50, 23.93) | control about X, -25 .. 25 deg, 120 deg/s | — | aileron (roll): + = trailing edge up (Blender X) |
+| `Aileron_L` | Wingtip_L | (-22.50, 7.50, 23.93) | control about X, -25 .. 25 deg, 120 deg/s | — | aileron (roll control), +/-25 deg |
+| `Aileron_R` | Wingtip_R | (22.50, 7.50, 23.93) | control about X, -25 .. 25 deg, 120 deg/s | — | aileron (roll control), +/-25 deg |
 | `AuxInlet_L` | Body | (-8.75, 10.09, -6.95) | rotate +35 deg about X | VTOL · 0–0.4 | VTOL auxiliary inlet door: rear-hinged, opens 35 deg for extra hover airflow |
 | `AuxInlet_R` | Body | (8.75, 10.09, -6.95) | rotate +35 deg about X | VTOL · 0–0.4 | VTOL auxiliary inlet door: rear-hinged, opens 35 deg for extra hover airflow |
 | `Avionics_Door_L` | Body | (-2.36, 8.39, -28.39) | rotate -100 deg about (-0.000, 0.030, 1.000) | Service · 0–1 | avionics bay door: hinged along its top edge, lifts up |
@@ -46,7 +48,7 @@ Axes are the joint frame (= model axes at rest). An axis is a letter (X / Y / Z)
 | `BellyTurret_Barrels_L` | BellyTurret_Pitch | (-1.18, 5.75, 17.32) | spin about Z at 55 rad/s | BellyTurret · 0.9–1 | belly turret rotary gun (spins while firing) |
 | `BellyTurret_Barrels_R` | BellyTurret_Pitch | (1.18, 5.75, 17.32) | spin about Z at 55 rad/s | BellyTurret · 0.9–1 | belly turret rotary gun (spins while firing) |
 | `BellyTurret_Lift` | Body | (-0.00, 8.11, 19.46) | slide -2.8571 studs along Y | BellyTurret · 0.35–1 | turret elevator: lowers the gun turret out of the belly |
-| `BellyTurret_Pitch` | BellyTurret_Yaw | (-0.00, 5.75, 19.46) | aim pitch about X, -90 .. 10 deg, 90 deg/s | — | belly turret gun elevation (+ = guns down, Blender X) |
+| `BellyTurret_Pitch` | BellyTurret_Yaw | (-0.00, 5.75, 19.46) | aim pitch about X, -90 .. 10 deg, 90 deg/s | — | belly turret gun elevation: from 10 deg up to straight down (90 deg) |
 | `BellyTurret_Yaw` | BellyTurret_Lift | (-0.00, 6.07, 19.46) | aim yaw about Y, unlimited, 120 deg/s | — | belly turret traverse (360 deg) |
 | `Canopy` | Body | (-0.00, 10.93, -18.39) | rotate +48 deg about X | Canopy · 0–1 | one-piece canopy, rear-hinged: opens up 48 deg (front rises) |
 | `ChineCam_Door_L` | Body | (-1.99, 5.69, -28.04) | rotate +100 deg about Z | Recon · 0–0.4 | chine camera bay door: swings down |
@@ -85,7 +87,7 @@ Axes are the joint frame (= model axes at rest). An axis is a letter (X / Y / Z)
 | `Laser_Door_L` | Body | (-1.62, 10.26, 3.75) | rotate +100 deg about Z | DorsalLaser · 0–0.35 | energy weapon bay door: swings up |
 | `Laser_Door_R` | Body | (1.62, 10.26, 3.75) | rotate -100 deg about Z | DorsalLaser · 0–0.35 | energy weapon bay door: swings up |
 | `Laser_Lift` | Body | (-0.00, 8.43, 3.75) | slide +2.2143 studs along Y | DorsalLaser · 0.35–1 | energy weapon elevator: raises the turret above the spine |
-| `Laser_Pitch` | Laser_Yaw | (-0.00, 9.75, 4.29) | aim pitch about X, -5 .. 60 deg, 70 deg/s | — | energy weapon elevation (- = up, Blender X) |
+| `Laser_Pitch` | Laser_Yaw | (-0.00, 9.75, 4.29) | aim pitch about X, -5 .. 60 deg, 70 deg/s | — | energy weapon elevation: 5 deg down to 60 deg up |
 | `Laser_Yaw` | Laser_Lift | (-0.00, 9.00, 4.29) | aim yaw about Y, unlimited, 90 deg/s | — | energy weapon traverse (360 deg) |
 | `LiftFan_DoorBot_L` | Body | (-3.08, 5.08, -12.68) | rotate -92 deg about Z | VTOL · 0.05–0.5 | lift fan ventral door: hinged on its outer edge, folds down 92 deg |
 | `LiftFan_DoorBot_R` | Body | (3.08, 5.08, -12.68) | rotate +92 deg about Z | VTOL · 0.05–0.5 | lift fan ventral door: hinged on its outer edge, folds down 92 deg |
@@ -117,7 +119,7 @@ Axes are the joint frame (= model axes at rest). An axis is a letter (X / Y / Z)
 | `Recon_ChineCam_R` | Body | (2.43, 7.11, -28.04) | slide -0.5714 studs along Y | Recon · 0.4–1 | reconnaissance camera cradle: lowers out of the chine bay |
 | `Recon_Door_L` | Body | (-1.44, 4.93, -7.68) | rotate -100 deg about Z | Recon · 0–0.4 | recon turret door: swings down |
 | `Recon_Door_R` | Body | (1.44, 4.93, -7.68) | rotate +100 deg about Z | Recon · 0–0.4 | recon turret door: swings down |
-| `Recon_Head` | Recon_Ball | (-0.00, 5.71, -7.68) | aim pitch about X, -90 .. 10 deg, 60 deg/s | — | recon head tilt (+ = look down, Blender X) |
+| `Recon_Head` | Recon_Ball | (-0.00, 5.71, -7.68) | aim pitch about X, -90 .. 10 deg, 60 deg/s | — | recon head tilt: 10 deg up to straight down (90 deg) |
 | `Recon_Mast` | Body | (-0.00, 7.00, -7.68) | slide -1.6071 studs along Y | Recon · 0.4–1 | recon mast: lowers the ball turret |
 | `Refuel_Door` | Body | (-0.00, 10.27, -5.53) | rotate +105 deg about X | Refuel · 0–1 | air-refuelling receptacle door: rear-hinged, opens forward-up to form the boom slipway |
 | `RollPost_Door_L` | Body | (-16.87, 7.15, 16.96) | rotate -95 deg about Z | VTOL · 0.1–0.5 | roll-post nozzle door: opens so bled engine air can control roll in the hover |
@@ -264,7 +266,7 @@ Axes are the joint frame (= model axes at rest). An axis is a letter (X / Y / Z)
 - **wheelbase m:** 11.75
 - **main gear track m:** 2.8
 - **engines:** 2 x F-140 adaptive-cycle afterburning turbofan (fictional): 155 kN dry / 225 kN with afterburner each
-- **lift fan:** hybrid-electric contra-rotating lift fan, 110 kN (fictional)
+- **lift fan:** hybrid-electric contra-rotating lift fan, 190 kN (fictional)
 - **roll posts:** 2 x 9 kN bleed-air jets
 - **thrust to weight combat:** 1.53
 - **top speed:** Mach 3.3 at 24,000 m (~3,500 km/h); 1,450 km/h at sea level
@@ -403,7 +405,7 @@ Axes are the joint frame (= model axes at rest). An axis is a letter (X / Y / Z)
 - **fire rate per s:** 90
 - **suggested damage:** 12
 - **range studs:** 1200
-- **note:** 360 deg traverse, -10..+90 deg (down) elevation
+- **note:** 360 deg traverse; elevation from 10 deg up to straight down (90 deg down)
 
 ### Helios energy turret
 - **type:** beam
@@ -440,7 +442,7 @@ Axes are the joint frame (= model axes at rest). An axis is a letter (X / Y / Z)
 - **channel:** VTOL
 - **thrust points:** ['LiftFan_Exhaust', 'Exhaust_L', 'Exhaust_R']
 - **roll points:** ['RollPost_L', 'RollPost_R']
-- **note:** hover: lift fan carries ~55%, swivel nozzles ~45%; roll posts trim roll; transition below 280 km/h
+- **note:** hover balance about the centre of mass (y 1.2 m): lift fan 4.8 m ahead, swivel nozzles 8.5 m behind -> fan carries ~64 %, nozzles ~36 % of the weight; roll posts trim roll; transition below 280 km/h
 
 ### Stealth
 - **type:** signature
@@ -467,4 +469,4 @@ Axes are the joint frame (= model axes at rest). An axis is a letter (X / Y / Z)
 - [ ] All server checks in place (who may use what, rate limits, clamped inputs) — the game is server-authoritative.
 - [ ] Output window clean (no errors/warnings from the new scripts).
 
-_Generated 2026-10-05 02:10 by `blender/export_handoff.py`. FBX re-import check: PASSED (112 pivots compared, 0 problems)._
+_Generated 2026-10-05 02:48 by `blender/export_handoff.py`. FBX re-import check: PASSED (112 pivots compared, 0 problems)._

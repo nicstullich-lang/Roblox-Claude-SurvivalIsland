@@ -1098,10 +1098,19 @@ def studio(size=6.0, floor_color=(0.20, 0.19, 0.17)):
     return cam
 
 
-def look(loc, target, lens=45):
+def look(loc, target, lens=45, up='Y'):
+    """aim the scene camera; up = the world axis that points to the top of the image ('Y' default, use 'X' for
+    straight-down / straight-up views of long models so they fill the wide frame)."""
     cam = bpy.context.scene.camera
     cam.location = V(loc)
-    cam.rotation_euler = (V(target) - V(loc)).to_track_quat('-Z', 'Y').to_euler()
+    f = (V(target) - V(loc)).normalized()
+    u = V({'Y': (0, 0, 1), 'X': (1, 0, 0), '-X': (-1, 0, 0)}[up])     # world direction shown at the image top
+    if abs(u.dot(f)) > 0.999:
+        u = V((0, 1, 0))
+    y = (u - f * u.dot(f)).normalized()
+    z = -f
+    x = y.cross(z)
+    cam.rotation_euler = Matrix((x, y, z)).transposed().to_euler()
     cam.data.lens = lens
     cam.data.clip_start = 0.05
     cam.data.clip_end = 500

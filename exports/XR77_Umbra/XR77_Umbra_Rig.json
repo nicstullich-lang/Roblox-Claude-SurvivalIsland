@@ -12,7 +12,7 @@
   "span_highspeed_m": 12.8,
   "height_m": 5.15
  },
- "generated": "2026-10-05 02:10",
+ "generated": "2026-10-05 02:48",
  "units": {
   "blender": "metres",
   "roblox": "studs",
@@ -49,7 +49,7 @@
      1
     ],
     "kind": "part",
-    "description": "aileron (roll): + = trailing edge up (Blender X)",
+    "description": "aileron (roll control), +/-25 deg",
     "min": -25,
     "max": 25,
     "speed": 120,
@@ -67,7 +67,7 @@
      1
     ],
     "kind": "part",
-    "description": "aileron (roll): + = trailing edge up (Blender X)",
+    "description": "aileron (roll control), +/-25 deg",
     "min": -25,
     "max": 25,
     "speed": 120,
@@ -100,7 +100,7 @@
      1
     ],
     "kind": "part",
-    "description": "aileron (roll): + = trailing edge up (Blender X)",
+    "description": "aileron (roll control), +/-25 deg",
     "min": -25,
     "max": 25,
     "speed": 120,
@@ -118,7 +118,7 @@
      1
     ],
     "kind": "part",
-    "description": "aileron (roll): + = trailing edge up (Blender X)",
+    "description": "aileron (roll control), +/-25 deg",
     "min": -25,
     "max": 25,
     "speed": 120,
@@ -517,7 +517,7 @@
      1
     ],
     "kind": "part",
-    "description": "belly turret gun elevation (+ = guns down, Blender X)",
+    "description": "belly turret gun elevation: from 10 deg up to straight down (90 deg)",
     "min": -90,
     "max": 10,
     "speed": 90,
@@ -534,7 +534,7 @@
      1
     ],
     "kind": "part",
-    "description": "belly turret gun elevation (+ = guns down, Blender X)",
+    "description": "belly turret gun elevation: from 10 deg up to straight down (90 deg)",
     "min": -10,
     "max": 90,
     "speed": 90,
@@ -2529,7 +2529,7 @@
      1
     ],
     "kind": "part",
-    "description": "energy weapon elevation (- = up, Blender X)",
+    "description": "energy weapon elevation: 5 deg down to 60 deg up",
     "min": -5,
     "max": 60,
     "speed": 70,
@@ -2546,7 +2546,7 @@
      1
     ],
     "kind": "part",
-    "description": "energy weapon elevation (- = up, Blender X)",
+    "description": "energy weapon elevation: 5 deg down to 60 deg up",
     "min": -60,
     "max": 5,
     "speed": 70,
@@ -4134,7 +4134,7 @@
      1
     ],
     "kind": "part",
-    "description": "recon head tilt (+ = look down, Blender X)",
+    "description": "recon head tilt: 10 deg up to straight down (90 deg)",
     "min": -90,
     "max": 10,
     "speed": 60,
@@ -4151,7 +4151,7 @@
      1
     ],
     "kind": "part",
-    "description": "recon head tilt (+ = look down, Blender X)",
+    "description": "recon head tilt: 10 deg up to straight down (90 deg)",
     "min": -10,
     "max": 90,
     "speed": 60,
@@ -6127,11 +6127,7 @@
    "driver": true,
    "enter_point": "Board_Left",
    "exit_point": "Exit_Left",
-   "eye": [
-    0.0,
-    -6.45,
-    3.0
-   ],
+   "camera": "Eye_Pilot",
    "description": "single ejection seat; pilot flies the aircraft"
   }
  },
@@ -9813,7 +9809,7 @@
   "wheelbase_m": 11.75,
   "main_gear_track_m": 2.8,
   "engines": "2 x F-140 adaptive-cycle afterburning turbofan (fictional): 155 kN dry / 225 kN with afterburner each",
-  "lift_fan": "hybrid-electric contra-rotating lift fan, 110 kN (fictional)",
+  "lift_fan": "hybrid-electric contra-rotating lift fan, 190 kN (fictional)",
   "roll_posts": "2 x 9 kN bleed-air jets",
   "thrust_to_weight_combat": 1.53,
   "top_speed": "Mach 3.3 at 24,000 m (~3,500 km/h); 1,450 km/h at sea level",
@@ -9913,7 +9909,7 @@
    "fire_rate_per_s": 90,
    "suggested_damage": 12,
    "range_studs": 1200,
-   "note": "360 deg traverse, -10..+90 deg (down) elevation"
+   "note": "360 deg traverse; elevation from 10 deg up to straight down (90 deg down)"
   },
   "Helios energy turret": {
    "type": "beam",
@@ -9968,7 +9964,7 @@
     "RollPost_L",
     "RollPost_R"
    ],
-   "note": "hover: lift fan carries ~55%, swivel nozzles ~45%; roll posts trim roll; transition below 280 km/h"
+   "note": "hover balance about the centre of mass (y 1.2 m): lift fan 4.8 m ahead, swivel nozzles 8.5 m behind -> fan carries ~64 %, nozzles ~36 % of the weight; roll posts trim roll; transition below 280 km/h"
   },
   "Stealth": {
    "type": "signature",

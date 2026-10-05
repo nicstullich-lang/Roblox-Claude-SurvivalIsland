@@ -376,7 +376,7 @@ def render_previews(blend_path, out_dir, rig, views, log):
     d = L * 0.95
     fr = (-0.62 * d, -0.80 * d, h * 0.9 + 0.25 * d)
     default = [('rest', 'rest_front34', fr), ('rest', 'rest_rear34', (0.62 * d, 0.85 * d, h + 0.25 * d)),
-               ('rest', 'rest_side', (-1.45 * d, 0.0, h * 0.6)), ('rest', 'rest_top', (0.0, 0.01, 1.7 * d))]
+               ('rest', 'rest_side', (-1.45 * d, 0.0, h * 0.6)), ('rest', 'rest_top', (0.0, 0.0, 1.45 * d))]
     for pn in rig.get('poses', {}):
         if pn != 'rest':
             default.append((pn, 'pose_' + pn, (-0.70 * d, -0.62 * d, h + 0.45 * d)))
@@ -391,9 +391,8 @@ def render_previews(blend_path, out_dir, rig, views, log):
         fl = bpy.data.objects.get('Studio_Floor')
         if fl:
             fl.hide_render = False
-        cam.location = Vector(loc)
-        cam.rotation_euler = (tgt - Vector(loc)).to_track_quat('-Z', 'Y').to_euler()
-        cam.data.lens = 40
+        from .geo import look
+        look(loc, tgt, 40, 'X' if nm.endswith('_top') else 'Y')
         cam.data.clip_end = 1000
         p = os.path.join(out_dir, 'previews', nm + '.png')
         sc.render.filepath = p
