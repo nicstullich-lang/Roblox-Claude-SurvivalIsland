@@ -1,0 +1,528 @@
+{
+ "schema": "survival-island-model/1",
+ "model": {
+  "name": "Sparrow9",
+  "display": "Sparrow-9",
+  "category": "weapon",
+  "description": "9 mm service pistol with a dark-steel slide, polymer frame and stippled grip panels",
+  "origin": "on the bore axis directly above the trigger (all five weapons share this datum)"
+ },
+ "generated": "2026-10-15 17:08",
+ "units": {
+  "blender": "metres",
+  "roblox": "studs",
+  "studs_per_metre": 3.571429,
+  "metres_per_stud": 0.28
+ },
+ "axes": {
+  "roblox_from_blender": "(-x, z, y) * 3.571429",
+  "forward": "-Z (LookVector)",
+  "up": "+Y",
+  "right": "+X",
+  "note": "all *_studs values and Roblox motions are already converted"
+ },
+ "groups": {
+  "SP9_Magazine": {
+   "parent_group": "Body",
+   "pivot_studs": [
+    -0.0,
+    -0.2778,
+    0.4027
+   ],
+   "pivot_blender_m": [
+    0.0,
+    0.1127,
+    -0.0778
+   ],
+   "motion": {
+    "type": "translate",
+    "axis": [
+     -0.0,
+     -0.9555,
+     0.2949
+    ],
+    "open": 0.6429,
+    "channel": "Reload",
+    "stage": [
+     0,
+     0.45
+    ],
+    "kind": "part",
+    "description": "magazine: drops out of the grip along the grip axis (0.18 m)",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": "studs"
+   },
+   "motion_text": "slide +0.6429 studs along (-0.000, -0.956, 0.295)",
+   "motion_blender": {
+    "type": "translate",
+    "axis": [
+     0.0,
+     0.29491,
+     -0.95552
+    ],
+    "open": 0.18,
+    "channel": "Reload",
+    "stage": [
+     0,
+     0.45
+    ],
+    "kind": "part",
+    "description": "magazine: drops out of the grip along the grip axis (0.18 m)",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": null
+   },
+   "meshes": [
+    "RBX_SP9_Magazine_DarkSteel",
+    "RBX_SP9_Magazine_PolyBlack"
+   ]
+  },
+  "SP9_Slide": {
+   "parent_group": "Body",
+   "pivot_studs": [
+    -0.0,
+    0.0714,
+    -1.3214
+   ],
+   "pivot_blender_m": [
+    0.0,
+    -0.37,
+    0.02
+   ],
+   "motion": {
+    "type": "translate",
+    "axis": "Z",
+    "open": 0.2857,
+    "channel": "Cycle",
+    "stage": [
+     0.0,
+     1.0
+    ],
+    "kind": "part",
+    "description": "slide: recoils 0.080 m rearward and returns once per shot (locks back on an empty magazine)",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": "studs"
+   },
+   "motion_text": "slide +0.2857 studs along Z",
+   "motion_blender": {
+    "type": "translate",
+    "axis": "Y",
+    "open": 0.08,
+    "channel": "Cycle",
+    "stage": [
+     0.0,
+     1.0
+    ],
+    "kind": "part",
+    "description": "slide: recoils 0.080 m rearward and returns once per shot (locks back on an empty magazine)",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": null
+   },
+   "meshes": [
+    "RBX_SP9_Slide_Blackened",
+    "RBX_SP9_Slide_DarkSteel",
+    "RBX_SP9_Slide_MarkRed",
+    "RBX_SP9_Slide_Steel"
+   ]
+  },
+  "SP9_Trigger": {
+   "parent_group": "Body",
+   "pivot_studs": [
+    -0.0,
+    -0.1286,
+    -0.0071
+   ],
+   "pivot_blender_m": [
+    0.0,
+    -0.002,
+    -0.036
+   ],
+   "motion": {
+    "type": "rotate",
+    "axis": "X",
+    "open": -12,
+    "channel": "Trigger",
+    "stage": [
+     0.0,
+     1.0
+    ],
+    "kind": "part",
+    "description": "trigger (with safety blade): 12 deg rearward to fire",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": "degrees"
+   },
+   "motion_text": "rotate -12 deg about X",
+   "motion_blender": {
+    "type": "rotate",
+    "axis": "X",
+    "open": 12,
+    "channel": "Trigger",
+    "stage": [
+     0.0,
+     1.0
+    ],
+    "kind": "part",
+    "description": "trigger (with safety blade): 12 deg rearward to fire",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": null
+   },
+   "meshes": [
+    "RBX_SP9_Trigger_Blackened",
+    "RBX_SP9_Trigger_PolyBlack"
+   ]
+  }
+ },
+ "channels": {
+  "Trigger": {
+   "description": "trigger pull",
+   "duration_s": 0.04,
+   "rules": [],
+   "default": 0
+  },
+  "Cycle": {
+   "description": "slide cycle per shot: play 0 -> 1 -> 0 (hold at 1 when the magazine is empty = slide lock)",
+   "duration_s": 0.035,
+   "rules": [],
+   "default": 0
+  },
+  "Reload": {
+   "description": "magazine out (1) / in (0)",
+   "duration_s": 0.6,
+   "rules": [],
+   "default": 0
+  }
+ },
+ "poses": {
+  "fire": {
+   "channels": {
+    "Trigger": 1,
+    "Cycle": 1
+   },
+   "inputs": {},
+   "description": "trigger pulled, slide fully back",
+   "ground": false
+  },
+  "reload": {
+   "channels": {
+    "Reload": 1,
+    "Cycle": 1
+   },
+   "inputs": {},
+   "description": "slide locked back, magazine out",
+   "ground": false
+  }
+ },
+ "seats": {},
+ "points": {
+  "SP9_Muzzle": {
+   "position_studs": [
+    -0.0,
+    0.0,
+    -1.3643
+   ],
+   "attached_to": "Body",
+   "purpose": "muzzle",
+   "direction": [
+    -0.0,
+    0.0,
+    -1.0
+   ],
+   "note": "bullet origin + muzzle flash"
+  },
+  "SP9_Ejection": {
+   "position_studs": [
+    0.0786,
+    0.1786,
+    -0.1429
+   ],
+   "attached_to": "Body",
+   "purpose": "ejection",
+   "direction": [
+    0.6217,
+    0.742,
+    0.2507
+   ],
+   "note": "spent cases leave the port up and to the right"
+  },
+  "SP9_Grip_Right": {
+   "position_studs": [
+    -0.0,
+    -0.3929,
+    0.4
+   ],
+   "attached_to": "Body",
+   "purpose": "grip_right",
+   "direction": null,
+   "note": "firing hand on the grip (RightGripAttachment)"
+  },
+  "SP9_Grip_Left": {
+   "position_studs": [
+    -0.0,
+    -0.4821,
+    0.4214
+   ],
+   "attached_to": "Body",
+   "purpose": "grip_left",
+   "direction": null,
+   "note": "support hand wraps the firing hand (two-hand hold)"
+  },
+  "SP9_Aim": {
+   "position_studs": [
+    -0.0,
+    0.2464,
+    0.6786
+   ],
+   "attached_to": "Body",
+   "purpose": "aim_eye",
+   "direction": [
+    -0.0,
+    0.0,
+    -1.0
+   ],
+   "note": "eye position on the notch / post sight line"
+  },
+  "SP9_MagWell": {
+   "position_studs": [
+    -0.0,
+    -0.6857,
+    0.5286
+   ],
+   "attached_to": "Body",
+   "purpose": "magwell",
+   "direction": [
+    -0.0,
+    -0.9555,
+    0.2949
+   ]
+  }
+ },
+ "lights": {},
+ "boxes": {},
+ "wheels": {},
+ "materials": {
+  "Blackened": {
+   "roblox_material": "Metal",
+   "color_rgb": [
+    38,
+    38,
+    40
+   ],
+   "transparency": 0.0,
+   "reflectance": 0.0,
+   "emissive": false
+  },
+  "DarkSteel": {
+   "roblox_material": "Metal",
+   "color_rgb": [
+    52,
+    53,
+    56
+   ],
+   "transparency": 0.0,
+   "reflectance": 0.0,
+   "emissive": false
+  },
+  "MarkRed": {
+   "roblox_material": "SmoothPlastic",
+   "color_rgb": [
+    118,
+    50,
+    38
+   ],
+   "transparency": 0.0,
+   "reflectance": 0.0,
+   "emissive": false
+  },
+  "PolyBlack": {
+   "roblox_material": "Plastic",
+   "color_rgb": [
+    34,
+    34,
+    36
+   ],
+   "transparency": 0.0,
+   "reflectance": 0.0,
+   "emissive": false
+  },
+  "Steel": {
+   "roblox_material": "Metal",
+   "color_rgb": [
+    128,
+    128,
+    125
+   ],
+   "transparency": 0.0,
+   "reflectance": 0.0,
+   "emissive": false
+  },
+  "Walnut": {
+   "roblox_material": "Wood",
+   "color_rgb": [
+    84,
+    52,
+    34
+   ],
+   "transparency": 0.0,
+   "reflectance": 0.0,
+   "emissive": false
+  }
+ },
+ "meshes": [
+  {
+   "name": "RBX_Body_Blackened",
+   "group": "Body",
+   "material": "Blackened",
+   "triangles": 1560
+  },
+  {
+   "name": "RBX_Body_MarkRed",
+   "group": "Body",
+   "material": "MarkRed",
+   "triangles": 792
+  },
+  {
+   "name": "RBX_Body_PolyBlack",
+   "group": "Body",
+   "material": "PolyBlack",
+   "triangles": 3852
+  },
+  {
+   "name": "RBX_Body_Steel",
+   "group": "Body",
+   "material": "Steel",
+   "triangles": 1840
+  },
+  {
+   "name": "RBX_Body_Walnut",
+   "group": "Body",
+   "material": "Walnut",
+   "triangles": 6036
+  },
+  {
+   "name": "RBX_SP9_Magazine_DarkSteel",
+   "group": "SP9_Magazine",
+   "material": "DarkSteel",
+   "triangles": 108
+  },
+  {
+   "name": "RBX_SP9_Magazine_PolyBlack",
+   "group": "SP9_Magazine",
+   "material": "PolyBlack",
+   "triangles": 356
+  },
+  {
+   "name": "RBX_SP9_Slide_Blackened",
+   "group": "SP9_Slide",
+   "material": "Blackened",
+   "triangles": 788
+  },
+  {
+   "name": "RBX_SP9_Slide_DarkSteel",
+   "group": "SP9_Slide",
+   "material": "DarkSteel",
+   "triangles": 3934
+  },
+  {
+   "name": "RBX_SP9_Slide_MarkRed",
+   "group": "SP9_Slide",
+   "material": "MarkRed",
+   "triangles": 1320
+  },
+  {
+   "name": "RBX_SP9_Slide_Steel",
+   "group": "SP9_Slide",
+   "material": "Steel",
+   "triangles": 336
+  },
+  {
+   "name": "RBX_SP9_Trigger_Blackened",
+   "group": "SP9_Trigger",
+   "material": "Blackened",
+   "triangles": 260
+  },
+  {
+   "name": "RBX_SP9_Trigger_PolyBlack",
+   "group": "SP9_Trigger",
+   "material": "PolyBlack",
+   "triangles": 260
+  }
+ ],
+ "physics": {},
+ "systems": {
+  "Weapon": {
+   "kind": "pistol",
+   "caliber": "9x21 mm (fictional)",
+   "magazine": 17,
+   "fire_modes": [
+    "SEMI"
+   ],
+   "rpm": 420,
+   "muzzle_velocity_mps": 370,
+   "effective_range_studs": 214,
+   "reload_s": 1.5,
+   "damage_hint": "low-medium",
+   "recoil_hint": "snappy muzzle flip",
+   "aim": "notch rear sight + post front sight (faded red insert)",
+   "ammo_item": "Ammo_9x21",
+   "holster": "hip"
+  }
+ },
+ "notes": [
+  "Weapon origin = bore axis above the trigger; the muzzle points -Z in Roblox (LookVector)."
+ ],
+ "import": {
+  "fbx": "Sparrow9.fbx",
+  "rig_json": "Sparrow9_Rig.json",
+  "handoff_md": "Sparrow9_HANDOFF.md",
+  "importer": {
+   "scale_unit": "Stud",
+   "scale_factor": 1,
+   "world_forward": "Front",
+   "world_up": "Top",
+   "set_pivot_to_scene_origin": true,
+   "upload_to_roblox": true
+  },
+  "expected_size_studs": [
+   0.26,
+   1.0245,
+   2.0429
+  ],
+  "expected_center_studs": [
+   0.0,
+   -0.248,
+   -0.3428
+  ],
+  "mesh_count": 13,
+  "triangles": 21442,
+  "max_mesh_triangles": 6036
+ },
+ "verification": {
+  "fbx_reimported": true,
+  "pivots_checked": 3,
+  "problems": [],
+  "passed": true,
+  "uv_meshes": 13
+ },
+ "textures": {
+  "BaseColor": "textures/Sparrow9_BaseColor.png",
+  "Roughness": "textures/Sparrow9_Roughness.png",
+  "Metalness": "textures/Sparrow9_Metalness.png",
+  "note": "one atlas per weapon shared by ALL its MeshParts (every mesh keeps the atlas UVs): SurfaceAppearance ColorMap / RoughnessMap / MetalnessMap. Without it, use the flat per-material colours in `materials`."
+ },
+ "previews": [
+  "Sparrow9_34.png",
+  "previews/Sparrow9_right.png",
+  "previews/Sparrow9_left_rear34.png"
+ ]
+}

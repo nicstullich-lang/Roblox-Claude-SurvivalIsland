@@ -1,0 +1,1023 @@
+{
+ "schema": "survival-island-model/1",
+ "model": {
+  "name": "RoadrunnerR12",
+  "display": "Roadrunner R-12",
+  "category": "weapon",
+  "description": "scavenger carbine built from salvaged rifle parts: olive-gray receiver, curved tan magazine, red-dot optic",
+  "origin": "on the bore axis directly above the trigger (all five weapons share this datum)"
+ },
+ "generated": "2026-10-15 17:08",
+ "units": {
+  "blender": "metres",
+  "roblox": "studs",
+  "studs_per_metre": 3.571429,
+  "metres_per_stud": 0.28
+ },
+ "axes": {
+  "roblox_from_blender": "(-x, z, y) * 3.571429",
+  "forward": "-Z (LookVector)",
+  "up": "+Y",
+  "right": "+X",
+  "note": "all *_studs values and Roblox motions are already converted"
+ },
+ "groups": {
+  "R12_Bolt": {
+   "parent_group": "Body",
+   "pivot_studs": [
+    -0.0,
+    0.0143,
+    -0.1214
+   ],
+   "pivot_blender_m": [
+    0.0,
+    -0.034,
+    0.004
+   ],
+   "motion": {
+    "type": "translate",
+    "axis": "Z",
+    "open": 0.3036,
+    "channel": "Cycle",
+    "stage": [
+     0.0,
+     1.0
+    ],
+    "kind": "part",
+    "description": "bolt carrier: recoils 0.085 m rearward and returns once per shot (ejects through the port)",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": "studs"
+   },
+   "motion_text": "slide +0.3036 studs along Z",
+   "motion_blender": {
+    "type": "translate",
+    "axis": "Y",
+    "open": 0.085,
+    "channel": "Cycle",
+    "stage": [
+     0.0,
+     1.0
+    ],
+    "kind": "part",
+    "description": "bolt carrier: recoils 0.085 m rearward and returns once per shot (ejects through the port)",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": null
+   },
+   "meshes": [
+    "RBX_R12_Bolt_DarkSteel",
+    "RBX_R12_Bolt_Steel"
+   ]
+  },
+  "R12_ChargingHandle": {
+   "parent_group": "Body",
+   "pivot_studs": [
+    -0.1429,
+    0.0411,
+    -0.4429
+   ],
+   "pivot_blender_m": [
+    0.04,
+    -0.124,
+    0.0115
+   ],
+   "motion": {
+    "type": "translate",
+    "axis": "Z",
+    "open": 0.3929,
+    "channel": "Charge",
+    "stage": [
+     0.0,
+     1.0
+    ],
+    "kind": "part",
+    "description": "charging handle: pulled 0.11 m rearward to chamber the first round, then released",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": "studs"
+   },
+   "motion_text": "slide +0.3929 studs along Z",
+   "motion_blender": {
+    "type": "translate",
+    "axis": "Y",
+    "open": 0.11,
+    "channel": "Charge",
+    "stage": [
+     0.0,
+     1.0
+    ],
+    "kind": "part",
+    "description": "charging handle: pulled 0.11 m rearward to chamber the first round, then released",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": null
+   },
+   "meshes": [
+    "RBX_R12_ChargingHandle_Blackened",
+    "RBX_R12_ChargingHandle_PolyBlack"
+   ]
+  },
+  "R12_DustCover": {
+   "parent_group": "Body",
+   "pivot_studs": [
+    0.1493,
+    -0.0589,
+    0.0786
+   ],
+   "pivot_blender_m": [
+    -0.0418,
+    0.022,
+    -0.0165
+   ],
+   "motion": {
+    "type": "rotate",
+    "axis": "Z",
+    "open": -150,
+    "channel": "DustCover",
+    "stage": [
+     0.0,
+     1.0
+    ],
+    "kind": "part",
+    "description": "ejection-port dust cover: closed at rest; swings 150 deg down to hang open below the port (first shot)",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": "degrees"
+   },
+   "motion_text": "rotate -150 deg about Z",
+   "motion_blender": {
+    "type": "rotate",
+    "axis": "Y",
+    "open": -150,
+    "channel": "DustCover",
+    "stage": [
+     0.0,
+     1.0
+    ],
+    "kind": "part",
+    "description": "ejection-port dust cover: closed at rest; swings 150 deg down to hang open below the port (first shot)",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": null
+   },
+   "meshes": [
+    "RBX_R12_DustCover_PaintOliveGray"
+   ]
+  },
+  "R12_FrontSight_Ears": {
+   "parent_group": "Body",
+   "pivot_studs": [
+    -0.0,
+    0.2325,
+    -1.7357
+   ],
+   "pivot_blender_m": [
+    0.0,
+    -0.486,
+    0.0651
+   ],
+   "motion": {
+    "type": "rotate",
+    "axis": "X",
+    "open": 90,
+    "channel": "IronSights",
+    "stage": [
+     0.0,
+     1.0
+    ],
+    "kind": "part",
+    "description": "front post: folds 90 deg rearward, flat on the rail",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": "degrees"
+   },
+   "motion_text": "rotate +90 deg about X",
+   "motion_blender": {
+    "type": "rotate",
+    "axis": "X",
+    "open": -90,
+    "channel": "IronSights",
+    "stage": [
+     0.0,
+     1.0
+    ],
+    "kind": "part",
+    "description": "front post: folds 90 deg rearward, flat on the rail",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": null
+   },
+   "meshes": [
+    "RBX_R12_FrontSight_Ears_Blackened",
+    "RBX_R12_FrontSight_Ears_Steel"
+   ]
+  },
+  "R12_Magazine": {
+   "parent_group": "Body",
+   "pivot_studs": [
+    -0.0,
+    -0.1429,
+    -0.3268
+   ],
+   "pivot_blender_m": [
+    0.0,
+    -0.0915,
+    -0.04
+   ],
+   "motion": {
+    "type": "translate",
+    "axis": [
+     -0.0,
+     -0.9929,
+     -0.1191
+    ],
+    "open": 0.7143,
+    "channel": "Reload",
+    "stage": [
+     0.0,
+     0.45
+    ],
+    "kind": "part",
+    "description": "magazine: drops out of the magwell along its insertion line (0.20 m) for a reload; the reverse inserts a fresh one",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": "studs"
+   },
+   "motion_text": "slide +0.7143 studs along (-0.000, -0.993, -0.119)",
+   "motion_blender": {
+    "type": "translate",
+    "axis": [
+     0.0,
+     -0.11915,
+     -0.99288
+    ],
+    "open": 0.2,
+    "channel": "Reload",
+    "stage": [
+     0.0,
+     0.45
+    ],
+    "kind": "part",
+    "description": "magazine: drops out of the magwell along its insertion line (0.20 m) for a reload; the reverse inserts a fresh one",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": null
+   },
+   "meshes": [
+    "RBX_R12_Magazine_MarkRed",
+    "RBX_R12_Magazine_PolyBlack",
+    "RBX_R12_Magazine_PolyTan"
+   ]
+  },
+  "R12_RearSight_Leaf": {
+   "parent_group": "Body",
+   "pivot_studs": [
+    -0.0,
+    0.2361,
+    0.6857
+   ],
+   "pivot_blender_m": [
+    0.0,
+    0.192,
+    0.0661
+   ],
+   "motion": {
+    "type": "rotate",
+    "axis": "X",
+    "open": -90,
+    "channel": "IronSights",
+    "stage": [
+     0.0,
+     1.0
+    ],
+    "kind": "part",
+    "description": "rear aperture leaf: folds 90 deg forward, flat on the rail",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": "degrees"
+   },
+   "motion_text": "rotate -90 deg about X",
+   "motion_blender": {
+    "type": "rotate",
+    "axis": "X",
+    "open": 90,
+    "channel": "IronSights",
+    "stage": [
+     0.0,
+     1.0
+    ],
+    "kind": "part",
+    "description": "rear aperture leaf: folds 90 deg forward, flat on the rail",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": null
+   },
+   "meshes": [
+    "RBX_R12_RearSight_Leaf_Blackened"
+   ]
+  },
+  "R12_Selector": {
+   "parent_group": "Body",
+   "pivot_studs": [
+    -0.1214,
+    -0.1786,
+    0.2786
+   ],
+   "pivot_blender_m": [
+    0.034,
+    0.078,
+    -0.05
+   ],
+   "motion": {
+    "type": "control",
+    "axis": "X",
+    "open": null,
+    "channel": null,
+    "stage": [
+     0.0,
+     1.0
+    ],
+    "kind": "part",
+    "description": "fire selector lever: SAFE = 0 deg (lever forward), SEMI = -90 (up), AUTO = -180 (rearward)",
+    "min": 0,
+    "max": 180,
+    "speed": 600,
+    "units": "degrees",
+    "detents": {
+     "SAFE": 0,
+     "SEMI": -90,
+     "AUTO": -180
+    },
+    "input": "fire_mode"
+   },
+   "motion_text": "control about X, 0 .. 180 deg, 600 deg/s",
+   "motion_blender": {
+    "type": "control",
+    "axis": "X",
+    "open": null,
+    "channel": null,
+    "stage": [
+     0.0,
+     1.0
+    ],
+    "kind": "part",
+    "description": "fire selector lever: SAFE = 0 deg (lever forward), SEMI = -90 (up), AUTO = -180 (rearward)",
+    "min": -180,
+    "max": 0,
+    "speed": 600,
+    "units": null,
+    "detents": {
+     "SAFE": 0,
+     "SEMI": -90,
+     "AUTO": -180
+    },
+    "input": "fire_mode"
+   },
+   "meshes": [
+    "RBX_R12_Selector_Blackened"
+   ]
+  },
+  "R12_Stock": {
+   "parent_group": "Body",
+   "pivot_studs": [
+    -0.0,
+    -0.0143,
+    1.0714
+   ],
+   "pivot_blender_m": [
+    0.0,
+    0.3,
+    -0.004
+   ],
+   "motion": {
+    "type": "translate",
+    "axis": "Z",
+    "open": -0.1964,
+    "channel": "StockLength",
+    "stage": [
+     0.0,
+     1.0
+    ],
+    "kind": "part",
+    "description": "adjustable stock: slides 0.055 m forward along the buffer tube (collapsed); 0 = extended",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": "studs"
+   },
+   "motion_text": "slide -0.1964 studs along Z",
+   "motion_blender": {
+    "type": "translate",
+    "axis": "Y",
+    "open": -0.055,
+    "channel": "StockLength",
+    "stage": [
+     0.0,
+     1.0
+    ],
+    "kind": "part",
+    "description": "adjustable stock: slides 0.055 m forward along the buffer tube (collapsed); 0 = extended",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": null
+   },
+   "meshes": [
+    "RBX_R12_Stock_Blackened",
+    "RBX_R12_Stock_PolyBlack",
+    "RBX_R12_Stock_Rubber",
+    "RBX_R12_Stock_Steel"
+   ]
+  },
+  "R12_Trigger": {
+   "parent_group": "Body",
+   "pivot_studs": [
+    -0.0,
+    -0.1929,
+    -0.0107
+   ],
+   "pivot_blender_m": [
+    0.0,
+    -0.003,
+    -0.054
+   ],
+   "motion": {
+    "type": "rotate",
+    "axis": "X",
+    "open": -14,
+    "channel": "Trigger",
+    "stage": [
+     0.0,
+     1.0
+    ],
+    "kind": "part",
+    "description": "trigger blade: pivots on the trigger pin, pulled 14 deg rearward to fire",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": "degrees"
+   },
+   "motion_text": "rotate -14 deg about X",
+   "motion_blender": {
+    "type": "rotate",
+    "axis": "X",
+    "open": 14,
+    "channel": "Trigger",
+    "stage": [
+     0.0,
+     1.0
+    ],
+    "kind": "part",
+    "description": "trigger blade: pivots on the trigger pin, pulled 14 deg rearward to fire",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": null
+   },
+   "meshes": [
+    "RBX_R12_Trigger_Steel"
+   ]
+  }
+ },
+ "channels": {
+  "Trigger": {
+   "description": "trigger pull (0 = rest, 1 = pulled)",
+   "duration_s": 0.06,
+   "rules": [],
+   "default": 0
+  },
+  "Cycle": {
+   "description": "bolt cycle per shot: play 0 -> 1 -> 0 once per round at the fire rate",
+   "duration_s": 0.05,
+   "rules": [],
+   "default": 0
+  },
+  "Charge": {
+   "description": "charging handle pulled back (chambering)",
+   "duration_s": 0.35,
+   "rules": [
+    "the bolt follows the handle while charging: drive Cycle together with Charge"
+   ],
+   "default": 0
+  },
+  "Reload": {
+   "description": "magazine out (1) / in (0)",
+   "duration_s": 0.9,
+   "rules": [],
+   "default": 0
+  },
+  "DustCover": {
+   "description": "dust cover open (1) / closed (0); spring-loaded: set it to 1 on the first shot or when charging, close it only on request",
+   "duration_s": 0.12,
+   "rules": [],
+   "default": 0
+  },
+  "IronSights": {
+   "description": "iron sights folded (1) / deployed (0)",
+   "duration_s": 0.3,
+   "rules": [],
+   "default": 0
+  },
+  "StockLength": {
+   "description": "stock collapsed (1) / extended (0)",
+   "duration_s": 0.3,
+   "rules": [],
+   "default": 0
+  }
+ },
+ "poses": {
+  "fire": {
+   "channels": {
+    "Trigger": 1,
+    "Cycle": 1,
+    "DustCover": 1
+   },
+   "inputs": {},
+   "description": "trigger pulled, bolt fully back, port open",
+   "ground": false
+  },
+  "reload": {
+   "channels": {
+    "Reload": 1,
+    "Charge": 1,
+    "Cycle": 1,
+    "DustCover": 1
+   },
+   "inputs": {},
+   "description": "magazine out, handle and bolt back",
+   "ground": false
+  },
+  "stowed": {
+   "channels": {
+    "IronSights": 1,
+    "StockLength": 1
+   },
+   "inputs": {
+    "R12_Selector": 0
+   },
+   "description": "carried: sights folded, stock collapsed, SAFE",
+   "ground": false
+  },
+  "auto": {
+   "channels": {},
+   "inputs": {
+    "R12_Selector": -180
+   },
+   "description": "selector on AUTO",
+   "ground": false
+  }
+ },
+ "seats": {},
+ "points": {
+  "R12_Muzzle": {
+   "position_studs": [
+    -0.0,
+    0.0,
+    -2.8571
+   ],
+   "attached_to": "Body",
+   "purpose": "muzzle",
+   "direction": [
+    -0.0,
+    0.0,
+    -1.0
+   ],
+   "note": "bullet origin + muzzle flash (compensator vents sideways)"
+  },
+  "R12_Ejection": {
+   "position_studs": [
+    0.1571,
+    0.0107,
+    0.0786
+   ],
+   "attached_to": "Body",
+   "purpose": "ejection",
+   "direction": [
+    0.823,
+    0.4817,
+    0.3011
+   ],
+   "note": "spent cases leave the ejection port here (right side, up and slightly back)"
+  },
+  "R12_Grip_Right": {
+   "position_studs": [
+    -0.0,
+    -0.4821,
+    0.3571
+   ],
+   "attached_to": "Body",
+   "purpose": "grip_right",
+   "direction": null,
+   "note": "firing hand on the pistol grip"
+  },
+  "R12_Grip_Left": {
+   "position_studs": [
+    -0.0,
+    -0.1429,
+    -1.2857
+   ],
+   "attached_to": "Body",
+   "purpose": "grip_left",
+   "direction": null,
+   "note": "support hand under the handguard"
+  },
+  "R12_Aim": {
+   "position_studs": [
+    -0.0,
+    0.3111,
+    0.6786
+   ],
+   "attached_to": "Body",
+   "purpose": "aim_eye",
+   "direction": [
+    -0.0,
+    0.0,
+    -1.0
+   ],
+   "note": "eye position for aiming down the red-dot (sight axis)"
+  },
+  "R12_MagWell": {
+   "position_studs": [
+    -0.0,
+    -0.3571,
+    -0.3268
+   ],
+   "attached_to": "Body",
+   "purpose": "magwell",
+   "direction": [
+    -0.0,
+    -0.9929,
+    -0.1191
+   ]
+  },
+  "R12_Sling_Front": {
+   "position_studs": [
+    -0.2054,
+    -0.0429,
+    -1.7964
+   ],
+   "attached_to": "Body",
+   "purpose": "sling",
+   "direction": null
+  },
+  "R12_Sling_Rear": {
+   "position_studs": [
+    -0.1696,
+    -0.3286,
+    1.6214
+   ],
+   "attached_to": "Body",
+   "purpose": "sling",
+   "direction": null
+  }
+ },
+ "lights": {},
+ "boxes": {},
+ "wheels": {},
+ "materials": {
+  "Blackened": {
+   "roblox_material": "Metal",
+   "color_rgb": [
+    38,
+    38,
+    40
+   ],
+   "transparency": 0.0,
+   "reflectance": 0.0,
+   "emissive": false
+  },
+  "DarkSteel": {
+   "roblox_material": "Metal",
+   "color_rgb": [
+    52,
+    53,
+    56
+   ],
+   "transparency": 0.0,
+   "reflectance": 0.0,
+   "emissive": false
+  },
+  "Graphite": {
+   "roblox_material": "Metal",
+   "color_rgb": [
+    74,
+    76,
+    80
+   ],
+   "transparency": 0.0,
+   "reflectance": 0.0,
+   "emissive": false
+  },
+  "Lens": {
+   "roblox_material": "Glass",
+   "color_rgb": [
+    32,
+    44,
+    42
+   ],
+   "transparency": 0.15,
+   "reflectance": 0.35,
+   "emissive": false
+  },
+  "MarkRed": {
+   "roblox_material": "SmoothPlastic",
+   "color_rgb": [
+    118,
+    50,
+    38
+   ],
+   "transparency": 0.0,
+   "reflectance": 0.0,
+   "emissive": false
+  },
+  "PaintOliveGray": {
+   "roblox_material": "SmoothPlastic",
+   "color_rgb": [
+    82,
+    88,
+    74
+   ],
+   "transparency": 0.0,
+   "reflectance": 0.0,
+   "emissive": false
+  },
+  "PolyBlack": {
+   "roblox_material": "Plastic",
+   "color_rgb": [
+    34,
+    34,
+    36
+   ],
+   "transparency": 0.0,
+   "reflectance": 0.0,
+   "emissive": false
+  },
+  "PolyTan": {
+   "roblox_material": "Plastic",
+   "color_rgb": [
+    138,
+    122,
+    94
+   ],
+   "transparency": 0.0,
+   "reflectance": 0.0,
+   "emissive": false
+  },
+  "Rubber": {
+   "roblox_material": "Rubber",
+   "color_rgb": [
+    30,
+    30,
+    30
+   ],
+   "transparency": 0.0,
+   "reflectance": 0.0,
+   "emissive": false
+  },
+  "Steel": {
+   "roblox_material": "Metal",
+   "color_rgb": [
+    128,
+    128,
+    125
+   ],
+   "transparency": 0.0,
+   "reflectance": 0.0,
+   "emissive": false
+  }
+ },
+ "meshes": [
+  {
+   "name": "RBX_Body_Blackened",
+   "group": "Body",
+   "material": "Blackened",
+   "triangles": 6002
+  },
+  {
+   "name": "RBX_Body_DarkSteel",
+   "group": "Body",
+   "material": "DarkSteel",
+   "triangles": 1488
+  },
+  {
+   "name": "RBX_Body_Graphite",
+   "group": "Body",
+   "material": "Graphite",
+   "triangles": 3510
+  },
+  {
+   "name": "RBX_Body_Lens",
+   "group": "Body",
+   "material": "Lens",
+   "triangles": 192
+  },
+  {
+   "name": "RBX_Body_MarkRed",
+   "group": "Body",
+   "material": "MarkRed",
+   "triangles": 2428
+  },
+  {
+   "name": "RBX_Body_PaintOliveGray",
+   "group": "Body",
+   "material": "PaintOliveGray",
+   "triangles": 7674
+  },
+  {
+   "name": "RBX_Body_PolyBlack",
+   "group": "Body",
+   "material": "PolyBlack",
+   "triangles": 1854
+  },
+  {
+   "name": "RBX_Body_Steel",
+   "group": "Body",
+   "material": "Steel",
+   "triangles": 3668
+  },
+  {
+   "name": "RBX_R12_Bolt_DarkSteel",
+   "group": "R12_Bolt",
+   "material": "DarkSteel",
+   "triangles": 44
+  },
+  {
+   "name": "RBX_R12_Bolt_Steel",
+   "group": "R12_Bolt",
+   "material": "Steel",
+   "triangles": 912
+  },
+  {
+   "name": "RBX_R12_ChargingHandle_Blackened",
+   "group": "R12_ChargingHandle",
+   "material": "Blackened",
+   "triangles": 688
+  },
+  {
+   "name": "RBX_R12_ChargingHandle_PolyBlack",
+   "group": "R12_ChargingHandle",
+   "material": "PolyBlack",
+   "triangles": 400
+  },
+  {
+   "name": "RBX_R12_DustCover_PaintOliveGray",
+   "group": "R12_DustCover",
+   "material": "PaintOliveGray",
+   "triangles": 584
+  },
+  {
+   "name": "RBX_R12_FrontSight_Ears_Blackened",
+   "group": "R12_FrontSight_Ears",
+   "material": "Blackened",
+   "triangles": 628
+  },
+  {
+   "name": "RBX_R12_FrontSight_Ears_Steel",
+   "group": "R12_FrontSight_Ears",
+   "material": "Steel",
+   "triangles": 108
+  },
+  {
+   "name": "RBX_R12_Magazine_MarkRed",
+   "group": "R12_Magazine",
+   "material": "MarkRed",
+   "triangles": 248
+  },
+  {
+   "name": "RBX_R12_Magazine_PolyBlack",
+   "group": "R12_Magazine",
+   "material": "PolyBlack",
+   "triangles": 220
+  },
+  {
+   "name": "RBX_R12_Magazine_PolyTan",
+   "group": "R12_Magazine",
+   "material": "PolyTan",
+   "triangles": 1388
+  },
+  {
+   "name": "RBX_R12_RearSight_Leaf_Blackened",
+   "group": "R12_RearSight_Leaf",
+   "material": "Blackened",
+   "triangles": 664
+  },
+  {
+   "name": "RBX_R12_Selector_Blackened",
+   "group": "R12_Selector",
+   "material": "Blackened",
+   "triangles": 412
+  },
+  {
+   "name": "RBX_R12_Stock_Blackened",
+   "group": "R12_Stock",
+   "material": "Blackened",
+   "triangles": 352
+  },
+  {
+   "name": "RBX_R12_Stock_PolyBlack",
+   "group": "R12_Stock",
+   "material": "PolyBlack",
+   "triangles": 2458
+  },
+  {
+   "name": "RBX_R12_Stock_Rubber",
+   "group": "R12_Stock",
+   "material": "Rubber",
+   "triangles": 762
+  },
+  {
+   "name": "RBX_R12_Stock_Steel",
+   "group": "R12_Stock",
+   "material": "Steel",
+   "triangles": 256
+  },
+  {
+   "name": "RBX_R12_Trigger_Steel",
+   "group": "R12_Trigger",
+   "material": "Steel",
+   "triangles": 260
+  }
+ ],
+ "physics": {},
+ "systems": {
+  "Weapon": {
+   "kind": "carbine",
+   "caliber": "5.5x42 mm (fictional)",
+   "magazine": 30,
+   "fire_modes": [
+    "SAFE",
+    "SEMI",
+    "AUTO"
+   ],
+   "rpm": 720,
+   "muzzle_velocity_mps": 880,
+   "effective_range_studs": 1429,
+   "reload_s": 2.4,
+   "damage_hint": "medium",
+   "recoil_hint": "moderate, compensated (low muzzle rise)",
+   "aim": "1x red-dot; iron sights co-witness below it",
+   "ammo_item": "Ammo_5.5x42"
+  }
+ },
+ "notes": [
+  "Weapon origin = bore axis above the trigger; the muzzle points -Z in Roblox (LookVector).",
+  "Hide / eject the magazine by its group (R12_Magazine with its baseplate and marking)."
+ ],
+ "import": {
+  "fbx": "RoadrunnerR12.fbx",
+  "rig_json": "RoadrunnerR12_Rig.json",
+  "handoff_md": "RoadrunnerR12_HANDOFF.md",
+  "importer": {
+   "scale_unit": "Stud",
+   "scale_factor": 1,
+   "world_forward": "Front",
+   "world_up": "Top",
+   "set_pivot_to_scene_origin": true,
+   "upload_to_roblox": true
+  },
+  "expected_size_studs": [
+   0.4239,
+   1.3763,
+   4.6
+  ],
+  "expected_center_studs": [
+   -0.0398,
+   -0.2585,
+   -0.5571
+  ],
+  "mesh_count": 25,
+  "triangles": 37200,
+  "max_mesh_triangles": 7674
+ },
+ "verification": {
+  "fbx_reimported": true,
+  "pivots_checked": 9,
+  "problems": [],
+  "passed": true,
+  "uv_meshes": 25
+ },
+ "textures": {
+  "BaseColor": "textures/RoadrunnerR12_BaseColor.png",
+  "Roughness": "textures/RoadrunnerR12_Roughness.png",
+  "Metalness": "textures/RoadrunnerR12_Metalness.png",
+  "note": "one atlas per weapon shared by ALL its MeshParts (every mesh keeps the atlas UVs): SurfaceAppearance ColorMap / RoughnessMap / MetalnessMap. Without it, use the flat per-material colours in `materials`."
+ },
+ "previews": [
+  "RoadrunnerR12_34.png",
+  "previews/RoadrunnerR12_right.png",
+  "previews/RoadrunnerR12_left_rear34.png"
+ ]
+}

@@ -1,0 +1,76 @@
+{
+ "size": 2048,
+ "samples": 16,
+ "maps": {
+  "R12": {
+   "BaseColor": {
+    "file": "textures/RoadrunnerR12_BaseColor.png",
+    "mean": 0.1412
+   },
+   "Roughness": {
+    "file": "textures/RoadrunnerR12_Roughness.png",
+    "mean": 0.2695
+   },
+   "Metalness": {
+    "file": "textures/RoadrunnerR12_Metalness.png",
+    "mean": 0.2462
+   }
+  },
+  "MAKO9": {
+   "BaseColor": {
+    "file": "textures/Mako9_BaseColor.png",
+    "mean": 0.1332
+   },
+   "Roughness": {
+    "file": "textures/Mako9_Roughness.png",
+    "mean": 0.3378
+   },
+   "Metalness": {
+    "file": "textures/Mako9_Metalness.png",
+    "mean": 0.2648
+   }
+  },
+  "TM308": {
+   "BaseColor": {
+    "file": "textures/Trailmark308_BaseColor.png",
+    "mean": 0.1188
+   },
+   "Roughness": {
+    "file": "textures/Trailmark308_Roughness.png",
+    "mean": 0.2695
+   },
+   "Metalness": {
+    "file": "textures/Trailmark308_Metalness.png",
+    "mean": 0.1909
+   }
+  },
+  "SP9": {
+   "BaseColor": {
+    "file": "textures/Sparrow9_BaseColor.png",
+    "mean": 0.1351
+   },
+   "Roughness": {
+    "file": "textures/Sparrow9_Roughness.png",
+    "mean": 0.3037
+   },
+   "Metalness": {
+    "file": "textures/Sparrow9_Metalness.png",
+    "mean": 0.2623
+   }
+  },
+  "BLMG": {
+   "BaseColor": {
+    "file": "textures/BastionLMG_BaseColor.png",
+    "mean": 0.1182
+   },
+   "Roughness": {
+    "file": "textures/BastionLMG_Roughness.png",
+    "mean": 0.242
+   },
+   "Metalness": {
+    "file": "textures/BastionLMG_Metalness.png",
+    "mean": 0.2136
+   }
+  }
+ }
+}

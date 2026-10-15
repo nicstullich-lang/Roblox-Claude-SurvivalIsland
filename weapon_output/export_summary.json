@@ -1,0 +1,97 @@
+{
+ "R12": {
+  "fbx": "RoadrunnerR12.fbx",
+  "meshes": 25,
+  "tris": 37200,
+  "max_mesh_tris": 7674,
+  "size_studs": [
+   0.4239,
+   1.3763,
+   4.6
+  ],
+  "target_studs_LHW": [
+   4.6,
+   1.4,
+   0.6
+  ],
+  "pivots_checked": 9,
+  "passed": true,
+  "problems": []
+ },
+ "MAKO9": {
+  "fbx": "Mako9.fbx",
+  "meshes": 17,
+  "tris": 30286,
+  "max_mesh_tris": 7986,
+  "size_studs": [
+   0.5261,
+   1.3002,
+   3.2975
+  ],
+  "target_studs_LHW": [
+   3.3,
+   1.35,
+   0.55
+  ],
+  "pivots_checked": 6,
+  "passed": true,
+  "problems": []
+ },
+ "TM308": {
+  "fbx": "Trailmark308.fbx",
+  "meshes": 27,
+  "tris": 34172,
+  "max_mesh_tris": 9864,
+  "size_studs": [
+   0.4903,
+   1.5125,
+   5.1
+  ],
+  "target_studs_LHW": [
+   5.1,
+   1.55,
+   0.6
+  ],
+  "pivots_checked": 9,
+  "passed": true,
+  "problems": []
+ },
+ "SP9": {
+  "fbx": "Sparrow9.fbx",
+  "meshes": 13,
+  "tris": 21442,
+  "max_mesh_tris": 6036,
+  "size_studs": [
+   0.26,
+   1.0245,
+   2.0429
+  ],
+  "target_studs_LHW": [
+   2.0,
+   1.0,
+   0.45
+  ],
+  "pivots_checked": 3,
+  "passed": true,
+  "problems": []
+ },
+ "BLMG": {
+  "fbx": "BastionLMG.fbx",
+  "meshes": 32,
+  "tris": 42938,
+  "max_mesh_tris": 9322,
+  "size_studs": [
+   0.7707,
+   1.6804,
+   5.0036
+  ],
+  "target_studs_LHW": [
+   5.0,
+   1.8,
+   0.75
+  ],
+  "pivots_checked": 10,
+  "passed": true,
+  "problems": []
+ }
+}

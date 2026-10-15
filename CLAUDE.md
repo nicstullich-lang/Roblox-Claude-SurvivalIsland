@@ -568,3 +568,54 @@ are separate `fixed` groups so the game can hide/release them. Showcase timeline
    function when possible (`canopy_outline(inset=…)`).
 7. Packaging: cockpit floor vs nose-gear well, avionics vs nose wheels, bay ceilings vs turret wells — keep every
    cavity's floor ≥ 5 cm from its neighbours; the checker finds overlaps only once parts move, so run all poses.
+
+---
+
+## 13. Survival weapon pack — 5 weapons (built 15 Oct 2026, cloud session)
+
+Five original survival-game weapons in one universe ("Haven armoury" scavenged / rebuilt service weapons), muted
+post-apocalyptic finish. Brief: semi-realistic, moderately detailed, distinct silhouettes, Blender only (the Roblox
+chat does the code). Everything is in `weapon_output/` (see its `README.md`).
+
+### 13.1 Files
+| What | Path |
+|---|---|
+| Editable source (collections `SURVIVAL_WEAPONS` › `ROADRUNNER_R12`, `MAKO9`, `TRAILMARK_308`, `SPARROW9`, `BASTION_LMG`; `PRESENTATION`) | `weapon_output/SurvivalWeaponPack.blend` |
+| Build all (~17 s) | `bpy-run blender/build_weapons.py` (partial: `... R12 SP9 --out /tmp/x.blend`) |
+| Modules | `blender/weapons/`: `lib` (materials, 2D fillet sketching, slab / loft / sweep / lathe builders, `cut` / `detail` / `finish`, markings, rails, presentation), `parts` (grips, magazines, triggers, guards, sights, red dot, muzzle devices, checkering), `r12`, `mako9`, `trailmark`, `sparrow9`, `bastion` |
+| QA | `bpy-run blender/check_weapons.py` → floating / clashes per pose / holes / hygiene / sizes / relative-size rules → `weapon_output/qa_report.json` |
+| Bake | `bpy-run blender/bake_weapons.py` (2048² BaseColor / Roughness / Metalness per weapon, EMIT trick, packed) + `verify_bake.py` (procedural vs baked-only renders) |
+| Export | `bpy-run blender/export_weapons.py` → `<Name>.fbx`, `<Name>_Rig.json`, `<Name>_HANDOFF.md` (re-import verified, UVs checked) |
+| Renders | `bpy-run blender/render_weapons.py BLEND OUT "lineup;R12:34;TM308:right" [w] [samples] [pose-json]` |
+
+### 13.2 Conventions
+- Metres, Z up, muzzle → −Y, left +X (like every model). Game scale 1 stud = 0.28 m (R-12 = 4.6 studs = 1.29 m).
+- **Origin datum (all five): bore axis, straight above the trigger.** Static parts share it (transforms applied);
+  moving groups have their origin on the hinge / slide pivot and identity rotation (rig `motion`).
+- Names `<CODE>_<Part>` with CODE = R12, MAKO9, TM308, SP9, BLMG. Model-level rig data is stored on each `<CODE>_Root`
+  (`rig.HOLDER`), markers in `<CODE>_RigMarkers` (`rig.MARKERS`) — several models live in one .blend.
+- Points on every weapon: `Muzzle` (+ direction), `Ejection`, `Grip_Right`, `Grip_Left`, `Aim` (eye point), `MagWell`.
+- Materials `SW_*` with procedural wear (Bevel-node edge wear, iso-line scratches, grime, AO recesses) + explicit
+  Roblox spec; red markings are real engravings with a paint fill sitting inside (no z-fighting).
+
+### 13.3 Result (15 Oct)
+R-12 37.2k tris / Mako-9 30.3k / Trailmark 34.2k / Sparrow-9 21.4k / Bastion 42.9k; largest merged mesh < 10k.
+Sizes (studs L × H × W): 4.60 × 1.38 × 0.42 / 3.30 × 1.30 × 0.53 / 5.10 × 1.51 × 0.49 / 2.04 × 1.02 × 0.26 /
+5.00 × 1.68 × 0.77 — lengths exact, heights within ±7 %, widths kept believable (brief asked 0.45–0.75).
+QA: 0 floating, 0 clashes in 16 poses, 0 holes, 0 hygiene issues, all 5 relative-size rules pass; FBX re-import:
+all pivots + sizes match, UVs present. Bake check: baked-only render vs procedural differ by < 1/255 on average.
+
+### 13.4 Lessons learned (weapon session)
+1. **EXACT booleans on bevelled meshes leave holes when big n-gons are involved** → `lib.cut` triangulates faces with
+   > 4 corners first (0 non-manifold edges afterwards). Booleans also append an empty material slot → `_clean_slots`.
+2. **A big bevel on a thin wall (6 mm bevel on a 14 mm inlet) folds the surface into itself** → every later boolean
+   fails far away from the cut. Order: outer shape → big round-over → inlets / pockets / grooves → weighted normals.
+3. Never boolean a mesh that is two overlapping solids merged with `merge_vf` (leaf + ring, body + lugs) → `union_vf`
+   first or keep them as separate parts.
+4. Bevel FIRST, then cut small features (`lib.detail`): serrations / vents / rail slots stay crisp and the triangle
+   count drops ~20 % (205k → 166k for the pack) with the same look at game distance.
+5. Blender's default kerning lets "RA" touch → non-manifold text → `space_character = 1.08` for markings.
+6. Moving parts need clearance in BOTH end states: the Mako stock arm must sit entirely in front of its hinge so the
+   180° swing never enters the end cap; the folded R-12 sight ring needs its hinge raised 5 mm.
+7. Baked images with no users are not saved → `use_fake_user = True` before saving the .blend.
+8. Close-up framing must use max(length, height × 2.25) or the pistol fills the frame.

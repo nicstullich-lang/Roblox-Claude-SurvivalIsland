@@ -38,8 +38,9 @@ def root():
 
 
 def C(name):
-    """collection <prefix><name> under the model collection."""
-    full = PROJ['prefix'] + name
+    """collection <prefix><name> under the model collection (PROJ['coll_prefix'] overrides the prefix, e.g. '' for a
+    pack of several models whose collections have fixed names)."""
+    full = PROJ.get('coll_prefix', PROJ['prefix']) + name
     c = bpy.data.collections.get(full)
     if c is None:
         c = bpy.data.collections.new(full)

@@ -60,7 +60,7 @@ rest are modelled open and their motion closes them.
 | Category | Must include |
 |---|---|
 | Vehicles / aircraft | seats (driver flag, enter/exit points), wheels with suspension travel, collision boxes, centre of mass, mass + performance figures, every door / hatch / control surface as a group, lights with modes |
-| Weapons | muzzle points + direction, moving parts (bolt, magazine, slide) as groups, fire modes / rates in `rig.system`, hand grip points |
+| Weapons | origin on the bore axis above the trigger; points `Muzzle` (+ direction), `Ejection`, `Grip_Right`, `Grip_Left`, `Aim` (eye point), `MagWell`; moving parts (bolt, magazine, slide, covers, bipod legs, stocks) as groups; fire modes / rates in `rig.system`; optional baked atlas (`textures/`) for a SurfaceAppearance. Reference: `weapon_output/` (5 weapons, `blender/weapons/`) |
 | Buildings | doors / windows as groups, interaction points, collision boxes per room, loot / spawn zones as boxes |
 | Props / tools | grip / attach points, collision box, any moving part |
 | Characters / creatures | need an armature (skinned mesh) — a different pipeline; tell Nic first |

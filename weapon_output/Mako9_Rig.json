@@ -1,0 +1,770 @@
+{
+ "schema": "survival-island-model/1",
+ "model": {
+  "name": "Mako9",
+  "display": "Mako-9",
+  "category": "weapon",
+  "description": "compact 9 mm submachine gun with a side-folding stock and a tan side panel",
+  "origin": "on the bore axis directly above the trigger (all five weapons share this datum)"
+ },
+ "generated": "2026-10-15 17:08",
+ "units": {
+  "blender": "metres",
+  "roblox": "studs",
+  "studs_per_metre": 3.571429,
+  "metres_per_stud": 0.28
+ },
+ "axes": {
+  "roblox_from_blender": "(-x, z, y) * 3.571429",
+  "forward": "-Z (LookVector)",
+  "up": "+Y",
+  "right": "+X",
+  "note": "all *_studs values and Roblox motions are already converted"
+ },
+ "groups": {
+  "MAKO9_Bolt": {
+   "parent_group": "Body",
+   "pivot_studs": [
+    -0.0,
+    0.0821,
+    -0.2571
+   ],
+   "pivot_blender_m": [
+    0.0,
+    -0.072,
+    0.023
+   ],
+   "motion": {
+    "type": "translate",
+    "axis": "Z",
+    "open": 0.2143,
+    "channel": "Cycle",
+    "stage": [
+     0.0,
+     1.0
+    ],
+    "kind": "part",
+    "description": "bolt: recoils 0.060 m rearward and returns once per shot (visible through the ejection port)",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": "studs"
+   },
+   "motion_text": "slide +0.2143 studs along Z",
+   "motion_blender": {
+    "type": "translate",
+    "axis": "Y",
+    "open": 0.06,
+    "channel": "Cycle",
+    "stage": [
+     0.0,
+     1.0
+    ],
+    "kind": "part",
+    "description": "bolt: recoils 0.060 m rearward and returns once per shot (visible through the ejection port)",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": null
+   },
+   "meshes": [
+    "RBX_MAKO9_Bolt_Steel"
+   ]
+  },
+  "MAKO9_ChargingHandle": {
+   "parent_group": "Body",
+   "pivot_studs": [
+    -0.0893,
+    0.0964,
+    -0.9857
+   ],
+   "pivot_blender_m": [
+    0.025,
+    -0.276,
+    0.027
+   ],
+   "motion": {
+    "type": "translate",
+    "axis": "Z",
+    "open": 0.4,
+    "channel": "Charge",
+    "stage": [
+     0.0,
+     1.0
+    ],
+    "kind": "part",
+    "description": "cocking handle: pulled 0.112 m rearward along the slot to cock, then released",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": "studs"
+   },
+   "motion_text": "slide +0.4 studs along Z",
+   "motion_blender": {
+    "type": "translate",
+    "axis": "Y",
+    "open": 0.112,
+    "channel": "Charge",
+    "stage": [
+     0.0,
+     1.0
+    ],
+    "kind": "part",
+    "description": "cocking handle: pulled 0.112 m rearward along the slot to cock, then released",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": null
+   },
+   "meshes": [
+    "RBX_MAKO9_ChargingHandle_Blackened",
+    "RBX_MAKO9_ChargingHandle_PolyBlack"
+   ]
+  },
+  "MAKO9_Magazine": {
+   "parent_group": "Body",
+   "pivot_studs": [
+    -0.0,
+    -0.1429,
+    -0.4429
+   ],
+   "pivot_blender_m": [
+    0.0,
+    -0.124,
+    -0.04
+   ],
+   "motion": {
+    "type": "translate",
+    "axis": [
+     -0.0,
+     -0.995,
+     -0.0995
+    ],
+    "open": 0.6429,
+    "channel": "Reload",
+    "stage": [
+     0.0,
+     0.45
+    ],
+    "kind": "part",
+    "description": "magazine: drops out of the magwell along its insertion line (0.18 m)",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": "studs"
+   },
+   "motion_text": "slide +0.6429 studs along (-0.000, -0.995, -0.100)",
+   "motion_blender": {
+    "type": "translate",
+    "axis": [
+     0.0,
+     -0.0995,
+     -0.99504
+    ],
+    "open": 0.18,
+    "channel": "Reload",
+    "stage": [
+     0.0,
+     0.45
+    ],
+    "kind": "part",
+    "description": "magazine: drops out of the magwell along its insertion line (0.18 m)",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": null
+   },
+   "meshes": [
+    "RBX_MAKO9_Magazine_DarkSteel",
+    "RBX_MAKO9_Magazine_PolyBlack"
+   ]
+  },
+  "MAKO9_Selector": {
+   "parent_group": "Body",
+   "pivot_studs": [
+    -0.1036,
+    -0.1857,
+    0.2643
+   ],
+   "pivot_blender_m": [
+    0.029,
+    0.074,
+    -0.052
+   ],
+   "motion": {
+    "type": "control",
+    "axis": "X",
+    "open": null,
+    "channel": null,
+    "stage": [
+     0.0,
+     1.0
+    ],
+    "kind": "part",
+    "description": "fire selector: SAFE = 0 deg (forward), SEMI = -90 (up), AUTO = -180 (rearward)",
+    "min": 0,
+    "max": 180,
+    "speed": 600,
+    "units": "degrees",
+    "detents": {
+     "SAFE": 0,
+     "SEMI": -90,
+     "AUTO": -180
+    },
+    "input": "fire_mode"
+   },
+   "motion_text": "control about X, 0 .. 180 deg, 600 deg/s",
+   "motion_blender": {
+    "type": "control",
+    "axis": "X",
+    "open": null,
+    "channel": null,
+    "stage": [
+     0.0,
+     1.0
+    ],
+    "kind": "part",
+    "description": "fire selector: SAFE = 0 deg (forward), SEMI = -90 (up), AUTO = -180 (rearward)",
+    "min": -180,
+    "max": 0,
+    "speed": 600,
+    "units": null,
+    "detents": {
+     "SAFE": 0,
+     "SEMI": -90,
+     "AUTO": -180
+    },
+    "input": "fire_mode"
+   },
+   "meshes": [
+    "RBX_MAKO9_Selector_Blackened"
+   ]
+  },
+  "MAKO9_Stock": {
+   "parent_group": "Body",
+   "pivot_studs": [
+    0.1214,
+    -0.0179,
+    0.8161
+   ],
+   "pivot_blender_m": [
+    -0.034,
+    0.2285,
+    -0.005
+   ],
+   "motion": {
+    "type": "rotate",
+    "axis": "Y",
+    "open": -180,
+    "channel": "StockFold",
+    "stage": [
+     0.0,
+     1.0
+    ],
+    "kind": "part",
+    "description": "side-folding stock: modelled folded along the right side; swings 180 deg outward and back to extend",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": "degrees"
+   },
+   "motion_text": "rotate -180 deg about Y",
+   "motion_blender": {
+    "type": "rotate",
+    "axis": "Z",
+    "open": -180,
+    "channel": "StockFold",
+    "stage": [
+     0.0,
+     1.0
+    ],
+    "kind": "part",
+    "description": "side-folding stock: modelled folded along the right side; swings 180 deg outward and back to extend",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": null
+   },
+   "meshes": [
+    "RBX_MAKO9_Stock_Blackened",
+    "RBX_MAKO9_Stock_PolyBlack",
+    "RBX_MAKO9_Stock_Rubber"
+   ]
+  },
+  "MAKO9_Trigger": {
+   "parent_group": "Body",
+   "pivot_studs": [
+    -0.0,
+    -0.2,
+    -0.0179
+   ],
+   "pivot_blender_m": [
+    0.0,
+    -0.005,
+    -0.056
+   ],
+   "motion": {
+    "type": "rotate",
+    "axis": "X",
+    "open": -14,
+    "channel": "Trigger",
+    "stage": [
+     0.0,
+     1.0
+    ],
+    "kind": "part",
+    "description": "trigger: pivots 14 deg rearward to fire",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": "degrees"
+   },
+   "motion_text": "rotate -14 deg about X",
+   "motion_blender": {
+    "type": "rotate",
+    "axis": "X",
+    "open": 14,
+    "channel": "Trigger",
+    "stage": [
+     0.0,
+     1.0
+    ],
+    "kind": "part",
+    "description": "trigger: pivots 14 deg rearward to fire",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": null
+   },
+   "meshes": [
+    "RBX_MAKO9_Trigger_DarkSteel"
+   ]
+  }
+ },
+ "channels": {
+  "Trigger": {
+   "description": "trigger pull (0 = rest, 1 = pulled)",
+   "duration_s": 0.05,
+   "rules": [],
+   "default": 0
+  },
+  "Cycle": {
+   "description": "bolt cycle per shot: play 0 -> 1 -> 0 once per round",
+   "duration_s": 0.04,
+   "rules": [],
+   "default": 0
+  },
+  "Charge": {
+   "description": "cocking handle pulled back",
+   "duration_s": 0.3,
+   "rules": [
+    "drive Cycle together with Charge while cocking"
+   ],
+   "default": 0
+  },
+  "Reload": {
+   "description": "magazine out (1) / in (0)",
+   "duration_s": 0.8,
+   "rules": [],
+   "default": 0
+  },
+  "StockFold": {
+   "description": "stock extended (1) / folded along the right side (0)",
+   "duration_s": 0.45,
+   "rules": [
+    "folded stock: lower accuracy, faster handling; extended: shoulder-fired"
+   ],
+   "default": 0
+  }
+ },
+ "poses": {
+  "fire": {
+   "channels": {
+    "Trigger": 1,
+    "Cycle": 1,
+    "StockFold": 1
+   },
+   "inputs": {},
+   "description": "stock out, trigger pulled, bolt back",
+   "ground": false
+  },
+  "reload": {
+   "channels": {
+    "Reload": 1,
+    "Charge": 1,
+    "Cycle": 1
+   },
+   "inputs": {},
+   "description": "magazine out, handle and bolt back",
+   "ground": false
+  },
+  "stock_extended": {
+   "channels": {
+    "StockFold": 1
+   },
+   "inputs": {},
+   "description": "stock unfolded",
+   "ground": false
+  }
+ },
+ "seats": {},
+ "points": {
+  "MAKO9_Muzzle": {
+   "position_studs": [
+    -0.0,
+    0.0,
+    -2.4571
+   ],
+   "attached_to": "Body",
+   "purpose": "muzzle",
+   "direction": [
+    -0.0,
+    0.0,
+    -1.0
+   ],
+   "note": "bullet origin + muzzle flash (4-prong flash hider)"
+  },
+  "MAKO9_Ejection": {
+   "position_studs": [
+    0.1286,
+    0.0821,
+    -0.0893
+   ],
+   "attached_to": "Body",
+   "purpose": "ejection",
+   "direction": [
+    0.798,
+    0.5486,
+    0.2494
+   ],
+   "note": "spent cases leave the ejection port here (right side, above the folded stock)"
+  },
+  "MAKO9_Grip_Right": {
+   "position_studs": [
+    -0.0,
+    -0.4571,
+    0.3786
+   ],
+   "attached_to": "Body",
+   "purpose": "grip_right",
+   "direction": null,
+   "note": "firing hand on the pistol grip"
+  },
+  "MAKO9_Grip_Left": {
+   "position_studs": [
+    -0.0,
+    -0.1071,
+    -1.4107
+   ],
+   "attached_to": "Body",
+   "purpose": "grip_left",
+   "direction": null,
+   "note": "support hand on the handguard, behind the hand stop"
+  },
+  "MAKO9_Aim": {
+   "position_studs": [
+    -0.0,
+    0.2429,
+    0.5357
+   ],
+   "attached_to": "Body",
+   "purpose": "aim_eye",
+   "direction": [
+    -0.0,
+    0.0,
+    -1.0
+   ],
+   "note": "eye position behind the aperture rear sight"
+  },
+  "MAKO9_MagWell": {
+   "position_studs": [
+    -0.0,
+    -0.3571,
+    -0.4429
+   ],
+   "attached_to": "Body",
+   "purpose": "magwell",
+   "direction": [
+    -0.0,
+    -0.995,
+    -0.0995
+   ]
+  },
+  "MAKO9_Sling": {
+   "position_studs": [
+    -0.2036,
+    0.1714,
+    0.5893
+   ],
+   "attached_to": "Body",
+   "purpose": "sling",
+   "direction": null
+  }
+ },
+ "lights": {},
+ "boxes": {},
+ "wheels": {},
+ "materials": {
+  "Blackened": {
+   "roblox_material": "Metal",
+   "color_rgb": [
+    38,
+    38,
+    40
+   ],
+   "transparency": 0.0,
+   "reflectance": 0.0,
+   "emissive": false
+  },
+  "DarkSteel": {
+   "roblox_material": "Metal",
+   "color_rgb": [
+    52,
+    53,
+    56
+   ],
+   "transparency": 0.0,
+   "reflectance": 0.0,
+   "emissive": false
+  },
+  "Graphite": {
+   "roblox_material": "Metal",
+   "color_rgb": [
+    74,
+    76,
+    80
+   ],
+   "transparency": 0.0,
+   "reflectance": 0.0,
+   "emissive": false
+  },
+  "MarkRed": {
+   "roblox_material": "SmoothPlastic",
+   "color_rgb": [
+    118,
+    50,
+    38
+   ],
+   "transparency": 0.0,
+   "reflectance": 0.0,
+   "emissive": false
+  },
+  "PolyBlack": {
+   "roblox_material": "Plastic",
+   "color_rgb": [
+    34,
+    34,
+    36
+   ],
+   "transparency": 0.0,
+   "reflectance": 0.0,
+   "emissive": false
+  },
+  "PolyTan": {
+   "roblox_material": "Plastic",
+   "color_rgb": [
+    138,
+    122,
+    94
+   ],
+   "transparency": 0.0,
+   "reflectance": 0.0,
+   "emissive": false
+  },
+  "Rubber": {
+   "roblox_material": "Rubber",
+   "color_rgb": [
+    30,
+    30,
+    30
+   ],
+   "transparency": 0.0,
+   "reflectance": 0.0,
+   "emissive": false
+  },
+  "Steel": {
+   "roblox_material": "Metal",
+   "color_rgb": [
+    128,
+    128,
+    125
+   ],
+   "transparency": 0.0,
+   "reflectance": 0.0,
+   "emissive": false
+  }
+ },
+ "meshes": [
+  {
+   "name": "RBX_Body_Blackened",
+   "group": "Body",
+   "material": "Blackened",
+   "triangles": 5780
+  },
+  {
+   "name": "RBX_Body_DarkSteel",
+   "group": "Body",
+   "material": "DarkSteel",
+   "triangles": 288
+  },
+  {
+   "name": "RBX_Body_Graphite",
+   "group": "Body",
+   "material": "Graphite",
+   "triangles": 4602
+  },
+  {
+   "name": "RBX_Body_MarkRed",
+   "group": "Body",
+   "material": "MarkRed",
+   "triangles": 1976
+  },
+  {
+   "name": "RBX_Body_PolyBlack",
+   "group": "Body",
+   "material": "PolyBlack",
+   "triangles": 7986
+  },
+  {
+   "name": "RBX_Body_PolyTan",
+   "group": "Body",
+   "material": "PolyTan",
+   "triangles": 762
+  },
+  {
+   "name": "RBX_Body_Steel",
+   "group": "Body",
+   "material": "Steel",
+   "triangles": 2036
+  },
+  {
+   "name": "RBX_MAKO9_Bolt_Steel",
+   "group": "MAKO9_Bolt",
+   "material": "Steel",
+   "triangles": 694
+  },
+  {
+   "name": "RBX_MAKO9_ChargingHandle_Blackened",
+   "group": "MAKO9_ChargingHandle",
+   "material": "Blackened",
+   "triangles": 536
+  },
+  {
+   "name": "RBX_MAKO9_ChargingHandle_PolyBlack",
+   "group": "MAKO9_ChargingHandle",
+   "material": "PolyBlack",
+   "triangles": 96
+  },
+  {
+   "name": "RBX_MAKO9_Magazine_DarkSteel",
+   "group": "MAKO9_Magazine",
+   "material": "DarkSteel",
+   "triangles": 1784
+  },
+  {
+   "name": "RBX_MAKO9_Magazine_PolyBlack",
+   "group": "MAKO9_Magazine",
+   "material": "PolyBlack",
+   "triangles": 220
+  },
+  {
+   "name": "RBX_MAKO9_Selector_Blackened",
+   "group": "MAKO9_Selector",
+   "material": "Blackened",
+   "triangles": 412
+  },
+  {
+   "name": "RBX_MAKO9_Stock_Blackened",
+   "group": "MAKO9_Stock",
+   "material": "Blackened",
+   "triangles": 1476
+  },
+  {
+   "name": "RBX_MAKO9_Stock_PolyBlack",
+   "group": "MAKO9_Stock",
+   "material": "PolyBlack",
+   "triangles": 680
+  },
+  {
+   "name": "RBX_MAKO9_Stock_Rubber",
+   "group": "MAKO9_Stock",
+   "material": "Rubber",
+   "triangles": 698
+  },
+  {
+   "name": "RBX_MAKO9_Trigger_DarkSteel",
+   "group": "MAKO9_Trigger",
+   "material": "DarkSteel",
+   "triangles": 260
+  }
+ ],
+ "physics": {},
+ "systems": {
+  "Weapon": {
+   "kind": "submachine gun",
+   "caliber": "9x21 mm (fictional)",
+   "magazine": 32,
+   "fire_modes": [
+    "SAFE",
+    "SEMI",
+    "AUTO"
+   ],
+   "rpm": 900,
+   "muzzle_velocity_mps": 390,
+   "effective_range_studs": 536,
+   "reload_s": 1.9,
+   "damage_hint": "low-medium",
+   "recoil_hint": "low; more spread with the stock folded",
+   "aim": "aperture rear + hooded front post",
+   "ammo_item": "Ammo_9x21"
+  }
+ },
+ "notes": [
+  "Weapon origin = bore axis above the trigger; the muzzle points -Z in Roblox (LookVector).",
+  "The stock group (MAKO9_Stock) rotates about a vertical hinge pin at its pivot; folded = rest."
+ ],
+ "import": {
+  "fbx": "Mako9.fbx",
+  "rig_json": "Mako9_Rig.json",
+  "handoff_md": "Mako9_HANDOFF.md",
+  "importer": {
+   "scale_unit": "Stud",
+   "scale_factor": 1,
+   "world_forward": "Front",
+   "world_up": "Top",
+   "set_pivot_to_scene_origin": true,
+   "upload_to_roblox": true
+  },
+  "expected_size_studs": [
+   0.5261,
+   1.3002,
+   3.2975
+  ],
+  "expected_center_studs": [
+   0.0523,
+   -0.3685,
+   -0.8084
+  ],
+  "mesh_count": 17,
+  "triangles": 30286,
+  "max_mesh_triangles": 7986
+ },
+ "verification": {
+  "fbx_reimported": true,
+  "pivots_checked": 6,
+  "problems": [],
+  "passed": true,
+  "uv_meshes": 17
+ },
+ "textures": {
+  "BaseColor": "textures/Mako9_BaseColor.png",
+  "Roughness": "textures/Mako9_Roughness.png",
+  "Metalness": "textures/Mako9_Metalness.png",
+  "note": "one atlas per weapon shared by ALL its MeshParts (every mesh keeps the atlas UVs): SurfaceAppearance ColorMap / RoughnessMap / MetalnessMap. Without it, use the flat per-material colours in `materials`."
+ },
+ "previews": [
+  "Mako9_34.png",
+  "previews/Mako9_right.png",
+  "previews/Mako9_left_rear34.png"
+ ]
+}

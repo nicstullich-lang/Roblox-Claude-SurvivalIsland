@@ -5,8 +5,25 @@ Every model is built 100 % from Python scripts (Blender 5.2.2) and ships as a **
 
 | Model | Build | Package |
 |---|---|---|
+| **Survival weapon pack** (Roadrunner R-12, Mako-9, Trailmark .308, Sparrow-9, Bastion LMG) | `bpy-run blender/build_weapons.py` | `weapon_output/` (see its README) |
 | XR-77 "Umbra" VTOL strike-recon fighter | `bpy-run blender/build_xr77.py` | `exports/XR77_Umbra/` |
 | TX-6 "Bastion" armoured super-SUV | `bpy-run blender/build.py` | `exports/TX6_Bastion_Roblox.fbx` + rig JSON (older format) |
+
+---
+
+# Survival weapon pack — how to use these files
+
+Five original weapons in one .blend (`../weapon_output/SurvivalWeaponPack.blend`), one collection each under
+`SURVIVAL_WEAPONS`; cameras / lights / backdrop in `PRESENTATION`. Open it and look through `CAM_Lineup` (all five side
+by side) or `CAM_<CODE>_34` (close-ups). Every weapon shares the same origin datum (bore axis above the trigger).
+```
+bpy-run blender/build_weapons.py       # rebuild the pack (~17 s) -> weapon_output/SurvivalWeaponPack.blend
+bpy-run blender/check_weapons.py       # QA: floating parts, clashes in every pose, holes, hygiene, sizes
+bpy-run blender/bake_weapons.py        # 2048 px BaseColor / Roughness / Metalness atlas per weapon
+bpy-run blender/verify_bake.py         # procedural vs baked-only renders
+bpy-run blender/export_weapons.py      # 5 FBX + rig JSON + handoff guides (verified by re-import)
+bpy-run blender/render_weapons.py weapon_output/SurvivalWeaponPack.blend out.png "lineup;R12:34;BLMG:right" 1600 64
+```
 
 ---
 

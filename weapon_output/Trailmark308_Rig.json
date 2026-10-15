@@ -1,0 +1,1011 @@
+{
+ "schema": "survival-island-model/1",
+ "model": {
+  "name": "Trailmark308",
+  "display": "Trailmark .308",
+  "category": "weapon",
+  "description": "bolt-action marksman rifle: slate receiver, olive precision stock, medium scope, folding bipod",
+  "origin": "on the bore axis directly above the trigger (all five weapons share this datum)"
+ },
+ "generated": "2026-10-15 17:08",
+ "units": {
+  "blender": "metres",
+  "roblox": "studs",
+  "studs_per_metre": 3.571429,
+  "metres_per_stud": 0.28
+ },
+ "axes": {
+  "roblox_from_blender": "(-x, z, y) * 3.571429",
+  "forward": "-Z (LookVector)",
+  "up": "+Y",
+  "right": "+X",
+  "note": "all *_studs values and Roblox motions are already converted"
+ },
+ "groups": {
+  "TM308_BipodLeg_L": {
+   "parent_group": "Body",
+   "pivot_studs": [
+    -0.0768,
+    -0.3307,
+    -2.1643
+   ],
+   "pivot_blender_m": [
+    0.0215,
+    -0.606,
+    -0.0926
+   ],
+   "motion": {
+    "type": "rotate",
+    "axis": "X",
+    "open": -90,
+    "channel": "Bipod",
+    "stage": [
+     0.0,
+     1.0
+    ],
+    "kind": "part",
+    "description": "bipod leg: folded forward under the barrel; swings 90 deg down to stand the rifle on its bipod",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": "degrees"
+   },
+   "motion_text": "rotate -90 deg about X",
+   "motion_blender": {
+    "type": "rotate",
+    "axis": "X",
+    "open": 90,
+    "channel": "Bipod",
+    "stage": [
+     0.0,
+     1.0
+    ],
+    "kind": "part",
+    "description": "bipod leg: folded forward under the barrel; swings 90 deg down to stand the rifle on its bipod",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": null
+   },
+   "meshes": [
+    "RBX_TM308_BipodLeg_L_Blackened",
+    "RBX_TM308_BipodLeg_L_Rubber",
+    "RBX_TM308_BipodLeg_L_Steel"
+   ]
+  },
+  "TM308_BipodLeg_R": {
+   "parent_group": "Body",
+   "pivot_studs": [
+    0.0768,
+    -0.3307,
+    -2.1643
+   ],
+   "pivot_blender_m": [
+    -0.0215,
+    -0.606,
+    -0.0926
+   ],
+   "motion": {
+    "type": "rotate",
+    "axis": "X",
+    "open": -90,
+    "channel": "Bipod",
+    "stage": [
+     0.0,
+     1.0
+    ],
+    "kind": "part",
+    "description": "bipod leg: folded forward under the barrel; swings 90 deg down to stand the rifle on its bipod",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": "degrees"
+   },
+   "motion_text": "rotate -90 deg about X",
+   "motion_blender": {
+    "type": "rotate",
+    "axis": "X",
+    "open": 90,
+    "channel": "Bipod",
+    "stage": [
+     0.0,
+     1.0
+    ],
+    "kind": "part",
+    "description": "bipod leg: folded forward under the barrel; swings 90 deg down to stand the rifle on its bipod",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": null
+   },
+   "meshes": [
+    "RBX_TM308_BipodLeg_R_Blackened",
+    "RBX_TM308_BipodLeg_R_Rubber",
+    "RBX_TM308_BipodLeg_R_Steel"
+   ]
+  },
+  "TM308_Bolt": {
+   "parent_group": "Body",
+   "pivot_studs": [
+    -0.0,
+    0.0,
+    -0.4571
+   ],
+   "pivot_blender_m": [
+    0.0,
+    -0.128,
+    0.0
+   ],
+   "motion": {
+    "type": "translate",
+    "axis": "Z",
+    "open": 0.3571,
+    "channel": "Bolt",
+    "stage": [
+     0.4,
+     1.0
+    ],
+    "kind": "part",
+    "description": "bolt: slides 0.100 m rearward after the handle is lifted (ejects through the port), then returns",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": "studs"
+   },
+   "motion_text": "slide +0.3571 studs along Z",
+   "motion_blender": {
+    "type": "translate",
+    "axis": "Y",
+    "open": 0.1,
+    "channel": "Bolt",
+    "stage": [
+     0.4,
+     1.0
+    ],
+    "kind": "part",
+    "description": "bolt: slides 0.100 m rearward after the handle is lifted (ejects through the port), then returns",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": null
+   },
+   "meshes": [
+    "RBX_TM308_Bolt_Blackened",
+    "RBX_TM308_Bolt_MarkRed",
+    "RBX_TM308_Bolt_Steel"
+   ]
+  },
+  "TM308_BoltHandle": {
+   "parent_group": "TM308_Bolt",
+   "pivot_studs": [
+    -0.0,
+    0.0,
+    0.1929
+   ],
+   "pivot_blender_m": [
+    0.0,
+    0.054,
+    0.0
+   ],
+   "motion": {
+    "type": "rotate",
+    "axis": "Z",
+    "open": 60,
+    "channel": "Bolt",
+    "stage": [
+     0.0,
+     0.4
+    ],
+    "kind": "part",
+    "description": "bolt handle: lifts 60 deg (unlocks), first stage of the bolt cycle",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": "degrees"
+   },
+   "motion_text": "rotate +60 deg about Z",
+   "motion_blender": {
+    "type": "rotate",
+    "axis": "Y",
+    "open": 60,
+    "channel": "Bolt",
+    "stage": [
+     0.0,
+     0.4
+    ],
+    "kind": "part",
+    "description": "bolt handle: lifts 60 deg (unlocks), first stage of the bolt cycle",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": null
+   },
+   "meshes": [
+    "RBX_TM308_BoltHandle_Blackened",
+    "RBX_TM308_BoltHandle_PolyBlack"
+   ]
+  },
+  "TM308_CheekRiser": {
+   "parent_group": "Body",
+   "pivot_studs": [
+    -0.0,
+    0.0802,
+    1.2429
+   ],
+   "pivot_blender_m": [
+    0.0,
+    0.348,
+    0.0225
+   ],
+   "motion": {
+    "type": "translate",
+    "axis": "Y",
+    "open": 0.05,
+    "channel": "CheekHeight",
+    "stage": [
+     0.0,
+     1.0
+    ],
+    "kind": "part",
+    "description": "adjustable cheek riser: rises up to 0.014 m on its two posts (0 = lowest)",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": "studs"
+   },
+   "motion_text": "slide +0.05 studs along Y",
+   "motion_blender": {
+    "type": "translate",
+    "axis": "Z",
+    "open": 0.014,
+    "channel": "CheekHeight",
+    "stage": [
+     0.0,
+     1.0
+    ],
+    "kind": "part",
+    "description": "adjustable cheek riser: rises up to 0.014 m on its two posts (0 = lowest)",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": null
+   },
+   "meshes": [
+    "RBX_TM308_CheekRiser_PolyOlive",
+    "RBX_TM308_CheekRiser_Steel"
+   ]
+  },
+  "TM308_Magazine": {
+   "parent_group": "Body",
+   "pivot_studs": [
+    -0.0,
+    -0.0857,
+    -0.3125
+   ],
+   "pivot_blender_m": [
+    0.0,
+    -0.0875,
+    -0.024
+   ],
+   "motion": {
+    "type": "translate",
+    "axis": "Y",
+    "open": -0.4286,
+    "channel": "Reload",
+    "stage": [
+     0,
+     0.45
+    ],
+    "kind": "part",
+    "description": "box magazine: drops straight down 0.12 m",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": "studs"
+   },
+   "motion_text": "slide -0.4286 studs along Y",
+   "motion_blender": {
+    "type": "translate",
+    "axis": "Z",
+    "open": -0.12,
+    "channel": "Reload",
+    "stage": [
+     0,
+     0.45
+    ],
+    "kind": "part",
+    "description": "box magazine: drops straight down 0.12 m",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": null
+   },
+   "meshes": [
+    "RBX_TM308_Magazine_DarkSteel",
+    "RBX_TM308_Magazine_PolyBlack"
+   ]
+  },
+  "TM308_Safety": {
+   "parent_group": "Body",
+   "pivot_studs": [
+    0.0929,
+    -0.0679,
+    0.2464
+   ],
+   "pivot_blender_m": [
+    -0.026,
+    0.069,
+    -0.019
+   ],
+   "motion": {
+    "type": "rotate",
+    "axis": "X",
+    "open": 20,
+    "channel": "Safety",
+    "stage": [
+     0.0,
+     1.0
+    ],
+    "kind": "part",
+    "description": "safety lever: rocks 20 deg forward to FIRE (rest = SAFE)",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": "degrees"
+   },
+   "motion_text": "rotate +20 deg about X",
+   "motion_blender": {
+    "type": "rotate",
+    "axis": "X",
+    "open": -20,
+    "channel": "Safety",
+    "stage": [
+     0.0,
+     1.0
+    ],
+    "kind": "part",
+    "description": "safety lever: rocks 20 deg forward to FIRE (rest = SAFE)",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": null
+   },
+   "meshes": [
+    "RBX_TM308_Safety_Blackened"
+   ]
+  },
+  "TM308_Scope_PowerRing": {
+   "parent_group": "Body",
+   "pivot_studs": [
+    -0.0,
+    0.3214,
+    0.4393
+   ],
+   "pivot_blender_m": [
+    0.0,
+    0.123,
+    0.09
+   ],
+   "motion": {
+    "type": "control",
+    "axis": "Z",
+    "open": null,
+    "channel": null,
+    "stage": [
+     0.0,
+     1.0
+    ],
+    "kind": "part",
+    "description": "magnification ring: rotates with the zoom (3x at 0, 12x at 120 deg)",
+    "min": 0,
+    "max": 120,
+    "speed": 240,
+    "units": "degrees",
+    "input": "zoom"
+   },
+   "motion_text": "control about Z, 0 .. 120 deg, 240 deg/s",
+   "motion_blender": {
+    "type": "control",
+    "axis": "Y",
+    "open": null,
+    "channel": null,
+    "stage": [
+     0.0,
+     1.0
+    ],
+    "kind": "part",
+    "description": "magnification ring: rotates with the zoom (3x at 0, 12x at 120 deg)",
+    "min": 0,
+    "max": 120,
+    "speed": 240,
+    "units": null,
+    "input": "zoom"
+   },
+   "meshes": [
+    "RBX_TM308_Scope_PowerRing_Blackened"
+   ]
+  },
+  "TM308_Trigger": {
+   "parent_group": "Body",
+   "pivot_studs": [
+    -0.0,
+    -0.1857,
+    0.0357
+   ],
+   "pivot_blender_m": [
+    0.0,
+    0.01,
+    -0.052
+   ],
+   "motion": {
+    "type": "rotate",
+    "axis": "X",
+    "open": -10,
+    "channel": "Trigger",
+    "stage": [
+     0.0,
+     1.0
+    ],
+    "kind": "part",
+    "description": "trigger: crisp single-stage, 10 deg rearward",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": "degrees"
+   },
+   "motion_text": "rotate -10 deg about X",
+   "motion_blender": {
+    "type": "rotate",
+    "axis": "X",
+    "open": 10,
+    "channel": "Trigger",
+    "stage": [
+     0.0,
+     1.0
+    ],
+    "kind": "part",
+    "description": "trigger: crisp single-stage, 10 deg rearward",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": null
+   },
+   "meshes": [
+    "RBX_TM308_Trigger_Steel"
+   ]
+  }
+ },
+ "channels": {
+  "Trigger": {
+   "description": "trigger pull",
+   "duration_s": 0.05,
+   "rules": [],
+   "default": 0
+  },
+  "Bolt": {
+   "description": "bolt cycle: 0 -> 1 lifts the handle then pulls the bolt back (eject); 1 -> 0 chambers",
+   "duration_s": 0.85,
+   "rules": [
+    "play 0 -> 1 -> 0 after every shot (bolt action)",
+    "TM308_BoltHandle rotates in stage 0-0.4, TM308_Bolt slides in stage 0.4-1"
+   ],
+   "default": 0
+  },
+  "Reload": {
+   "description": "magazine out (1) / in (0)",
+   "duration_s": 0.8,
+   "rules": [],
+   "default": 0
+  },
+  "Bipod": {
+   "description": "bipod legs deployed (1) / folded (0)",
+   "duration_s": 0.5,
+   "rules": [
+    "deployed bipod: allow prone / rested fire with much less sway"
+   ],
+   "default": 0
+  },
+  "Safety": {
+   "description": "safety off (1) / on (0)",
+   "duration_s": 0.1,
+   "rules": [],
+   "default": 0
+  },
+  "CheekHeight": {
+   "description": "cheek riser up (1) / down (0) - cosmetic adjustment",
+   "duration_s": 0.4,
+   "rules": [],
+   "default": 0
+  }
+ },
+ "poses": {
+  "bolt_open": {
+   "channels": {
+    "Bolt": 1,
+    "Safety": 1
+   },
+   "inputs": {},
+   "description": "bolt handle up and back (ejecting / loading)",
+   "ground": false
+  },
+  "bipod": {
+   "channels": {
+    "Bipod": 1,
+    "Safety": 1
+   },
+   "inputs": {
+    "TM308_Scope_PowerRing": 120
+   },
+   "description": "bipod down, scope at max zoom",
+   "ground": false
+  },
+  "reload": {
+   "channels": {
+    "Reload": 1,
+    "Bolt": 1
+   },
+   "inputs": {},
+   "description": "magazine out, bolt open",
+   "ground": false
+  }
+ },
+ "seats": {},
+ "points": {
+  "TM308_Muzzle": {
+   "position_studs": [
+    -0.0,
+    0.0,
+    -3.3929
+   ],
+   "attached_to": "Body",
+   "purpose": "muzzle",
+   "direction": [
+    -0.0,
+    0.0,
+    -1.0
+   ],
+   "note": "bullet origin + muzzle flash (2-port brake vents sideways)"
+  },
+  "TM308_Ejection": {
+   "position_studs": [
+    0.1071,
+    0.0286,
+    -0.1786
+   ],
+   "attached_to": "Body",
+   "purpose": "ejection",
+   "direction": [
+    0.8653,
+    0.4581,
+    0.2036
+   ],
+   "note": "the case is extracted when the bolt is pulled back (Bolt channel), not on firing"
+  },
+  "TM308_Grip_Right": {
+   "position_studs": [
+    -0.0,
+    -0.5714,
+    0.4571
+   ],
+   "attached_to": "Body",
+   "purpose": "grip_right",
+   "direction": null,
+   "note": "firing hand on the thumbhole grip"
+  },
+  "TM308_Grip_Left": {
+   "position_studs": [
+    -0.0,
+    -0.1786,
+    -1.5714
+   ],
+   "attached_to": "Body",
+   "purpose": "grip_left",
+   "direction": null,
+   "note": "support hand under the forend"
+  },
+  "TM308_Aim": {
+   "position_studs": [
+    -0.0,
+    0.3214,
+    0.9357
+   ],
+   "attached_to": "Body",
+   "purpose": "aim_eye",
+   "direction": [
+    -0.0,
+    0.0,
+    -1.0
+   ],
+   "note": "eye position at the scope eye relief (sight axis)"
+  },
+  "TM308_MagWell": {
+   "position_studs": [
+    -0.0,
+    -0.2286,
+    -0.3125
+   ],
+   "attached_to": "Body",
+   "purpose": "magwell",
+   "direction": [
+    -0.0,
+    -1.0,
+    0.0
+   ]
+  },
+  "TM308_BipodFeet": {
+   "position_studs": [
+    -0.0,
+    -1.0504,
+    -2.1643
+   ],
+   "attached_to": "Body",
+   "purpose": "bipod_contact",
+   "direction": null,
+   "note": "ground contact of both feet when the Bipod channel = 1 (legs straight down)"
+  },
+  "TM308_Sling_Front": {
+   "position_studs": [
+    -0.1643,
+    -0.15,
+    -2.0893
+   ],
+   "attached_to": "Body",
+   "purpose": "sling",
+   "direction": null
+  },
+  "TM308_Sling_Rear": {
+   "position_studs": [
+    -0.1571,
+    -0.625,
+    1.4286
+   ],
+   "attached_to": "Body",
+   "purpose": "sling",
+   "direction": null
+  }
+ },
+ "lights": {},
+ "boxes": {},
+ "wheels": {},
+ "materials": {
+  "Blackened": {
+   "roblox_material": "Metal",
+   "color_rgb": [
+    38,
+    38,
+    40
+   ],
+   "transparency": 0.0,
+   "reflectance": 0.0,
+   "emissive": false
+  },
+  "DarkSteel": {
+   "roblox_material": "Metal",
+   "color_rgb": [
+    52,
+    53,
+    56
+   ],
+   "transparency": 0.0,
+   "reflectance": 0.0,
+   "emissive": false
+  },
+  "Lens": {
+   "roblox_material": "Glass",
+   "color_rgb": [
+    32,
+    44,
+    42
+   ],
+   "transparency": 0.15,
+   "reflectance": 0.35,
+   "emissive": false
+  },
+  "MarkRed": {
+   "roblox_material": "SmoothPlastic",
+   "color_rgb": [
+    118,
+    50,
+    38
+   ],
+   "transparency": 0.0,
+   "reflectance": 0.0,
+   "emissive": false
+  },
+  "PaintSlate": {
+   "roblox_material": "SmoothPlastic",
+   "color_rgb": [
+    68,
+    72,
+    77
+   ],
+   "transparency": 0.0,
+   "reflectance": 0.0,
+   "emissive": false
+  },
+  "PolyBlack": {
+   "roblox_material": "Plastic",
+   "color_rgb": [
+    34,
+    34,
+    36
+   ],
+   "transparency": 0.0,
+   "reflectance": 0.0,
+   "emissive": false
+  },
+  "PolyOlive": {
+   "roblox_material": "Plastic",
+   "color_rgb": [
+    76,
+    80,
+    54
+   ],
+   "transparency": 0.0,
+   "reflectance": 0.0,
+   "emissive": false
+  },
+  "Rubber": {
+   "roblox_material": "Rubber",
+   "color_rgb": [
+    30,
+    30,
+    30
+   ],
+   "transparency": 0.0,
+   "reflectance": 0.0,
+   "emissive": false
+  },
+  "Steel": {
+   "roblox_material": "Metal",
+   "color_rgb": [
+    128,
+    128,
+    125
+   ],
+   "transparency": 0.0,
+   "reflectance": 0.0,
+   "emissive": false
+  }
+ },
+ "meshes": [
+  {
+   "name": "RBX_Body_Blackened",
+   "group": "Body",
+   "material": "Blackened",
+   "triangles": 9864
+  },
+  {
+   "name": "RBX_Body_DarkSteel",
+   "group": "Body",
+   "material": "DarkSteel",
+   "triangles": 1700
+  },
+  {
+   "name": "RBX_Body_Lens",
+   "group": "Body",
+   "material": "Lens",
+   "triangles": 256
+  },
+  {
+   "name": "RBX_Body_MarkRed",
+   "group": "Body",
+   "material": "MarkRed",
+   "triangles": 1636
+  },
+  {
+   "name": "RBX_Body_PaintSlate",
+   "group": "Body",
+   "material": "PaintSlate",
+   "triangles": 3940
+  },
+  {
+   "name": "RBX_Body_PolyBlack",
+   "group": "Body",
+   "material": "PolyBlack",
+   "triangles": 792
+  },
+  {
+   "name": "RBX_Body_PolyOlive",
+   "group": "Body",
+   "material": "PolyOlive",
+   "triangles": 4576
+  },
+  {
+   "name": "RBX_Body_Rubber",
+   "group": "Body",
+   "material": "Rubber",
+   "triangles": 1526
+  },
+  {
+   "name": "RBX_Body_Steel",
+   "group": "Body",
+   "material": "Steel",
+   "triangles": 3192
+  },
+  {
+   "name": "RBX_TM308_BipodLeg_L_Blackened",
+   "group": "TM308_BipodLeg_L",
+   "material": "Blackened",
+   "triangles": 640
+  },
+  {
+   "name": "RBX_TM308_BipodLeg_L_Rubber",
+   "group": "TM308_BipodLeg_L",
+   "material": "Rubber",
+   "triangles": 128
+  },
+  {
+   "name": "RBX_TM308_BipodLeg_L_Steel",
+   "group": "TM308_BipodLeg_L",
+   "material": "Steel",
+   "triangles": 56
+  },
+  {
+   "name": "RBX_TM308_BipodLeg_R_Blackened",
+   "group": "TM308_BipodLeg_R",
+   "material": "Blackened",
+   "triangles": 640
+  },
+  {
+   "name": "RBX_TM308_BipodLeg_R_Rubber",
+   "group": "TM308_BipodLeg_R",
+   "material": "Rubber",
+   "triangles": 128
+  },
+  {
+   "name": "RBX_TM308_BipodLeg_R_Steel",
+   "group": "TM308_BipodLeg_R",
+   "material": "Steel",
+   "triangles": 56
+  },
+  {
+   "name": "RBX_TM308_Bolt_Blackened",
+   "group": "TM308_Bolt",
+   "material": "Blackened",
+   "triangles": 400
+  },
+  {
+   "name": "RBX_TM308_Bolt_MarkRed",
+   "group": "TM308_Bolt",
+   "material": "MarkRed",
+   "triangles": 48
+  },
+  {
+   "name": "RBX_TM308_Bolt_Steel",
+   "group": "TM308_Bolt",
+   "material": "Steel",
+   "triangles": 696
+  },
+  {
+   "name": "RBX_TM308_BoltHandle_Blackened",
+   "group": "TM308_BoltHandle",
+   "material": "Blackened",
+   "triangles": 156
+  },
+  {
+   "name": "RBX_TM308_BoltHandle_PolyBlack",
+   "group": "TM308_BoltHandle",
+   "material": "PolyBlack",
+   "triangles": 374
+  },
+  {
+   "name": "RBX_TM308_CheekRiser_PolyOlive",
+   "group": "TM308_CheekRiser",
+   "material": "PolyOlive",
+   "triangles": 448
+  },
+  {
+   "name": "RBX_TM308_CheekRiser_Steel",
+   "group": "TM308_CheekRiser",
+   "material": "Steel",
+   "triangles": 112
+  },
+  {
+   "name": "RBX_TM308_Magazine_DarkSteel",
+   "group": "TM308_Magazine",
+   "material": "DarkSteel",
+   "triangles": 588
+  },
+  {
+   "name": "RBX_TM308_Magazine_PolyBlack",
+   "group": "TM308_Magazine",
+   "material": "PolyBlack",
+   "triangles": 356
+  },
+  {
+   "name": "RBX_TM308_Safety_Blackened",
+   "group": "TM308_Safety",
+   "material": "Blackened",
+   "triangles": 688
+  },
+  {
+   "name": "RBX_TM308_Scope_PowerRing_Blackened",
+   "group": "TM308_Scope_PowerRing",
+   "material": "Blackened",
+   "triangles": 916
+  },
+  {
+   "name": "RBX_TM308_Trigger_Steel",
+   "group": "TM308_Trigger",
+   "material": "Steel",
+   "triangles": 260
+  }
+ ],
+ "physics": {},
+ "systems": {
+  "Weapon": {
+   "kind": "marksman rifle (bolt action)",
+   "caliber": ".308 / 7.8x51 mm (fictional)",
+   "magazine": 5,
+   "fire_modes": [
+    "BOLT"
+   ],
+   "rpm": 50,
+   "muzzle_velocity_mps": 830,
+   "effective_range_studs": 2857,
+   "reload_s": 3.0,
+   "damage_hint": "high",
+   "recoil_hint": "strong single kick, brake reduces it",
+   "aim": "3-12x scope (zoom on the power ring); no iron sights",
+   "ammo_item": "Ammo_308",
+   "scope": {
+    "magnification": [
+     3,
+     12
+    ],
+    "eye_point": "TM308_Aim",
+    "lens_front_y_m": -0.286,
+    "axis_z_m": 0.09
+   }
+  }
+ },
+ "notes": [
+  "Weapon origin = bore axis above the trigger; the muzzle points -Z in Roblox (LookVector).",
+  "Bolt animation: TM308_BoltHandle (child of TM308_Bolt) rotates about the bolt axis, then TM308_Bolt slides."
+ ],
+ "import": {
+  "fbx": "Trailmark308.fbx",
+  "rig_json": "Trailmark308_Rig.json",
+  "handoff_md": "Trailmark308_HANDOFF.md",
+  "importer": {
+   "scale_unit": "Stud",
+   "scale_factor": 1,
+   "world_forward": "Front",
+   "world_up": "Top",
+   "set_pivot_to_scene_origin": true,
+   "upload_to_roblox": true
+  },
+  "expected_size_studs": [
+   0.4903,
+   1.5125,
+   5.1
+  ],
+  "expected_center_studs": [
+   0.0376,
+   -0.2496,
+   -0.8429
+  ],
+  "mesh_count": 27,
+  "triangles": 34172,
+  "max_mesh_triangles": 9864
+ },
+ "verification": {
+  "fbx_reimported": true,
+  "pivots_checked": 9,
+  "problems": [],
+  "passed": true,
+  "uv_meshes": 27
+ },
+ "textures": {
+  "BaseColor": "textures/Trailmark308_BaseColor.png",
+  "Roughness": "textures/Trailmark308_Roughness.png",
+  "Metalness": "textures/Trailmark308_Metalness.png",
+  "note": "one atlas per weapon shared by ALL its MeshParts (every mesh keeps the atlas UVs): SurfaceAppearance ColorMap / RoughnessMap / MetalnessMap. Without it, use the flat per-material colours in `materials`."
+ },
+ "previews": [
+  "Trailmark308_34.png",
+  "previews/Trailmark308_right.png",
+  "previews/Trailmark308_left_rear34.png"
+ ]
+}

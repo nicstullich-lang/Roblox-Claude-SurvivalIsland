@@ -31,8 +31,12 @@ def rbx_dir(v):
     return [round(-v.x, 4), round(v.z, 4), round(v.y, 4)]
 
 
+HOLDER = None            # ID that stores model-level data; None = the scene. A pack of several models (e.g. the
+MARKERS = 'RIG_Markers'  # weapon pack) stores each model's data on its root empty and its markers in its own collection.
+
+
 def _scene():
-    return bpy.context.scene
+    return HOLDER if HOLDER is not None else bpy.context.scene
 
 
 def _set_json(idb, key, value):
@@ -45,10 +49,10 @@ def get_json(idb, key, default=None):
 
 
 def _markers():
-    c = bpy.data.collections.get('RIG_Markers')
+    c = bpy.data.collections.get(MARKERS)
     if c is None:
-        c = bpy.data.collections.new('RIG_Markers')
-        _scene().collection.children.link(c)
+        c = bpy.data.collections.new(MARKERS)
+        bpy.context.scene.collection.children.link(c)
     return c
 
 

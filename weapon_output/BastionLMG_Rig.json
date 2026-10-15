@@ -1,0 +1,1145 @@
+{
+ "schema": "survival-island-model/1",
+ "model": {
+  "name": "BastionLMG",
+  "display": "Bastion LMG",
+  "category": "weapon",
+  "description": "belt-fed light machine gun with a carry handle, side ammo box and folding bipod",
+  "origin": "on the bore axis directly above the trigger (all five weapons share this datum)"
+ },
+ "generated": "2026-10-15 17:08",
+ "units": {
+  "blender": "metres",
+  "roblox": "studs",
+  "studs_per_metre": 3.571429,
+  "metres_per_stud": 0.28
+ },
+ "axes": {
+  "roblox_from_blender": "(-x, z, y) * 3.571429",
+  "forward": "-Z (LookVector)",
+  "up": "+Y",
+  "right": "+X",
+  "note": "all *_studs values and Roblox motions are already converted"
+ },
+ "groups": {
+  "BLMG_AmmoBox": {
+   "parent_group": "Body",
+   "pivot_studs": [
+    0.2821,
+    -0.2571,
+    -0.4589
+   ],
+   "pivot_blender_m": [
+    -0.079,
+    -0.1285,
+    -0.072
+   ],
+   "motion": {
+    "type": "translate",
+    "axis": "Y",
+    "open": -0.6429,
+    "channel": "Reload",
+    "stage": [
+     0.3,
+     1.0
+    ],
+    "kind": "part",
+    "description": "ammo box: unlatches from its mount and drops 0.18 m (stage 0.3-1, after the feed cover is open)",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": "studs"
+   },
+   "motion_text": "slide -0.6429 studs along Y",
+   "motion_blender": {
+    "type": "translate",
+    "axis": "Z",
+    "open": -0.18,
+    "channel": "Reload",
+    "stage": [
+     0.3,
+     1.0
+    ],
+    "kind": "part",
+    "description": "ammo box: unlatches from its mount and drops 0.18 m (stage 0.3-1, after the feed cover is open)",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": null
+   },
+   "meshes": [
+    "RBX_BLMG_AmmoBox_MarkRed",
+    "RBX_BLMG_AmmoBox_PaintOliveDark",
+    "RBX_BLMG_AmmoBox_Steel"
+   ]
+  },
+  "BLMG_AmmoBox_Lid": {
+   "parent_group": "BLMG_AmmoBox",
+   "pivot_studs": [
+    0.4821,
+    -0.35,
+    -0.4571
+   ],
+   "pivot_blender_m": [
+    -0.135,
+    -0.128,
+    -0.098
+   ],
+   "motion": {
+    "type": "rotate",
+    "axis": "Z",
+    "open": -100,
+    "channel": "BoxLid",
+    "stage": [
+     0.0,
+     1.0
+    ],
+    "kind": "part",
+    "description": "ammo box lid: swings 100 deg outward on its hinge to refill the box",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": "degrees"
+   },
+   "motion_text": "rotate -100 deg about Z",
+   "motion_blender": {
+    "type": "rotate",
+    "axis": "Y",
+    "open": -100,
+    "channel": "BoxLid",
+    "stage": [
+     0.0,
+     1.0
+    ],
+    "kind": "part",
+    "description": "ammo box lid: swings 100 deg outward on its hinge to refill the box",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": null
+   },
+   "meshes": [
+    "RBX_BLMG_AmmoBox_Lid_Blackened",
+    "RBX_BLMG_AmmoBox_Lid_PaintOliveDark",
+    "RBX_BLMG_AmmoBox_Lid_Steel"
+   ]
+  },
+  "BLMG_Belt_Cartridges": {
+   "parent_group": "Body",
+   "pivot_studs": [
+    0.1643,
+    -0.0714,
+    -0.3036
+   ],
+   "pivot_blender_m": [
+    -0.046,
+    -0.085,
+    -0.02
+   ],
+   "motion": {
+    "type": "fixed",
+    "axis": null,
+    "open": null,
+    "channel": null,
+    "stage": [
+     0.0,
+     1.0
+    ],
+    "kind": "store",
+    "description": "decorative linked belt (8 rounds): hide it while the feed cover is open / during reload",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": null,
+    "store": "belt"
+   },
+   "motion_text": "fixed to its parent (store: belt)",
+   "motion_blender": {
+    "type": "fixed",
+    "axis": null,
+    "open": null,
+    "channel": null,
+    "stage": [
+     0.0,
+     1.0
+    ],
+    "kind": "store",
+    "description": "decorative linked belt (8 rounds): hide it while the feed cover is open / during reload",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": null,
+    "store": "belt"
+   },
+   "meshes": [
+    "RBX_BLMG_Belt_Cartridges_Blackened",
+    "RBX_BLMG_Belt_Cartridges_Brass",
+    "RBX_BLMG_Belt_Cartridges_Copper"
+   ]
+  },
+  "BLMG_BipodLeg_L": {
+   "parent_group": "Body",
+   "pivot_studs": [
+    -0.0982,
+    -0.3143,
+    -2.0786
+   ],
+   "pivot_blender_m": [
+    0.0275,
+    -0.582,
+    -0.088
+   ],
+   "motion": {
+    "type": "rotate",
+    "axis": "X",
+    "open": 90,
+    "channel": "Bipod",
+    "stage": [
+     0.0,
+     1.0
+    ],
+    "kind": "part",
+    "description": "bipod leg: folded back under the handguard; swings 90 deg down to deploy",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": "degrees"
+   },
+   "motion_text": "rotate +90 deg about X",
+   "motion_blender": {
+    "type": "rotate",
+    "axis": "X",
+    "open": -90,
+    "channel": "Bipod",
+    "stage": [
+     0.0,
+     1.0
+    ],
+    "kind": "part",
+    "description": "bipod leg: folded back under the handguard; swings 90 deg down to deploy",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": null
+   },
+   "meshes": [
+    "RBX_BLMG_BipodLeg_L_Blackened",
+    "RBX_BLMG_BipodLeg_L_Rubber",
+    "RBX_BLMG_BipodLeg_L_Steel"
+   ]
+  },
+  "BLMG_BipodLeg_R": {
+   "parent_group": "Body",
+   "pivot_studs": [
+    0.0982,
+    -0.3143,
+    -2.0786
+   ],
+   "pivot_blender_m": [
+    -0.0275,
+    -0.582,
+    -0.088
+   ],
+   "motion": {
+    "type": "rotate",
+    "axis": "X",
+    "open": 90,
+    "channel": "Bipod",
+    "stage": [
+     0.0,
+     1.0
+    ],
+    "kind": "part",
+    "description": "bipod leg: folded back under the handguard; swings 90 deg down to deploy",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": "degrees"
+   },
+   "motion_text": "rotate +90 deg about X",
+   "motion_blender": {
+    "type": "rotate",
+    "axis": "X",
+    "open": -90,
+    "channel": "Bipod",
+    "stage": [
+     0.0,
+     1.0
+    ],
+    "kind": "part",
+    "description": "bipod leg: folded back under the handguard; swings 90 deg down to deploy",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": null
+   },
+   "meshes": [
+    "RBX_BLMG_BipodLeg_R_Blackened",
+    "RBX_BLMG_BipodLeg_R_Rubber",
+    "RBX_BLMG_BipodLeg_R_Steel"
+   ]
+  },
+  "BLMG_Bolt": {
+   "parent_group": "Body",
+   "pivot_studs": [
+    -0.0,
+    -0.0071,
+    -0.3929
+   ],
+   "pivot_blender_m": [
+    0.0,
+    -0.11,
+    -0.002
+   ],
+   "motion": {
+    "type": "translate",
+    "axis": "Z",
+    "open": 0.25,
+    "channel": "Cycle",
+    "stage": [
+     0.0,
+     1.0
+    ],
+    "kind": "part",
+    "description": "bolt: recoils 0.070 m and returns per shot (visible through the left ejection port)",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": "studs"
+   },
+   "motion_text": "slide +0.25 studs along Z",
+   "motion_blender": {
+    "type": "translate",
+    "axis": "Y",
+    "open": 0.07,
+    "channel": "Cycle",
+    "stage": [
+     0.0,
+     1.0
+    ],
+    "kind": "part",
+    "description": "bolt: recoils 0.070 m and returns per shot (visible through the left ejection port)",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": null
+   },
+   "meshes": [
+    "RBX_BLMG_Bolt_Steel"
+   ]
+  },
+  "BLMG_ChargingHandle": {
+   "parent_group": "Body",
+   "pivot_studs": [
+    -0.1571,
+    -0.1,
+    -0.6179
+   ],
+   "pivot_blender_m": [
+    0.044,
+    -0.173,
+    -0.028
+   ],
+   "motion": {
+    "type": "translate",
+    "axis": "Z",
+    "open": 0.4214,
+    "channel": "Charge",
+    "stage": [
+     0.0,
+     1.0
+    ],
+    "kind": "part",
+    "description": "charging handle (left): pulled 0.118 m back to cock the open bolt, then pushed forward again",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": "studs"
+   },
+   "motion_text": "slide +0.4214 studs along Z",
+   "motion_blender": {
+    "type": "translate",
+    "axis": "Y",
+    "open": 0.118,
+    "channel": "Charge",
+    "stage": [
+     0.0,
+     1.0
+    ],
+    "kind": "part",
+    "description": "charging handle (left): pulled 0.118 m back to cock the open bolt, then pushed forward again",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": null
+   },
+   "meshes": [
+    "RBX_BLMG_ChargingHandle_Blackened",
+    "RBX_BLMG_ChargingHandle_PolyBlack"
+   ]
+  },
+  "BLMG_FeedCover": {
+   "parent_group": "Body",
+   "pivot_studs": [
+    -0.0,
+    0.1214,
+    -0.5357
+   ],
+   "pivot_blender_m": [
+    0.0,
+    -0.15,
+    0.034
+   ],
+   "motion": {
+    "type": "rotate",
+    "axis": "X",
+    "open": -80,
+    "channel": "FeedCover",
+    "stage": [
+     0.0,
+     1.0
+    ],
+    "kind": "part",
+    "description": "feed cover: hinged at its front, lifts 80 deg to lay a new belt on the feed tray",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": "degrees"
+   },
+   "motion_text": "rotate -80 deg about X",
+   "motion_blender": {
+    "type": "rotate",
+    "axis": "X",
+    "open": 80,
+    "channel": "FeedCover",
+    "stage": [
+     0.0,
+     1.0
+    ],
+    "kind": "part",
+    "description": "feed cover: hinged at its front, lifts 80 deg to lay a new belt on the feed tray",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": null
+   },
+   "meshes": [
+    "RBX_BLMG_FeedCover_Blackened",
+    "RBX_BLMG_FeedCover_Steel"
+   ]
+  },
+  "BLMG_Safety": {
+   "parent_group": "Body",
+   "pivot_studs": [
+    -0.0143,
+    -0.2357,
+    0.2357
+   ],
+   "pivot_blender_m": [
+    0.004,
+    0.066,
+    -0.066
+   ],
+   "motion": {
+    "type": "translate",
+    "axis": "X",
+    "open": -0.0286,
+    "channel": "Safety",
+    "stage": [
+     0.0,
+     1.0
+    ],
+    "kind": "part",
+    "description": "cross-bolt safety: pushed 8 mm from left to right = FIRE (red band shows); rest = SAFE",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": "studs"
+   },
+   "motion_text": "slide -0.0286 studs along X",
+   "motion_blender": {
+    "type": "translate",
+    "axis": "X",
+    "open": -0.008,
+    "channel": "Safety",
+    "stage": [
+     0.0,
+     1.0
+    ],
+    "kind": "part",
+    "description": "cross-bolt safety: pushed 8 mm from left to right = FIRE (red band shows); rest = SAFE",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": null
+   },
+   "meshes": [
+    "RBX_BLMG_Safety_MarkRed",
+    "RBX_BLMG_Safety_Steel"
+   ]
+  },
+  "BLMG_Trigger": {
+   "parent_group": "Body",
+   "pivot_studs": [
+    -0.0,
+    -0.2571,
+    -0.0107
+   ],
+   "pivot_blender_m": [
+    0.0,
+    -0.003,
+    -0.072
+   ],
+   "motion": {
+    "type": "rotate",
+    "axis": "X",
+    "open": -14,
+    "channel": "Trigger",
+    "stage": [
+     0.0,
+     1.0
+    ],
+    "kind": "part",
+    "description": "trigger: 14 deg rearward; hold = automatic fire",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": "degrees"
+   },
+   "motion_text": "rotate -14 deg about X",
+   "motion_blender": {
+    "type": "rotate",
+    "axis": "X",
+    "open": 14,
+    "channel": "Trigger",
+    "stage": [
+     0.0,
+     1.0
+    ],
+    "kind": "part",
+    "description": "trigger: 14 deg rearward; hold = automatic fire",
+    "min": null,
+    "max": null,
+    "speed": null,
+    "units": null
+   },
+   "meshes": [
+    "RBX_BLMG_Trigger_Steel"
+   ]
+  }
+ },
+ "channels": {
+  "Trigger": {
+   "description": "trigger pull (hold for automatic fire)",
+   "duration_s": 0.05,
+   "rules": [],
+   "default": 0
+  },
+  "Cycle": {
+   "description": "bolt cycle per shot: play 0 -> 1 -> 0 once per round (open-bolt gun)",
+   "duration_s": 0.05,
+   "rules": [],
+   "default": 0
+  },
+  "Charge": {
+   "description": "charging handle pulled back",
+   "duration_s": 0.4,
+   "rules": [],
+   "default": 0
+  },
+  "Safety": {
+   "description": "safety off (1) / on (0)",
+   "duration_s": 0.1,
+   "rules": [],
+   "default": 0
+  },
+  "FeedCover": {
+   "description": "feed cover open (1) / closed (0)",
+   "duration_s": 0.5,
+   "rules": [
+    "reload order: FeedCover 1 -> hide BLMG_Belt -> Reload 1 (box drops) -> Reload 0 (new box) -> show BLMG_Belt -> FeedCover 0 -> Charge 1 -> 0"
+   ],
+   "default": 0
+  },
+  "Reload": {
+   "description": "ammo box removed (1) / mounted (0)",
+   "duration_s": 1.2,
+   "rules": [],
+   "default": 0
+  },
+  "BoxLid": {
+   "description": "ammo box lid open (1) / closed (0)",
+   "duration_s": 0.4,
+   "rules": [],
+   "default": 0
+  },
+  "Bipod": {
+   "description": "bipod deployed (1) / folded (0)",
+   "duration_s": 0.6,
+   "rules": [
+    "deployed: prone / rested fire with much less spread"
+   ],
+   "default": 0
+  }
+ },
+ "poses": {
+  "fire": {
+   "channels": {
+    "Trigger": 1,
+    "Cycle": 1,
+    "Safety": 1,
+    "Bipod": 1
+   },
+   "inputs": {},
+   "description": "bipod down, firing",
+   "ground": false
+  },
+  "reload": {
+   "channels": {
+    "FeedCover": 1,
+    "Reload": 1,
+    "BoxLid": 1
+   },
+   "inputs": {},
+   "description": "feed cover open, box off with lid open",
+   "ground": false
+  },
+  "charge": {
+   "channels": {
+    "Charge": 1,
+    "Cycle": 1
+   },
+   "inputs": {},
+   "description": "charging handle and bolt back",
+   "ground": false
+  }
+ },
+ "seats": {},
+ "points": {
+  "BLMG_Muzzle": {
+   "position_studs": [
+    -0.0,
+    0.0,
+    -3.1429
+   ],
+   "attached_to": "Body",
+   "purpose": "muzzle",
+   "direction": [
+    -0.0,
+    0.0,
+    -1.0
+   ],
+   "note": "bullet origin + muzzle flash (long 6-prong flash hider)"
+  },
+  "BLMG_Ejection": {
+   "position_studs": [
+    -0.1714,
+    -0.0036,
+    -0.25
+   ],
+   "attached_to": "Body",
+   "purpose": "ejection",
+   "direction": [
+    -0.9126,
+    0.3758,
+    0.161
+   ],
+   "note": "spent cases leave the LEFT ejection port; links drop below"
+  },
+  "BLMG_BeltFeed": {
+   "position_studs": [
+    0.1714,
+    0.0429,
+    -0.3036
+   ],
+   "attached_to": "Body",
+   "purpose": "belt_feed",
+   "direction": [
+    -1.0,
+    0.0,
+    0.0
+   ],
+   "note": "belt enters the feed tray (right side)"
+  },
+  "BLMG_Grip_Right": {
+   "position_studs": [
+    -0.0,
+    -0.5357,
+    0.4071
+   ],
+   "attached_to": "Body",
+   "purpose": "grip_right",
+   "direction": null,
+   "note": "firing hand on the pistol grip"
+  },
+  "BLMG_Grip_Left": {
+   "position_studs": [
+    -0.0,
+    -0.2571,
+    -1.5
+   ],
+   "attached_to": "Body",
+   "purpose": "grip_left",
+   "direction": null,
+   "note": "support hand under the handguard (or on the carry handle)"
+  },
+  "BLMG_Carry": {
+   "position_studs": [
+    -0.0,
+    0.4214,
+    -0.9714
+   ],
+   "attached_to": "Body",
+   "purpose": "carry_handle",
+   "direction": null,
+   "note": "hand position when carrying the gun one-handed"
+  },
+  "BLMG_Aim": {
+   "position_studs": [
+    -0.0,
+    0.3214,
+    0.5357
+   ],
+   "attached_to": "Body",
+   "purpose": "aim_eye",
+   "direction": [
+    -0.0,
+    0.0,
+    -1.0
+   ],
+   "note": "eye position behind the aperture rear sight"
+  },
+  "BLMG_BipodFeet": {
+   "position_studs": [
+    -0.0,
+    -1.1857,
+    -2.0786
+   ],
+   "attached_to": "Body",
+   "purpose": "bipod_contact",
+   "direction": null,
+   "note": "feet contact point with Bipod = 1"
+  },
+  "BLMG_Sling_Front": {
+   "position_studs": [
+    -0.185,
+    -0.1786,
+    -1.0714
+   ],
+   "attached_to": "Body",
+   "purpose": "sling",
+   "direction": null
+  },
+  "BLMG_Sling_Rear": {
+   "position_studs": [
+    -0.1875,
+    -0.4286,
+    1.6786
+   ],
+   "attached_to": "Body",
+   "purpose": "sling",
+   "direction": null
+  }
+ },
+ "lights": {},
+ "boxes": {},
+ "wheels": {},
+ "materials": {
+  "Blackened": {
+   "roblox_material": "Metal",
+   "color_rgb": [
+    38,
+    38,
+    40
+   ],
+   "transparency": 0.0,
+   "reflectance": 0.0,
+   "emissive": false
+  },
+  "Brass": {
+   "roblox_material": "Metal",
+   "color_rgb": [
+    136,
+    110,
+    66
+   ],
+   "transparency": 0.0,
+   "reflectance": 0.0,
+   "emissive": false
+  },
+  "Copper": {
+   "roblox_material": "Metal",
+   "color_rgb": [
+    140,
+    90,
+    62
+   ],
+   "transparency": 0.0,
+   "reflectance": 0.0,
+   "emissive": false
+  },
+  "DarkSteel": {
+   "roblox_material": "Metal",
+   "color_rgb": [
+    52,
+    53,
+    56
+   ],
+   "transparency": 0.0,
+   "reflectance": 0.0,
+   "emissive": false
+  },
+  "Graphite": {
+   "roblox_material": "Metal",
+   "color_rgb": [
+    74,
+    76,
+    80
+   ],
+   "transparency": 0.0,
+   "reflectance": 0.0,
+   "emissive": false
+  },
+  "MarkRed": {
+   "roblox_material": "SmoothPlastic",
+   "color_rgb": [
+    118,
+    50,
+    38
+   ],
+   "transparency": 0.0,
+   "reflectance": 0.0,
+   "emissive": false
+  },
+  "PaintOlive": {
+   "roblox_material": "SmoothPlastic",
+   "color_rgb": [
+    86,
+    90,
+    62
+   ],
+   "transparency": 0.0,
+   "reflectance": 0.0,
+   "emissive": false
+  },
+  "PaintOliveDark": {
+   "roblox_material": "SmoothPlastic",
+   "color_rgb": [
+    60,
+    64,
+    50
+   ],
+   "transparency": 0.0,
+   "reflectance": 0.0,
+   "emissive": false
+  },
+  "PolyBlack": {
+   "roblox_material": "Plastic",
+   "color_rgb": [
+    34,
+    34,
+    36
+   ],
+   "transparency": 0.0,
+   "reflectance": 0.0,
+   "emissive": false
+  },
+  "PolyOlive": {
+   "roblox_material": "Plastic",
+   "color_rgb": [
+    76,
+    80,
+    54
+   ],
+   "transparency": 0.0,
+   "reflectance": 0.0,
+   "emissive": false
+  },
+  "Rubber": {
+   "roblox_material": "Rubber",
+   "color_rgb": [
+    30,
+    30,
+    30
+   ],
+   "transparency": 0.0,
+   "reflectance": 0.0,
+   "emissive": false
+  },
+  "Steel": {
+   "roblox_material": "Metal",
+   "color_rgb": [
+    128,
+    128,
+    125
+   ],
+   "transparency": 0.0,
+   "reflectance": 0.0,
+   "emissive": false
+  }
+ },
+ "meshes": [
+  {
+   "name": "RBX_BLMG_AmmoBox_MarkRed",
+   "group": "BLMG_AmmoBox",
+   "material": "MarkRed",
+   "triangles": 776
+  },
+  {
+   "name": "RBX_BLMG_AmmoBox_PaintOliveDark",
+   "group": "BLMG_AmmoBox",
+   "material": "PaintOliveDark",
+   "triangles": 1092
+  },
+  {
+   "name": "RBX_BLMG_AmmoBox_Steel",
+   "group": "BLMG_AmmoBox",
+   "material": "Steel",
+   "triangles": 340
+  },
+  {
+   "name": "RBX_BLMG_AmmoBox_Lid_Blackened",
+   "group": "BLMG_AmmoBox_Lid",
+   "material": "Blackened",
+   "triangles": 288
+  },
+  {
+   "name": "RBX_BLMG_AmmoBox_Lid_PaintOliveDark",
+   "group": "BLMG_AmmoBox_Lid",
+   "material": "PaintOliveDark",
+   "triangles": 112
+  },
+  {
+   "name": "RBX_BLMG_AmmoBox_Lid_Steel",
+   "group": "BLMG_AmmoBox_Lid",
+   "material": "Steel",
+   "triangles": 44
+  },
+  {
+   "name": "RBX_BLMG_Belt_Cartridges_Blackened",
+   "group": "BLMG_Belt_Cartridges",
+   "material": "Blackened",
+   "triangles": 1704
+  },
+  {
+   "name": "RBX_BLMG_Belt_Cartridges_Brass",
+   "group": "BLMG_Belt_Cartridges",
+   "material": "Brass",
+   "triangles": 1792
+  },
+  {
+   "name": "RBX_BLMG_Belt_Cartridges_Copper",
+   "group": "BLMG_Belt_Cartridges",
+   "material": "Copper",
+   "triangles": 768
+  },
+  {
+   "name": "RBX_BLMG_BipodLeg_L_Blackened",
+   "group": "BLMG_BipodLeg_L",
+   "material": "Blackened",
+   "triangles": 396
+  },
+  {
+   "name": "RBX_BLMG_BipodLeg_L_Rubber",
+   "group": "BLMG_BipodLeg_L",
+   "material": "Rubber",
+   "triangles": 128
+  },
+  {
+   "name": "RBX_BLMG_BipodLeg_L_Steel",
+   "group": "BLMG_BipodLeg_L",
+   "material": "Steel",
+   "triangles": 96
+  },
+  {
+   "name": "RBX_BLMG_BipodLeg_R_Blackened",
+   "group": "BLMG_BipodLeg_R",
+   "material": "Blackened",
+   "triangles": 396
+  },
+  {
+   "name": "RBX_BLMG_BipodLeg_R_Rubber",
+   "group": "BLMG_BipodLeg_R",
+   "material": "Rubber",
+   "triangles": 128
+  },
+  {
+   "name": "RBX_BLMG_BipodLeg_R_Steel",
+   "group": "BLMG_BipodLeg_R",
+   "material": "Steel",
+   "triangles": 96
+  },
+  {
+   "name": "RBX_BLMG_Bolt_Steel",
+   "group": "BLMG_Bolt",
+   "material": "Steel",
+   "triangles": 572
+  },
+  {
+   "name": "RBX_BLMG_ChargingHandle_Blackened",
+   "group": "BLMG_ChargingHandle",
+   "material": "Blackened",
+   "triangles": 688
+  },
+  {
+   "name": "RBX_BLMG_ChargingHandle_PolyBlack",
+   "group": "BLMG_ChargingHandle",
+   "material": "PolyBlack",
+   "triangles": 112
+  },
+  {
+   "name": "RBX_BLMG_FeedCover_Blackened",
+   "group": "BLMG_FeedCover",
+   "material": "Blackened",
+   "triangles": 2478
+  },
+  {
+   "name": "RBX_BLMG_FeedCover_Steel",
+   "group": "BLMG_FeedCover",
+   "material": "Steel",
+   "triangles": 488
+  },
+  {
+   "name": "RBX_BLMG_Safety_MarkRed",
+   "group": "BLMG_Safety",
+   "material": "MarkRed",
+   "triangles": 112
+  },
+  {
+   "name": "RBX_BLMG_Safety_Steel",
+   "group": "BLMG_Safety",
+   "material": "Steel",
+   "triangles": 112
+  },
+  {
+   "name": "RBX_BLMG_Trigger_Steel",
+   "group": "BLMG_Trigger",
+   "material": "Steel",
+   "triangles": 260
+  },
+  {
+   "name": "RBX_Body_Blackened",
+   "group": "Body",
+   "material": "Blackened",
+   "triangles": 9322
+  },
+  {
+   "name": "RBX_Body_DarkSteel",
+   "group": "Body",
+   "material": "DarkSteel",
+   "triangles": 448
+  },
+  {
+   "name": "RBX_Body_Graphite",
+   "group": "Body",
+   "material": "Graphite",
+   "triangles": 2782
+  },
+  {
+   "name": "RBX_Body_MarkRed",
+   "group": "Body",
+   "material": "MarkRed",
+   "triangles": 2112
+  },
+  {
+   "name": "RBX_Body_PaintOlive",
+   "group": "Body",
+   "material": "PaintOlive",
+   "triangles": 1884
+  },
+  {
+   "name": "RBX_Body_PolyBlack",
+   "group": "Body",
+   "material": "PolyBlack",
+   "triangles": 5014
+  },
+  {
+   "name": "RBX_Body_PolyOlive",
+   "group": "Body",
+   "material": "PolyOlive",
+   "triangles": 3706
+  },
+  {
+   "name": "RBX_Body_Rubber",
+   "group": "Body",
+   "material": "Rubber",
+   "triangles": 788
+  },
+  {
+   "name": "RBX_Body_Steel",
+   "group": "Body",
+   "material": "Steel",
+   "triangles": 3904
+  }
+ ],
+ "physics": {},
+ "systems": {
+  "Weapon": {
+   "kind": "light machine gun (belt fed, open bolt)",
+   "caliber": "7.8x51 mm (fictional)",
+   "magazine": 200,
+   "feed": "linked belt from the side ammo box",
+   "fire_modes": [
+    "SAFE",
+    "AUTO"
+   ],
+   "rpm": 750,
+   "muzzle_velocity_mps": 840,
+   "effective_range_studs": 2143,
+   "reload_s": 5.5,
+   "damage_hint": "medium-high",
+   "recoil_hint": "heavy, sustained climb; much lower on the bipod",
+   "aim": "aperture rear on the feed cover + tower front",
+   "movement_hint": "slow while carried; very slow while firing standing",
+   "ammo_item": "AmmoBelt_7.8x51"
+  }
+ },
+ "notes": [
+  "Weapon origin = bore axis above the trigger; the muzzle points -Z in Roblox (LookVector).",
+  "BLMG_Belt is a decorative 8-round belt (kind=store): hide it during reload, show it when the box is back."
+ ],
+ "import": {
+  "fbx": "BastionLMG.fbx",
+  "rig_json": "BastionLMG_Rig.json",
+  "handoff_md": "BastionLMG_HANDOFF.md",
+  "importer": {
+   "scale_unit": "Stud",
+   "scale_factor": 1,
+   "world_forward": "Front",
+   "world_up": "Top",
+   "set_pivot_to_scene_origin": true,
+   "upload_to_roblox": true
+  },
+  "expected_size_studs": [
+   0.7707,
+   1.6804,
+   5.0036
+  ],
+  "expected_center_studs": [
+   0.1118,
+   -0.4045,
+   -0.6411
+  ],
+  "mesh_count": 32,
+  "triangles": 42938,
+  "max_mesh_triangles": 9322
+ },
+ "verification": {
+  "fbx_reimported": true,
+  "pivots_checked": 10,
+  "problems": [],
+  "passed": true,
+  "uv_meshes": 32
+ },
+ "textures": {
+  "BaseColor": "textures/BastionLMG_BaseColor.png",
+  "Roughness": "textures/BastionLMG_Roughness.png",
+  "Metalness": "textures/BastionLMG_Metalness.png",
+  "note": "one atlas per weapon shared by ALL its MeshParts (every mesh keeps the atlas UVs): SurfaceAppearance ColorMap / RoughnessMap / MetalnessMap. Without it, use the flat per-material colours in `materials`."
+ },
+ "previews": [
+  "BastionLMG_34.png",
+  "previews/BastionLMG_right.png",
+  "previews/BastionLMG_left_rear34.png"
+ ]
+}

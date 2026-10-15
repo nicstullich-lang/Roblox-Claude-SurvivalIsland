@@ -1,0 +1,249 @@
+{
+ "blend": "SurvivalWeaponPack.blend",
+ "weapons": {
+  "R12": {
+   "objects": 66,
+   "groups": [
+    "R12_Bolt",
+    "R12_ChargingHandle",
+    "R12_DustCover",
+    "R12_FrontSight_Ears",
+    "R12_Magazine",
+    "R12_RearSight_Leaf",
+    "R12_Selector",
+    "R12_Stock",
+    "R12_Trigger"
+   ],
+   "floating": [],
+   "clashes": {
+    "fire": [],
+    "reload": [],
+    "stowed": [],
+    "auto": []
+   },
+   "holes": [],
+   "inverted": [],
+   "hygiene": [],
+   "tris": 37200,
+   "largest_merge": [
+    [
+     "Body",
+     "SW_PaintOliveGray"
+    ],
+    7674
+   ],
+   "size_studs": [
+    4.6,
+    1.376,
+    0.424
+   ],
+   "target_studs": [
+    4.6,
+    1.4,
+    0.6
+   ],
+   "origin_check": [
+    -0.0482,
+    -0.8,
+    -0.265
+   ]
+  },
+  "MAKO9": {
+   "objects": 45,
+   "groups": [
+    "MAKO9_Bolt",
+    "MAKO9_ChargingHandle",
+    "MAKO9_Magazine",
+    "MAKO9_Selector",
+    "MAKO9_Stock",
+    "MAKO9_Trigger"
+   ],
+   "floating": [],
+   "clashes": {
+    "fire": [],
+    "reload": [],
+    "stock_extended": []
+   },
+   "holes": [],
+   "inverted": [],
+   "hygiene": [],
+   "tris": 30286,
+   "largest_merge": [
+    [
+     "Body",
+     "SW_PolyBlack"
+    ],
+    7986
+   ],
+   "size_studs": [
+    3.298,
+    1.3,
+    0.526
+   ],
+   "target_studs": [
+    3.3,
+    1.35,
+    0.55
+   ],
+   "origin_check": [
+    -0.0883,
+    -0.688,
+    -0.2852
+   ]
+  },
+  "TM308": {
+   "objects": 62,
+   "groups": [
+    "TM308_BipodLeg_L",
+    "TM308_BipodLeg_R",
+    "TM308_Bolt",
+    "TM308_BoltHandle",
+    "TM308_CheekRiser",
+    "TM308_Magazine",
+    "TM308_Safety",
+    "TM308_Scope_PowerRing",
+    "TM308_Trigger"
+   ],
+   "floating": [],
+   "clashes": {
+    "bolt_open": [],
+    "bipod": [],
+    "reload": []
+   },
+   "holes": [],
+   "inverted": [],
+   "hygiene": [],
+   "tris": 34172,
+   "largest_merge": [
+    [
+     "Body",
+     "SW_Blackened"
+    ],
+    9864
+   ],
+   "size_studs": [
+    5.1,
+    1.512,
+    0.49
+   ],
+   "target_studs": [
+    5.1,
+    1.55,
+    0.6
+   ],
+   "origin_check": [
+    -0.0792,
+    -0.95,
+    -0.2816
+   ]
+  },
+  "SP9": {
+   "objects": 26,
+   "groups": [
+    "SP9_Magazine",
+    "SP9_Slide",
+    "SP9_Trigger"
+   ],
+   "floating": [],
+   "clashes": {
+    "fire": [],
+    "reload": []
+   },
+   "holes": [],
+   "inverted": [],
+   "hygiene": [],
+   "tris": 21442,
+   "largest_merge": [
+    [
+     "Body",
+     "SW_Walnut"
+    ],
+    6036
+   ],
+   "size_studs": [
+    2.043,
+    1.025,
+    0.26
+   ],
+   "target_studs": [
+    2.0,
+    1.0,
+    0.45
+   ],
+   "origin_check": [
+    -0.0364,
+    -0.382,
+    -0.2129
+   ]
+  },
+  "BLMG": {
+   "objects": 75,
+   "groups": [
+    "BLMG_AmmoBox",
+    "BLMG_AmmoBox_Lid",
+    "BLMG_Belt_Cartridges",
+    "BLMG_BipodLeg_L",
+    "BLMG_BipodLeg_R",
+    "BLMG_Bolt",
+    "BLMG_ChargingHandle",
+    "BLMG_FeedCover",
+    "BLMG_Safety",
+    "BLMG_Trigger"
+   ],
+   "floating": [],
+   "clashes": {
+    "fire": [],
+    "reload": [],
+    "charge": []
+   },
+   "holes": [],
+   "inverted": [],
+   "hygiene": [],
+   "tris": 42938,
+   "largest_merge": [
+    [
+     "Body",
+     "SW_Blackened"
+    ],
+    9322
+   ],
+   "size_studs": [
+    5.004,
+    1.68,
+    0.771
+   ],
+   "target_studs": [
+    5.0,
+    1.8,
+    0.75
+   ],
+   "origin_check": [
+    -0.1392,
+    -0.88,
+    -0.3485
+   ]
+  }
+ },
+ "rules": [
+  [
+   "pistol is the smallest weapon",
+   true
+  ],
+  [
+   "SMG is more compact than the carbine",
+   true
+  ],
+  [
+   "marksman rifle is the longest",
+   true
+  ],
+  [
+   "marksman rifle is the slimmest long gun (H/L)",
+   true
+  ],
+  [
+   "LMG is the broadest (width and height)",
+   true
+  ]
+ ]
+}

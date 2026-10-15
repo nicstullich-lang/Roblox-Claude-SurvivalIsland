@@ -143,13 +143,16 @@ def _group_of(o, groups):
     return 'Body'
 
 
-def export(repo, blend_path, renders=True, preview_views=None, mat_prefix='', log=print):
+def export(repo, blend_path, renders=True, preview_views=None, mat_prefix='', log=print, out_dir=None, file_base=None):
+    """out_dir / file_base: write <out_dir>/<file_base>.fbx, <file_base>_Rig.json, <file_base>_HANDOFF.md instead of
+    exports/<Model>/<Model>.fbx, <Model>_Rig.json, HANDOFF.md (used by packs that share one output folder)."""
     bpy.ops.wm.open_mainfile(filepath=blend_path)
     sc = bpy.context.scene
     model = get_json(sc, 'rig_model')
     assert model, 'scene has no rig_model - tag the model with common.rig.model(...) first'
     name = model['name']
-    out_dir = os.path.join(repo, 'exports', name)
+    out_dir = out_dir or os.path.join(repo, 'exports', name)
+    base = file_base or name
     os.makedirs(os.path.join(out_dir, 'previews'), exist_ok=True)
     from . import poses as P
     for o in sc.objects:
@@ -172,12 +175,13 @@ def export(repo, blend_path, renders=True, preview_views=None, mat_prefix='', lo
         bm.from_mesh(me)
         bm.transform(Matrix.Scale(S, 4) @ o.matrix_world)
         bmesh.ops.triangulate(bm, faces=bm.faces)
+        uvl = bm.loops.layers.uv.active
         mats = [m.name[len(mat_prefix):] if (m and m.name.startswith(mat_prefix)) else (m.name if m else 'None')
                 for m in me.materials] or ['None']
         bm.verts.index_update()
         for f in bm.faces:
             mn = mats[f.material_index] if f.material_index < len(mats) else mats[0]
-            b = buckets.setdefault((g, mn), {'V': [], 'F': [], 'map': {}})
+            b = buckets.setdefault((g, mn), {'V': [], 'F': [], 'UV': [], 'map': {}})
             idx = []
             for v in f.verts:
                 key = (o.name, v.index)
@@ -186,6 +190,7 @@ def export(repo, blend_path, renders=True, preview_views=None, mat_prefix='', lo
                     b['V'].append(v.co.copy())
                 idx.append(b['map'][key])
             b['F'].append(tuple(idx))
+            b['UV'].append([tuple(l[uvl].uv) for l in f.loops] if uvl is not None else None)
         bm.free()
         ev.to_mesh_clear()
 
@@ -193,9 +198,13 @@ def export(repo, blend_path, renders=True, preview_views=None, mat_prefix='', lo
     sc.collection.children.link(ex)
     made = []
 
-    def emit(nm, V, F, mat, piv, group):
+    def emit(nm, V, F, mat, piv, group, UV=None):
         me = bpy.data.meshes.new(nm)
         me.from_pydata([tuple(v - piv) for v in V], [], F)
+        if UV and any(u is not None for u in UV):       # carry the source UVs (texture atlases) into the export
+            lay = me.uv_layers.new(name='UVMap')
+            flat = [uv for f, u in zip(F, UV) for uv in (u if u is not None else [(0.0, 0.0)] * len(f))]
+            lay.data.foreach_set('uv', [c for uv in flat for c in uv])
         me.validate()
         me.materials.append(bpy.data.materials.get(mat_prefix + mat) or bpy.data.materials.get(mat))
         me.shade_smooth()
@@ -207,30 +216,26 @@ def export(repo, blend_path, renders=True, preview_views=None, mat_prefix='', lo
 
     for (g, mn), b in sorted(buckets.items()):
         piv = Vector((0, 0, 0)) if g == 'Body' else groups[g].matrix_world.translation * S
-        base = 'RBX_%s_%s' % (g, mn)
-        V, F = b['V'], b['F']
+        mesh_base = 'RBX_%s_%s' % (g, mn)
+        V, F, UV = b['V'], b['F'], b['UV']
         if len(F) <= 16000:
-            emit(base, V, F, mn, piv, g)
+            emit(mesh_base, V, F, mn, piv, g, UV)
             continue
-        Fs = sorted(F, key=lambda f: sum(V[i].y for i in f))
-        chunks, cur = [], []
-        for f in Fs:
-            cur.append(f)
-            if len(cur) >= 15000:
-                chunks.append(cur)
-                cur = []
-        if cur:
-            chunks.append(cur)
+        order = sorted(range(len(F)), key=lambda k: sum(V[i].y for i in F[k]))
+        Fs = [F[k] for k in order]
+        UVs = [UV[k] for k in order]
+        chunks = [list(range(a, min(a + 15000, len(Fs)))) for a in range(0, len(Fs), 15000)]
         for k, ch in enumerate(chunks):
-            used = sorted({i for f in ch for i in f})
-            rm = {i: j for j, i in enumerate(used)}
-            emit('%s_%d' % (base, k + 1), [V[i] for i in used], [tuple(rm[i] for i in f) for f in ch], mn, piv, g)
+            used = sorted({i for j in ch for i in Fs[j]})
+            rm = {i: n for n, i in enumerate(used)}
+            emit('%s_%d' % (mesh_base, k + 1), [V[i] for i in used], [tuple(rm[i] for i in Fs[j]) for j in ch], mn, piv, g,
+                 [UVs[j] for j in ch])
 
     bpy.context.view_layer.update()
     for o in bpy.context.view_layer.objects:
         o.select_set(o.name in ex.objects)
     bpy.context.view_layer.objects.active = ex.objects[0]
-    fbx_path = os.path.join(out_dir, name + '.fbx')
+    fbx_path = os.path.join(out_dir, base + '.fbx')
     bpy.ops.export_scene.fbx(filepath=fbx_path, use_selection=True, object_types={'MESH'}, apply_unit_scale=True,
                              apply_scale_options='FBX_SCALE_UNITS', axis_forward='Z', axis_up='Y',
                              mesh_smooth_type='FACE', use_mesh_modifiers=True, add_leaf_bones=False, bake_anim=False)
@@ -256,7 +261,9 @@ def export(repo, blend_path, renders=True, preview_views=None, mat_prefix='', lo
                units=dict(blender='metres', roblox='studs', studs_per_metre=round(S, 6), metres_per_stud=0.28),
                axes=dict(roblox_from_blender='(-x, z, y) * %.6f' % S, forward='-Z (LookVector)', up='+Y',
                          right='+X', note='all *_studs values and Roblox motions are already converted'),
-               import_=dict(fbx=name + '.fbx', importer=dict(scale_unit='Stud', scale_factor=1, world_forward='Front',
+               import_=dict(fbx=base + '.fbx', rig_json=base + '_Rig.json',
+                            handoff_md=('HANDOFF.md' if file_base is None else base + '_HANDOFF.md'),
+                            importer=dict(scale_unit='Stud', scale_factor=1, world_forward='Front',
                                                              world_up='Top', set_pivot_to_scene_origin=True,
                                                              upload_to_roblox=True),
                             expected_size_studs=size, expected_center_studs=center, mesh_count=len(made),
@@ -344,7 +351,7 @@ def export(repo, blend_path, renders=True, preview_views=None, mat_prefix='', lo
         problems.append('re-imported size %s differs from %s' % (rsize, size))
     rig['verification'] = dict(fbx_reimported=True, pivots_checked=checked, problems=problems,
                                passed=not problems)
-    json.dump(rig, open(os.path.join(out_dir, name + '_Rig.json'), 'w'), indent=1)
+    json.dump(rig, open(os.path.join(out_dir, base + '_Rig.json'), 'w'), indent=1)
     log('EXPORT %s: %d meshes, %d tris, size %s studs, pivots checked %d, problems %d'
         % (name, len(made), rig['import']['triangles'], size, checked, len(problems)))
     for p in problems:
@@ -412,6 +419,7 @@ def write_handoff_md(out_dir, rig, previews):
     m = rig['model']
     name = m['name']
     imp = rig['import']
+    fbx, rjs = imp['fbx'], imp['rig_json']
     L = []
     w = L.append
     w('# %s — Roblox handoff package' % m['display'])
@@ -420,7 +428,7 @@ def write_handoff_md(out_dir, rig, previews):
       'pipeline. Everything you need to make the model *fully functional and realistic* in Survival Island is here: the '
       'mesh file, every moving part with its exact hinge and motion, seats, sockets, lights, collision proxies, physics '
       'data and gameplay rules. The machine-readable source of truth is `%s_Rig.json` (schema `%s`); this file explains it. '
-      'Please read sections 3–4 before writing code.' % (name, rig['schema']))
+      'Please read sections 3–4 before writing code.' % (rjs[:-len('_Rig.json')], rig['schema']))
     w('')
     w('**%s** · category: **%s** · %s' % (m['display'], m['category'], m['description']))
     w('')
@@ -430,10 +438,10 @@ def write_handoff_md(out_dir, rig, previews):
     w('## 1. Files')
     w('| File | What |')
     w('|---|---|')
-    w('| `%s.fbx` | %d meshes, %d triangles (largest %d — under Roblox\'s 20k limit), already in studs |'
-      % (name, imp['mesh_count'], imp['triangles'], imp['max_mesh_triangles']))
-    w('| `%s_Rig.json` | all data below, machine-readable |' % name)
-    w('| `HANDOFF.md` | this guide |')
+    w('| `%s` | %d meshes, %d triangles (largest %d — under Roblox\'s 20k limit), already in studs |'
+      % (fbx, imp['mesh_count'], imp['triangles'], imp['max_mesh_triangles']))
+    w('| `%s` | all data below, machine-readable |' % rjs)
+    w('| `%s` | this guide |' % imp['handoff_md'])
     w('| `previews/` | renders at rest and deployed |')
     w('')
     w('## 2. Import into Studio')
@@ -447,14 +455,47 @@ def write_handoff_md(out_dir, rig, previews):
     w('')
     w('## 3. Coordinates, units, names')
     w('- **1 stud = 0.28 m.** All `*_studs` values in the JSON are final Roblox numbers.')
-    w('- Model space: origin on the ground under the model\'s centre, **front = −Z (LookVector)**, up = +Y, '
-      '**the model\'s RIGHT = +X**, its left = −X. (Blender source: front −Y, left +X; converted for you.)')
+    w('- Model space: origin %s, **front = −Z (LookVector)**, up = +Y, **the model\'s RIGHT = +X**, its left = −X. '
+      '(Blender source: front −Y, left +X; converted for you.)' % (m.get('origin') or 'on the ground under the model\'s centre'))
     w('- Mesh names: `RBX_<Group>_<Material>[_n]`. `<Group>` is either `Body` (static) or a moving group from §5. '
       'Group names contain underscores, so match them against the JSON `groups` keys (longest match first); '
       '`<Material>` has no digits; `_n` is a chunk index for big meshes.')
     w('- Every moving group\'s meshes were exported with the MeshPart pivot on the group\'s hinge, but Roblox recentres '
       'MeshParts — always use `pivot_studs` from the JSON, never the MeshPart position.')
     w('')
+    if m.get('category') == 'weapon':
+        _weapon_assembly(w, rig)
+    else:
+        _vehicle_assembly(w)
+    _rest_of_handoff(w, rig, previews, out_dir, imp)
+    open(os.path.join(out_dir, imp['handoff_md']), 'w').write('\n'.join(L) + '\n')
+
+
+def _weapon_assembly(w, rig):
+    pts = rig['points']
+    code = next(iter(rig['groups']), 'X_').split('_')[0]
+    w('## 4. Recommended assembly (Roblox `Tool`)')
+    w('1. Put every MeshPart in a **`Tool`**. Add an invisible, unanchored **`Handle`** part (about 0.4 × 0.4 × 0.4 '
+      'studs, `CanCollide = false`) centred on point `%s_Grip_Right` (§8). Set `Tool.Grip` so that point sits in the '
+      'character\'s right hand. The weapon then points along the HumanoidRootPart LookVector, because the muzzle is −Z.' % code)
+    w('2. Static meshes (`RBX_Body_*`): `WeldConstraint` to the Handle. Visual parts: `CanCollide = CanTouch = CanQuery '
+      '= false`, `Massless = true`, materials from §11 (or the SurfaceAppearance of §15).')
+    w('3. **One Motor6D per moving group** (§5): Part0 = the parent group\'s joint (or the Handle for `parent_group = '
+      'Body`), Part1 = an invisible joint part at `pivot_studs` (identity rotation); weld the group\'s meshes to that '
+      'joint part. Create parents first (e.g. a bolt before its handle).')
+    w('4. Animate on the client with `Motor6D.Transform` (`rotate` → `CFrame.fromAxisAngle(axis, math.rad(open * '
+      'eased_progress))`, `translate` → `CFrame.new(axis * studs * eased_progress)`). Use the channels in §6: play '
+      '`Cycle` 0→1→0 once per shot at the `rpm` of §12, `Trigger` while the button is held, `Reload` / `Charge` / '
+      'covers in the order given in the channel rules. The server owns ammo, fire rate and hit detection.')
+    w('5. Attachments at the points of §8: `Muzzle` (raycast origin + direction, flash, smoke), `Ejection` (shell '
+      'casing emitter, direction given), `Aim` (camera position for aiming down sights), `Grip_Left` (support hand '
+      'IK target), `MagWell` (where a new magazine enters).')
+    w('6. Hide / show a group (e.g. the magazine during reload) by setting `LocalTransparencyModifier` on its meshes; '
+      'groups of `kind = store` are meant to be hidden and shown like that.')
+    w('')
+
+
+def _vehicle_assembly(w):
     w('## 4. Recommended assembly')
     w('1. Invisible, unanchored **root part** (PrimaryPart) — for vehicles a heavy chassis box low in the hull '
       '(`RootPriority` high); set `Model.WorldPivot` = ground origin so `PivotTo` places it on the ground.')
@@ -471,6 +512,9 @@ def write_handoff_md(out_dir, rig, previews):
       'wheel groups\' meshes to them (§10). Use collision groups so wheels never touch the body boxes.')
     w('7. Set `Model.ModelStreamingMode = Atomic` (the map uses streaming).')
     w('')
+
+
+def _rest_of_handoff(w, rig, previews, out_dir, imp):
     w('## 5. Moving parts')
     w('Axes are the joint frame (= model axes at rest). An axis is a letter (X / Y / Z) or a unit vector `(x, y, z)` '
       'in model space for hinges that are not on a model axis — rotate about it with `CFrame.fromAxisAngle(axis, '
@@ -586,6 +630,7 @@ def write_handoff_md(out_dir, rig, previews):
     w('- [ ] Output window clean (no errors/warnings from the new scripts).')
     w('')
     v = rig['verification']
-    w('_Generated %s by `blender/export_handoff.py`. FBX re-import check: %s (%d pivots compared, %d problems)._'
+    w('_Generated %s by the handoff exporter (`blender/common/handoff.py`). FBX re-import check: %s (%d pivots compared, '
+      '%d problems)._'
       % (rig['generated'], 'PASSED' if v['passed'] else 'FAILED', v['pivots_checked'], len(v['problems'])))
-    open(os.path.join(out_dir, 'HANDOFF.md'), 'w').write('\n'.join(L) + '\n')
+
